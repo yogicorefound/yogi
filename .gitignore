@@ -6,7 +6,7 @@ grammar/*.tokens
 grammar/*.listener
 grammar/*.base
 grammar/antlr
-antlr4
+libs/antlr4
 
 /src/parser/Tokens/Main.tokens
 /src/parser/antlr

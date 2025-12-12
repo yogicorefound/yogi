@@ -15,10 +15,10 @@
 #include "antlr4-runtime.h"
 
 // cromio headers
-#include "ast/nodes/nodes.h"
 #include "ast/ast.h"
+#include "ast/nodes/nodes.h"
 #include "core/core.h"
 #include "semantic/semantic.h"
 
 // utils headers
-#include <utils/utils.h>
+#include "utils/utils.h"

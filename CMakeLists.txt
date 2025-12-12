@@ -27,7 +27,7 @@ set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/src")
 
 # ---- ANTLR4 runtime include and lib paths ----
 set(ANTLR4_RUNTIME_INCLUDE "/usr/local/include/antlr4-runtime")
-set(ANTLR4_RUNTIME_LIB "${CMAKE_SOURCE_DIR}/antlr4/runtime/Cpp/build/runtime")
+set(ANTLR4_RUNTIME_LIB "${CMAKE_SOURCE_DIR}/libs/antlr4/runtime/Cpp/build/runtime")
 
 # ============================================================
 #                     LLVM INTEGRATION
@@ -78,13 +78,6 @@ file(GLOB_RECURSE ALL_SOURCES
         "${SOURCES_DIR}/cromio.cpp"
         "${GENERATED_DIR}/*.cpp"
         "${SOURCES_DIR}/*.cpp"
-#        "${SOURCES_DIR}/utils/*.cpp"
-#        "${SOURCES_DIR}/visitor/*.cpp"
-#        "${SOURCES_DIR}/optimizer/*.cpp"
-#        "${SOURCES_DIR}/backend/*.cpp"
-#        "${SOURCES_DIR}/core/*.cpp"
-#        "${SOURCES_DIR}/semantic/*.cpp"
-#        "${SOURCES_DIR}/modules/*.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${ALL_SOURCES})
