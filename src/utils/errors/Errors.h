@@ -14,7 +14,7 @@ namespace cromio::utils {
 
     struct NodePosition; // Forward declaration
 
-    class Error {
+    class Errors {
        public:
         static void throwError(const std::string& errorType, const std::string& message, const std::any& node, const std::string& source);
         static void throwRangeError(const std::string& message, const std::any& node, const std::string& source);

@@ -106,7 +106,7 @@ namespace cromio::semantic {
     json Variables::analyzeVariableDeclaration(json& node, const std::string& source) {
         if (node["value"].contains("error")) {
             const std::string error = node["value"]["error"];
-            utils::Error::throwError("Error", error, node, source);
+            utils::Errors::throwError("Error", error, node, source);
         }
 
         const std::string identifier = node["Identifier"]["value"];
@@ -116,7 +116,7 @@ namespace cromio::semantic {
         const std::string returnType = node["value"]["type"];
 
         if (!checkDataType(dataType, returnType)) {
-            utils::Error::throwTypeError(identifier, dataType, node, source);
+            utils::Errors::throwTypeError(identifier, dataType, node, source);
         }
 
         analyze64BitInteger(rValue, dataType, identifier, source, node);
@@ -134,12 +134,12 @@ namespace cromio::semantic {
         }
 
         else if (dataType == "str" && returnType != "str") {
-            utils::Error::throwTypeError(identifier, dataType, node, source);
+            utils::Errors::throwTypeError(identifier, dataType, node, source);
         }
 
         else if (dataType == "bool") {
             if (stringValue != "true" && stringValue != "false") {
-                utils::Error::throwTypeError(identifier, dataType, node, source);
+                utils::Errors::throwTypeError(identifier, dataType, node, source);
             }
         }
 

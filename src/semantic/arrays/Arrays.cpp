@@ -13,7 +13,7 @@ namespace cromio::semantic {
 
         const auto items = node["value"]["items"];
         if (const int length = items.size(); size != "auto" && length > std::stoi(size)) {
-            utils::Error::throwRangeError("Expected array size of " + size + ", but received " + std::to_string(length) + " elements.", node["value"], source);
+            utils::Errors::throwRangeError("Expected array size of " + size + ", but received " + std::to_string(length) + " elements.", node["value"], source);
         }
 
         return node;

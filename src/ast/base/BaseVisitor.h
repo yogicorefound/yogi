@@ -12,7 +12,7 @@
 
 namespace cromio::visitor {
 
-    class BaseVisitor : public GrammarVisitor, public utils::Error, public utils::Helpers, public semantic::Semantic {
+    class BaseVisitor : public GrammarVisitor, public utils::Errors, public utils::Helpers, public semantic::Semantic {
        protected:
         std::string& source;
         Grammar* parser;

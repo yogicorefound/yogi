@@ -2,7 +2,7 @@
 // Created by Brayhan De Aza on 11/29/25.
 //
 
-#include "Error.h"
+#include "Errors.h"
 #include <ast/nodes/nodes.h>
 #include <algorithm>
 #include <iostream>
@@ -84,7 +84,7 @@ namespace cromio::utils {
         return NodePosition{start.line, start.column, end.line, end.column};
     }
 
-    void Error::printContext(const NodePosition& pos, const std::string& source, const std::string& hint) {
+    void Errors::printContext(const NodePosition& pos, const std::string& source, const std::string& hint) {
         constexpr int context = 2;
         int startLine = static_cast<int>(pos.startLine);
         int startCol = static_cast<int>(pos.startCol);
@@ -130,30 +130,30 @@ namespace cromio::utils {
     }
 
 
-    void Error::throwError(const std::string& errorType, const std::string& message, const std::any& node, const std::string& source) {
+    void Errors::throwError(const std::string& errorType, const std::string& message, const std::any& node, const std::string& source) {
         std::cerr << "\n\033[1;31m" << errorType << ": " << message << "\033[0m\n";
         const NodePosition pos = extractPosition(node);
         printContext(pos, source, "");
         std::exit(1);
     }
 
-    void Error::throwRangeError(const std::string& message, const std::any& node, const std::string& source) {
+    void Errors::throwRangeError(const std::string& message, const std::any& node, const std::string& source) {
         throwError("RangeError", message, node, source);
     }
 
-    void Error::throwTypeError(const std::string& identifier, const std::string& dataType, const std::any& node, const std::string& source) {
+    void Errors::throwTypeError(const std::string& identifier, const std::string& dataType, const std::any& node, const std::string& source) {
         const std::string typeMsg = getTypeMessage(dataType);
         const std::string message = "'" + identifier + "' expects " + typeMsg;
         throwError("TypeError", message, node, source);
     }
 
-    void Error::throwScopeError(const std::string& message, const std::string& identifier, const std::any& node, const std::string& source) {
+    void Errors::throwScopeError(const std::string& message, const std::string& identifier, const std::any& node, const std::string& source) {
         std::cerr << "  Identifier: \033[1;33m" << identifier << "\033[0m\n\n";
         throwError("ScopeError", message, node, source);
         std::exit(1);
     }
 
-    void Error::throwTypeMismatchError(const std::string& identifier, const std::string& expectedType, const std::string& actualType, const std::any& node, const std::string& source) {
+    void Errors::throwTypeMismatchError(const std::string& identifier, const std::string& expectedType, const std::string& actualType, const std::any& node, const std::string& source) {
         const std::string expectedMsg = getTypeMessage(expectedType);
         const std::string actualMsg = getTypeMessage(actualType);
 
@@ -168,7 +168,7 @@ namespace cromio::utils {
         throwError("TypeError", message, node, source);
     }
 
-    std::string Error::getTypeMessage(const std::string& dataType) {
+    std::string Errors::getTypeMessage(const std::string& dataType) {
         // SIGNED
         if (dataType == "int8")
             return "signed 8-bit integer";
