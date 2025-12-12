@@ -3,7 +3,7 @@
 //
 
 #include "Helpers.h"
-#include <visitor/nodes/nodes.h>
+#include <ast/nodes/nodes.h>
 #include <algorithm>
 #include <string>
 #include "antlr4-runtime.h"

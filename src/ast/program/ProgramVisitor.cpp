@@ -3,9 +3,8 @@
 //
 
 #include "ProgramVisitor.h"
+#include <ast/nodes/nodes.h>
 #include <utils/utils.h>
-#include <visitor/nodes/nodes.h>
-
 
 std::any cromio::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};

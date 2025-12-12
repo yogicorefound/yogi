@@ -7,7 +7,7 @@
 
 #include "GrammarVisitor.h"
 #include "semantic/semantic.h"
-#include "visitor/base/BaseVisitor.h"
+#include "ast/base/BaseVisitor.h"
 
 namespace cromio::visitor {
     class ArraysVisitor : public virtual BaseVisitor {

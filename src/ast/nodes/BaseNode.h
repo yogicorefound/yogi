@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include <cstddef>
 
+#include <cstddef>
 
 namespace cromio::visitor::nodes {
 

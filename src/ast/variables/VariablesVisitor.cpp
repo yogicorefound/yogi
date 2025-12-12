@@ -3,7 +3,7 @@
 //
 
 #include "VariablesVisitor.h"
-#include <visitor/nodes/nodes.h>
+#include <ast/nodes/nodes.h>
 #include "semantic/semantic.h"
 
 namespace cromio::visitor {

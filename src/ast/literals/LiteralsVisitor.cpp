@@ -4,7 +4,7 @@
 
 #include "LiteralsVisitor.h"
 
-#include <visitor/nodes/nodes.h>
+#include <ast/nodes/nodes.h>
 
 std::any cromio::visitor::LiteralsVisitor::visitLiteral(Grammar::LiteralContext* ctx) {
     if (ctx->stringLiteral()) {

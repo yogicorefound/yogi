@@ -3,7 +3,7 @@
 //
 
 #include "ExpressionVisitor.h"
-#include <visitor/nodes/nodes.h>
+#include <ast/nodes/nodes.h>
 
 #include <cmath>
 #include <stdexcept>

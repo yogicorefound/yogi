@@ -78,13 +78,13 @@ file(GLOB_RECURSE ALL_SOURCES
         "${SOURCES_DIR}/cromio.cpp"
         "${GENERATED_DIR}/*.cpp"
         "${SOURCES_DIR}/*.cpp"
-        "${SOURCES_DIR}/utils/*.cpp"
-        "${SOURCES_DIR}/visitor/*.cpp"
-        "${SOURCES_DIR}/optimizer/*.cpp"
-        "${SOURCES_DIR}/backend/*.cpp"
-        "${SOURCES_DIR}/core/*.cpp"
-        "${SOURCES_DIR}/semantic/*.cpp"
-        "${SOURCES_DIR}/modules/*.cpp"
+#        "${SOURCES_DIR}/utils/*.cpp"
+#        "${SOURCES_DIR}/visitor/*.cpp"
+#        "${SOURCES_DIR}/optimizer/*.cpp"
+#        "${SOURCES_DIR}/backend/*.cpp"
+#        "${SOURCES_DIR}/core/*.cpp"
+#        "${SOURCES_DIR}/semantic/*.cpp"
+#        "${SOURCES_DIR}/modules/*.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${ALL_SOURCES})

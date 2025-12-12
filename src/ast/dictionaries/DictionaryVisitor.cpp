@@ -3,7 +3,7 @@
 //
 
 #include "DictionaryVisitor.h"
-#include "visitor/nodes/nodes.h"
+#include "ast/nodes/nodes.h"
 
 namespace cromio::visitor {
     using namespace cromio::visitor::nodes;

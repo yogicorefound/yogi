@@ -5,8 +5,8 @@
 #ifndef CROMIO_SCOPE_H
 #define CROMIO_SCOPE_H
 
+#include <ast/nodes/nodes.h>
 #include <utils/utils.h>
-#include <visitor/nodes/nodes.h>
 #include <memory>
 #include <optional>
 #include <string>

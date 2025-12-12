@@ -3,7 +3,7 @@
 //
 
 #include "Error.h"
-#include <visitor/nodes/nodes.h>
+#include <ast/nodes/nodes.h>
 #include <algorithm>
 #include <iostream>
 #include <sstream>

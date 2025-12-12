@@ -5,7 +5,7 @@
 #ifndef CROMIO_ERROR_H
 #define CROMIO_ERROR_H
 
-#include <visitor/nodes/nodes.h>
+#include <ast/nodes/nodes.h>
 #include <any>
 #include <string>
 // #include "AntlrErrorListener.h"

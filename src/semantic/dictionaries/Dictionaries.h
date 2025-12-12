@@ -6,10 +6,10 @@
 #ifndef CROMIO_DICTIONARIES_SEMANTIC_ANALYZE_H
 #define CROMIO_DICTIONARIES_SEMANTIC_ANALYZE_H
 
+#include "ast/nodes/nodes.h"
 #include "semantic/BaseSemantic.h"
 #include "semantic/scopes/Scope.h"
 #include "utils/utils.h"
-#include "visitor/nodes/nodes.h"
 
 namespace cromio::semantic {
 

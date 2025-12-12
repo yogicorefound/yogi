@@ -6,7 +6,7 @@
 #define CROMIO_LITERALS_VISITOR_H
 
 #include "GrammarVisitor.h"
-#include "visitor/base/BaseVisitor.h"
+#include "ast/base/BaseVisitor.h"
 
 namespace cromio::visitor {
     class LiteralsVisitor : public virtual BaseVisitor {
