@@ -8,6 +8,7 @@
 #include <visitor/nodes/nodes.h>
 #include <any>
 #include <string>
+// #include "AntlrErrorListener.h"
 
 namespace cromio::utils {
 
@@ -15,7 +16,6 @@ namespace cromio::utils {
 
     class Error {
        public:
-        // ------------------- Error functions with AST nodes -------------------
         static void throwError(const std::string& errorType, const std::string& message, const std::any& node, const std::string& source);
         static void throwRangeError(const std::string& message, const std::any& node, const std::string& source);
         static void throwScopeError(const std::string& message, const std::string& identifier, const std::any& node, const std::string& source);

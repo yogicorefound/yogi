@@ -5,7 +5,7 @@
 #ifndef CROMIO_IR_H
 #define CROMIO_IR_H
 
-#include <utils/Helpers.h>
+#include <utils/utils.h>
 #include <string>
 
 #include "llvm/IR/IRBuilder.h"

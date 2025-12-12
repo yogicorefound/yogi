@@ -7015,7 +7015,7 @@ NLOHMANN_JSON_NAMESPACE_END
 
 // #include <nlohmann/detail/exceptions.hpp>
 
-// #include <nlohmann/detail/input/lexer.hpp>
+// #include <nlohmann/detail/input/parser.hpp>
 //     __ _____ _____ _____
 //  __|  |   __|     |   | |  JSON for Modern C++
 // |  |  |__   |  |  | | | |  version 3.12.0
@@ -7050,7 +7050,7 @@ namespace detail
 {
 
 ///////////
-// lexer //
+// parser //
 ///////////
 
 template<typename BasicJsonType>
@@ -8647,7 +8647,7 @@ scan_number_done:
     /// buffer for variable-length tokens (numbers, strings)
     string_t token_buffer {};
 
-    /// a description of occurred lexer errors
+    /// a description of occurred parser errors
     const char* error_message = "";
 
     // number values
@@ -9115,7 +9115,7 @@ class json_sax_dom_parser
     bool errored = false;
     /// whether to throw exceptions in case of errors
     const bool allow_exceptions = true;
-    /// the lexer reference to obtain the current position
+    /// the parser reference to obtain the current position
     lexer_t* m_lexer_ref = nullptr;
 };
 
@@ -9552,7 +9552,7 @@ class json_sax_dom_callback_parser
     const bool allow_exceptions = true;
     /// a discarded value for the callback
     BasicJsonType discarded = BasicJsonType::value_t::discarded;
-    /// the lexer reference to obtain the current position
+    /// the parser reference to obtain the current position
     lexer_t* m_lexer_ref = nullptr;
 };
 
@@ -9635,7 +9635,7 @@ class json_sax_acceptor
 }  // namespace detail
 NLOHMANN_JSON_NAMESPACE_END
 
-// #include <nlohmann/detail/input/lexer.hpp>
+// #include <nlohmann/detail/input/parser.hpp>
 
 // #include <nlohmann/detail/macro_scope.hpp>
 
@@ -12845,7 +12845,7 @@ NLOHMANN_JSON_NAMESPACE_END
 
 // #include <nlohmann/detail/input/input_adapters.hpp>
 
-// #include <nlohmann/detail/input/lexer.hpp>
+// #include <nlohmann/detail/input/parser.hpp>
 
 // #include <nlohmann/detail/input/parser.hpp>
 //     __ _____ _____ _____
@@ -12871,7 +12871,7 @@ NLOHMANN_JSON_NAMESPACE_END
 
 // #include <nlohmann/detail/input/json_sax.hpp>
 
-// #include <nlohmann/detail/input/lexer.hpp>
+// #include <nlohmann/detail/input/parser.hpp>
 
 // #include <nlohmann/detail/macro_scope.hpp>
 
@@ -13327,7 +13327,7 @@ class parser
         }
     }
 
-    /// get next token from lexer
+    /// get next token from parser
     token_type get_token()
     {
         return last_token = m_lexer.scan();
@@ -13367,7 +13367,7 @@ class parser
     const parser_callback_t<BasicJsonType> callback = nullptr;
     /// the type of the last read token
     token_type last_token = token_type::uninitialized;
-    /// the lexer
+    /// the parser
     lexer_t m_lexer;
     /// whether to throw exceptions in case of errors
     const bool allow_exceptions = true;

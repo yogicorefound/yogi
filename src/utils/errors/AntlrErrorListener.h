@@ -8,7 +8,7 @@
 #include <string>
 #include "antlr4-runtime.h"
 
-namespace cromio::utils {
+namespace cromio::utils::errors {
     class AntlrErrorListener final : public antlr4::BaseErrorListener {
        public:
         explicit AntlrErrorListener(const std::string& source);

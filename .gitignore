@@ -8,8 +8,8 @@ grammar/*.base
 grammar/antlr
 antlr4
 
-/src/lexer/Tokens/Main.tokens
-/src/lexer/antlr
+/src/parser/Tokens/Main.tokens
+/src/parser/antlr
 /antlr4/
 /ast.json
 /src/modules/runtime.bc

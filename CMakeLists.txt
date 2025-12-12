@@ -22,7 +22,7 @@ set(CMAKE_C_COMPILER "/usr/bin/clang")
 set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 
 # ---- Path Definitions ----
-set(GENERATED_DIR "${CMAKE_SOURCE_DIR}/src/lexer/antlr")
+set(GENERATED_DIR "${CMAKE_SOURCE_DIR}/src/parser/generated")
 set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/src")
 
 # ---- ANTLR4 runtime include and lib paths ----
@@ -82,7 +82,7 @@ file(GLOB_RECURSE ALL_SOURCES
         "${SOURCES_DIR}/visitor/*.cpp"
         "${SOURCES_DIR}/optimizer/*.cpp"
         "${SOURCES_DIR}/backend/*.cpp"
-        "${SOURCES_DIR}/lowering/*.cpp"
+        "${SOURCES_DIR}/core/*.cpp"
         "${SOURCES_DIR}/semantic/*.cpp"
         "${SOURCES_DIR}/modules/*.cpp"
 )

@@ -1,7 +1,7 @@
 lexer grammar MainTokens;
 
 // --------------------------------------------------------------------
-// FLAG compartida entre parser y lexer
+// FLAG compartida entre parser y parser
 // --------------------------------------------------------------------
 @members {
     bool* inSkipMode = nullptr;

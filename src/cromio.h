@@ -15,11 +15,10 @@
 #include "antlr4-runtime.h"
 
 // cromio headers
-#include "lowering/lowering.h"
-#include "runtime/runtime.h"
+#include "core/core.h"
 #include "semantic/semantic.h"
-#include "visitor/visitor.h"
 #include "visitor/nodes/nodes.h"
+#include "visitor/visitor.h"
 
 // utils headers
-#include <utils/AntlrErrorListener.h>
+#include <utils/utils.h>

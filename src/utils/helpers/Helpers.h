@@ -34,6 +34,6 @@ namespace cromio::utils {
         static void printNode(const std::any& node, int indent = 0);
         static void printIndent(const int indent);
     };
-} // namespace cromio::utils
+} // namespace cromio::utils::helpers
 
 #endif // CROMIO_HELPERS_H

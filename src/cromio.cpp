@@ -4,6 +4,8 @@
 
 #include "cromio.h"
 
+#include <utils/errors/AntlrErrorListener.h>
+
 int main(int argc, const char* argv[]) {
     try {
         // ---------------------------------------------
@@ -43,7 +45,7 @@ int main(int argc, const char* argv[]) {
         lexer.removeErrorListeners();
         grammar.removeErrorListeners();
 
-        cromio::utils::AntlrErrorListener errorListener(content);
+        cromio::utils::errors::AntlrErrorListener errorListener(content);
         lexer.addErrorListener(&errorListener);
         grammar.addErrorListener(&errorListener);
 
