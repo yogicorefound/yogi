@@ -5,7 +5,7 @@
 #ifndef CROMIO_LOWERING_H
 #define CROMIO_LOWERING_H
 
-#include "emitter/CodeEmitter.h"
-#include "ir/IR.h"
+#include "core/llvm/emitter/CodeEmitter.h"
+#include "core/llvm/ir/IR.h"
 
-#endif //CROMIO_LOWERING_H
+#endif // CROMIO_LOWERING_H
