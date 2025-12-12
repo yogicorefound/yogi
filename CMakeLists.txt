@@ -24,6 +24,7 @@ set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 # ---- Path Definitions ----
 set(GENERATED_DIR "${CMAKE_SOURCE_DIR}/src/parser/generated")
 set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/src")
+set(SOURCES_TESTS "${CMAKE_SOURCE_DIR}/test")
 
 # ---- ANTLR4 runtime include and lib paths ----
 set(ANTLR4_RUNTIME_INCLUDE "/usr/local/include/antlr4-runtime")
@@ -78,6 +79,7 @@ file(GLOB_RECURSE ALL_SOURCES
         "${SOURCES_DIR}/cromio.cpp"
         "${GENERATED_DIR}/*.cpp"
         "${SOURCES_DIR}/*.cpp"
+        "${SOURCES_TESTS}/*.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${ALL_SOURCES})
@@ -89,6 +91,7 @@ add_executable(${PROJECT_NAME} ${ALL_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC
         ${CMAKE_SOURCE_DIR}
         ${SOURCES_DIR}
+        ${SOURCES_TESTS}
         ${ANTLR4_RUNTIME_INCLUDE}
         ${GENERATED_DIR}
 )
