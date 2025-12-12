@@ -6,6 +6,7 @@
 #define CROMIO_UTILS_H
 
 #include "utils/errors/Errors.h"
+#include "utils/errors/AntlrErrorListener.h"
 #include "utils/helpers/Helpers.h"
 
 #endif // CROMIO_UTILS_H
