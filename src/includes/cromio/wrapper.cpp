@@ -97,7 +97,7 @@ namespace cromio {
     void Cromio::processLLVM(const std::any& ast) const {
         const auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
-        lowering::IR ir(fileName);
+        core::ir::IR ir(fileName);
         llvm::Module* module = ir.generate(node);
 
         std::cout << "=== LLVM IR ===" << std::endl;

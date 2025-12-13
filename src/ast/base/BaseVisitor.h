@@ -8,6 +8,7 @@
 #include "GrammarVisitor.h"
 #include "semantic/scopes/Scope.h"
 #include "semantic/semantic.h"
+#include "llvm/IR/IRBuilder.h"
 
 
 namespace cromio::visitor {

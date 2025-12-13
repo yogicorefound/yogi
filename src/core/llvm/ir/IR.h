@@ -14,7 +14,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 
-namespace cromio::lowering {
+namespace cromio::core::ir {
     class IR {
        public:
         explicit IR(const std::string& moduleName);
