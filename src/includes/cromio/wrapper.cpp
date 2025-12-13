@@ -19,14 +19,11 @@
 
 namespace cromio {
     void Cromio::compile() {
-        const std::any ast = getAST();
-        printAST(ast);
-
-        // const llvm::Module* module = getLLVMModule(ast);
-        // printIR(*module);
+        const visitor::nodes::ProgramNode ast = getAST();
+        processLLVM(ast);
     }
 
-    std::string Cromio::getContent(const int argc, const char* argv[]) {
+    void Cromio::getContent(const int argc, const char* argv[]) {
         if (argc < 2) {
             std::cerr << "Usage: " << argv[0] << " <input-file>" << std::endl;
             std::exit(1);
@@ -38,20 +35,15 @@ namespace cromio {
             std::exit(1);
         }
 
-        std::string filenamePath = argv[1];
-        std::string fileName = filenamePath.substr(filenamePath.find_last_of('/') + 1);
-
-        // Remove extension for output name
-        std::string baseName = fileName.substr(0, fileName.find_last_of('.'));
+        std::string filePath = argv[1];
+        fileName = filePath.substr(filePath.find_last_of('/') + 1);
 
         std::stringstream buffer;
         buffer << file.rdbuf();
-
-        std::string content = buffer.str();
-        return content;
+        this->content = buffer.str();
     }
 
-    std::any Cromio::getAST() {
+    visitor::nodes::ProgramNode Cromio::getAST() {
         // ---------------------------------------------
         // Feed file content into ANTLR
         // ---------------------------------------------
@@ -84,7 +76,9 @@ namespace cromio {
         // Feed Grammar into Visitor and generate AST
         // ---------------------------------------------
         auto ast = visitor.visit(tree);
-        return ast;
+        auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
+
+        return node;
     }
 
     void Cromio::printAST(const std::any& ast) {
@@ -100,25 +94,20 @@ namespace cromio {
         }
     }
 
-    void Cromio::printIR(const llvm::Module& module) {
-        std::cout << "=== LLVM IR ===" << std::endl;
-        module.print(llvm::outs(), nullptr);
-        std::cout << std::endl;
-    }
+    void Cromio::processLLVM(const std::any& ast) const {
+        const auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
-    // const llvm::Module* Cromio::getLLVMModule(const std::any& ast) const {
-    //     auto programNode = std::any_cast<visitor::nodes::ProgramNode>(ast);
-    //
-    //     // lowering::IR ir(fileName);
-    //     // const llvm::Module* module = ir.generate(programNode);
-    //
-    //     // ---------------------------------------------
-    //     // Generate executable
-    //     // ---------------------------------------------
-    //     // cromio::lowering::CodeEmitter::toExecutable(module, baseName);
-    //     // std::cout << "Executable generated successfully!" << std::endl;
-    //
-    //     return module;
-    // }
+        lowering::IR ir(fileName);
+        llvm::Module* module = ir.generate(node);
+
+        std::cout << "=== LLVM IR ===" << std::endl;
+        module->print(llvm::outs(), nullptr);
+
+        // ---------------------------------------------
+        // Generate executable
+        // ---------------------------------------------
+        const std::string baseName = fileName.substr(0, fileName.find_last_of('.'));
+        lowering::CodeEmitter::toExecutable(module, baseName);
+    }
 
 } // namespace cromio

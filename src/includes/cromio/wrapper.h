@@ -4,24 +4,26 @@
 
 #pragma once
 
+#include <ast/nodes/ProgramNode.h>
 #include <llvm/IR/Module.h>
 #include <any>
 
 namespace cromio {
     class Cromio final {
        public:
-        Cromio(const int argc, const char* argv[]) : content(getContent(argc, argv)) {}
+        Cromio(const int argc, const char* argv[]) {
+            getContent(argc, argv);
+        }
 
         void compile();
 
        private:
-        std::any getAST();
+        visitor::nodes::ProgramNode getAST();
         static void printAST(const std::any& ast);
 
         // LLVM
-        const llvm::Module* getLLVMModule(const std::any& ast) const;
-        static void printIR(const llvm::Module& module);
-        static std::string getContent(int argc, const char* argv[]);
+        void processLLVM(const std::any& ast) const;
+        void getContent(int argc, const char* argv[]);
 
         std::string content;
         std::string fileName;

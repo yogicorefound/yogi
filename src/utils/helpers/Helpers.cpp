@@ -465,11 +465,11 @@ namespace cromio::utils {
                 std::cout << "\"kind\": \"Program\",\n";
                 printIndent(indent + 1);
                 std::cout << "\"body\": [\n";
-                for (size_t i = 0; i < n.statements.size(); i++) {
+                for (size_t i = 0; i < n.body.size(); i++) {
                     // Wrap StatementNode in std::any before printing
-                    std::any stmtAny = n.statements[i];
+                    std::any stmtAny = n.body[i];
                     printNode(stmtAny, indent + 2);
-                    if (i < n.statements.size() - 1)
+                    if (i < n.body.size() - 1)
                         std::cout << ",";
                     std::cout << "\n";
                 }

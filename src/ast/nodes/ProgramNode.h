@@ -10,7 +10,7 @@
 namespace cromio::visitor::nodes {
     // Program Node (root of AST - holds all top-level statements)
     struct ProgramNode : BaseNode {
-        std::vector<StatementNode> statements;  // All top-level statements
+        std::vector<StatementNode> body;  // All top-level statements
 
         explicit ProgramNode(
             const Position start,
@@ -18,7 +18,7 @@ namespace cromio::visitor::nodes {
         ) : BaseNode(Kind::PROGRAM, start, end) {}
 
         void addStatement(StatementNode stmt) {
-            statements.push_back(std::move(stmt));
+            body.push_back(std::move(stmt));
         }
     };
 

@@ -21,7 +21,6 @@ FLOAT_HEX
     ;
 
 
-// integer
 INTEGER
     : DIGIT+ // Decimal
     | [+-]? '0x' HEX_DIGIT+ // Hexadecimal
