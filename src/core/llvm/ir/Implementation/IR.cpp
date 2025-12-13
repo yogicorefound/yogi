@@ -20,26 +20,62 @@ namespace cromio::core::ir {
         builder = std::make_unique<llvm::IRBuilder<>>(*context);
     }
 
+    llvm::Value* IR::convertType(llvm::Value* val, llvm::Type* targetType, const std::string& name, const std::string& phase) const {
+        if (val->getType() == targetType)
+            return val;
+
+        if (val->getType()->isIntegerTy() && targetType->isFloatingPointTy()) {
+            return val->getType()->getIntegerBitWidth() == 1 ? builder->CreateUIToFP(val, targetType, name + "_" + phase + "_bool_to_fp") : builder->CreateSIToFP(val, targetType, name + "_" + phase + "_int_to_fp");
+        }
+        if (val->getType()->isFloatingPointTy() && targetType->isIntegerTy()) {
+            return builder->CreateFPToSI(val, targetType, name + "_" + phase + "_fp_to_int");
+        }
+        if (val->getType()->isIntegerTy() && targetType->isIntegerTy()) {
+            const auto* src = llvm::cast<llvm::IntegerType>(val->getType());
+            auto* tgt = llvm::cast<llvm::IntegerType>(targetType);
+
+            if (src->getBitWidth() < tgt->getBitWidth())
+                return src->getBitWidth() == 1 ? builder->CreateZExt(val, tgt, name + "_" + phase + "_zext") : builder->CreateSExt(val, tgt, name + "_" + phase + "_sext");
+
+            return builder->CreateTrunc(val, tgt, name + "_" + phase + "_trunc");
+        }
+        if (val->getType()->isPointerTy() && targetType->isPointerTy()) {
+            return builder->CreateBitCast(val, targetType, name + "_" + phase + "_bitcast");
+        }
+
+        throw std::runtime_error("Cannot convert value to target type for: " + name);
+    }
+
     bool IR::linkModule(std::unique_ptr<llvm::Module> other) const {
         llvm::Linker linker(*module);
-        if (constexpr llvm::Linker::Flags flags = llvm::Linker::Flags::None;
-            linker.linkInModule(std::move(other), flags))
+        if (constexpr llvm::Linker::Flags flags = llvm::Linker::Flags::None; linker.linkInModule(std::move(other), flags))
             return false;
         return true;
     }
 
     llvm::Type* IR::mapDataType(const std::string& typeName) const {
-        if (typeName == "int") return builder->getInt32Ty();
-        if (typeName == "int8") return builder->getInt8Ty();
-        if (typeName == "int16") return builder->getInt16Ty();
-        if (typeName == "int32") return builder->getInt32Ty();
-        if (typeName == "int64") return builder->getInt64Ty();
-        if (typeName == "float") return builder->getDoubleTy();
-        if (typeName == "float32") return builder->getFloatTy();
-        if (typeName == "float64") return builder->getDoubleTy();
-        if (typeName == "bool") return builder->getInt1Ty();
-        if (typeName == "none") return builder->getInt8Ty();
-        if (typeName == "str") return llvm::PointerType::get(*context, 0);
+        if (typeName == "int")
+            return builder->getInt32Ty();
+        if (typeName == "int8")
+            return builder->getInt8Ty();
+        if (typeName == "int16")
+            return builder->getInt16Ty();
+        if (typeName == "int32")
+            return builder->getInt32Ty();
+        if (typeName == "int64")
+            return builder->getInt64Ty();
+        if (typeName == "float")
+            return builder->getDoubleTy();
+        if (typeName == "float32")
+            return builder->getFloatTy();
+        if (typeName == "float64")
+            return builder->getDoubleTy();
+        if (typeName == "bool")
+            return builder->getInt1Ty();
+        if (typeName == "none")
+            return builder->getInt8Ty();
+        if (typeName == "str")
+            return llvm::PointerType::get(*context, 0);
         return builder->getInt64Ty();
     }
 
@@ -97,7 +133,7 @@ namespace cromio::core::ir {
                 auto it = symbols.find(n.value);
                 if (it == symbols.end())
                     throw std::runtime_error("Undefined identifier in inferType: " + n.value);
-                return it->second->getAllocatedType();
+                return it->second->getType();
             }
         } catch (const std::bad_any_cast& e) {
             throw std::runtime_error("Type inference failed: " + std::string(e.what()));
@@ -116,8 +152,7 @@ namespace cromio::core::ir {
         if (!mb)
             return nullptr;
 
-        llvm::Expected<std::unique_ptr<llvm::Module>> modOrErr =
-            llvm::parseBitcodeFile(mb.get()->getMemBufferRef(), context);
+        llvm::Expected<std::unique_ptr<llvm::Module>> modOrErr = llvm::parseBitcodeFile(mb.get()->getMemBufferRef(), context);
 
         if (!modOrErr)
             return nullptr;
@@ -139,8 +174,7 @@ namespace cromio::core::ir {
                 continue;
 
             try {
-                if (auto extMod = loadBitcode(entry.path().string(), *context);
-                    extMod && !linkModule(std::move(extMod))) {
+                if (auto extMod = loadBitcode(entry.path().string(), *context); extMod && !linkModule(std::move(extMod))) {
                     llvm::errs() << "Warning: Failed to link module: " << entry.path() << "\n";
                 }
             } catch (...) {
@@ -181,4 +215,4 @@ namespace cromio::core::ir {
 
         return fn;
     }
-} // namespace cromio::lowering
+} // namespace cromio::core::ir

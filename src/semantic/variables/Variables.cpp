@@ -3,199 +3,211 @@
 //
 
 #include "semantic/variables/Variables.h"
-
-#include <nlohmann/json.hpp>
+#include <ast/nodes/nodes.h>
 #include <string>
 #include <unordered_set>
 #include "semantic/BaseSemantic.h"
+#include "utils/utils.h"
 
 namespace cromio::semantic {
+    using namespace cromio::visitor::nodes;
 
-    json Variables::cleanASTExpression(const json& node) {
-        if (!node.is_object())
-            return node;
+    void Variables::analyzeVariableWithoutAssignment(const VariableDeclarationNode& node, const Position& start, const Position& end) {
+        const std::string& type = node.varType;
 
-        // Detecta si el nodo es un literal por su "kind"
-        bool isLiteral = false;
-        if (node.contains("kind") && node["kind"].is_string()) {
-            if (const auto k = node["kind"].get<std::string>(); k.size() >= 7 && k.substr(k.size() - 7) == "Literal") {
-                isLiteral = true;
-            }
+        // Create a copy of the node to modify
+        VariableDeclarationNode result = node;
+
+        if (type.find("int") != std::string::npos) {
+            auto value = IntegerLiteralNode("0", start, end);
+            result.value = std::any(value);
+
+        } else if (type.find("float") != std::string::npos) {
+            auto value = FloatLiteralNode("0.0", start, end);
+            result.value = std::any(value);
+
+        } else if (type.find("str") != std::string::npos) {
+            auto value = StringLiteralNode("", start, end);
+            result.value = std::any(value);
+
+        } else if (type.find("bool") != std::string::npos) {
+            auto value = BooleanLiteralNode("0", start, end);
+            result.value = std::any(value);
         }
-
-        json cleaned = json::object();
-
-        static const std::unordered_set<std::string> removeKeys = {"raw", "value", "stringValue", "numberValue"};
-
-        for (auto it = node.begin(); it != node.end(); ++it) {
-            const std::string& key = it.key();
-            const json& value = it.value();
-
-            if (value.is_object() || value.is_array()) {
-                cleaned[key] = cleanASTExpression(value);
-                continue;
-            }
-
-            // --- LITERALS ---
-            if (isLiteral) {
-                if (key == "raw" || key == "value" || key == "kind") {
-                    cleaned[key] = value;
-                }
-                continue;
-            }
-
-            // --- NO LITERALS ---
-            if (!removeKeys.contains(key)) {
-                cleaned[key] = value;
-            }
-        }
-
-        return cleaned;
     }
 
-    json Variables::analyzeVariableWithoutAssignment(json& node, const antlr4::Token* start, const antlr4::Token* stop) {
-        const std::string type = node["DataType"]["value"];
+    void Variables::analyzeVariableDeclaration(const VariableDeclarationNode& node, const std::string& source) {
+        const std::string& identifier = node.identifier;
+        const std::string& dataType = node.varType;
 
-        if (type.contains("int")) {
-            json value = utils::Helpers::createNode("", "IntegerLiteral", start, stop);
-            value["value"] = 0;
-            value["raw"] = "0";
-            value["type"] = "int";
-            value["stringValue"] = "0";
-            value["numberValue"] = "0";
-            node["value"] = value;
-
-            return node;
-        }
-        if (type.contains("float")) {
-            json value = utils::Helpers::createNode("", "FloatLiteral", start, stop);
-            value["value"] = 0.0;
-            value["raw"] = "0.0";
-            value["type"] = "float";
-            value["stringValue"] = "0.0";
-            value["numberValue"] = "0.0";
-
-            node["value"] = value;
-            return node;
-        }
-        if (type.contains("str")) {
-            json value = utils::Helpers::createNode("", "StringLiteral", start, stop);
-            value["value"] = "";
-            value["raw"] = "";
-            value["type"] = "str";
-            value["stringValue"] = "";
-            value["numberValue"] = "";
-            node["value"] = value;
-            return node;
-        }
-        if (type.contains("bool")) {
-            json value = utils::Helpers::createNode("", "BooleanLiteral", start, stop);
-            value["value"] = false;
-            value["raw"] = "false";
-            value["type"] = "bool";
-            value["stringValue"] = "false";
-            value["numberValue"] = "0";
-            node["value"] = value;
-            return node;
+        // Extract value information from the node
+        if (!node.value.has_value()) {
+            throw std::runtime_error("Variable declaration missing value: " + identifier);
         }
 
-        node["value"] = nullptr;
-        return node;
-    }
+        std::string returnType;
+        std::string rValue;
+        std::string stringValue;
 
-    json Variables::analyzeVariableDeclaration(json& node, const std::string& source) {
-        if (node["value"].contains("error")) {
-            const std::string error = node["value"]["error"];
-            utils::Errors::throwError("Error", error, node, source);
+        // Determine the type and value from the std::any
+        try {
+            if (node.value.type() == typeid(IntegerLiteralNode)) {
+                auto val = std::any_cast<IntegerLiteralNode>(node.value);
+                returnType = "int";
+                rValue = val.value;
+                stringValue = val.value;
+            } else if (node.value.type() == typeid(FloatLiteralNode)) {
+                auto val = std::any_cast<FloatLiteralNode>(node.value);
+                returnType = "float";
+                rValue = val.value;
+                stringValue = val.value;
+            } else if (node.value.type() == typeid(BooleanLiteralNode)) {
+                auto val = std::any_cast<BooleanLiteralNode>(node.value);
+                returnType = "bool";
+                rValue = val.value;
+                stringValue = (val.value == "1") ? "true" : "false";
+            } else if (node.value.type() == typeid(StringLiteralNode)) {
+                auto val = std::any_cast<StringLiteralNode>(node.value);
+                returnType = "str";
+                rValue = val.value;
+                stringValue = val.value;
+            } else if (node.value.type() == typeid(BinaryExpressionNode)) {
+                auto val = std::any_cast<BinaryExpressionNode>(node.value);
+                returnType = val.resultType;
+                rValue = val.value;
+                stringValue = val.value;
+            } else if (node.value.type() == typeid(NoneLiteralNode)) {
+                auto val = std::any_cast<NoneLiteralNode>(node.value);
+                returnType = "none";
+                rValue = "0";
+                stringValue = "None";
+            } else {
+                throw std::runtime_error("Unsupported value type in variable declaration");
+            }
+        } catch (const std::bad_any_cast& e) {
+            throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
 
-        const std::string identifier = node["Identifier"]["value"];
-        const std::string dataType = node["DataType"]["value"];
-        const std::string rValue = node["value"]["numberValue"];
-        const std::string stringValue = node["value"]["stringValue"];
-        const std::string returnType = node["value"]["type"];
-
+        // Type checking
         if (!checkDataType(dataType, returnType)) {
-            utils::Errors::throwTypeError(identifier, dataType, node, source);
+            utils::Errors::throwTypeError(identifier, dataType, node.value, source);
         }
 
-        analyze64BitInteger(rValue, dataType, identifier, source, node);
+        // Range checking for integers
+        analyze64BitInteger(rValue, dataType, identifier, source, node.value);
 
-        if (dataType.contains("uint")) {
-            analyzeUnsignedInteger(rValue, dataType, identifier, source, node);
-        }
-
-        else if (dataType.contains("int")) {
-            analyzeSignedInteger(rValue, dataType, identifier, source, node);
-        }
-
-        else if (dataType.contains("float")) {
-            analyzeFloat(rValue, dataType, source, node);
-        }
-
-        else if (dataType == "str" && returnType != "str") {
-            utils::Errors::throwTypeError(identifier, dataType, node, source);
-        }
-
-        else if (dataType == "bool") {
+        if (dataType.find("uint") != std::string::npos) {
+            analyzeUnsignedInteger(rValue, dataType, identifier, source, node.value);
+        } else if (dataType.find("int") != std::string::npos) {
+            analyzeSignedInteger(rValue, dataType, identifier, source, node.value);
+        } else if (dataType.find("float") != std::string::npos) {
+            analyzeFloat(rValue, dataType, source, node.value);
+        } else if (dataType == "str" && returnType != "str") {
+            utils::Errors::throwTypeError(identifier, dataType, node.value, source);
+        } else if (dataType == "bool") {
             if (stringValue != "true" && stringValue != "false") {
-                utils::Errors::throwTypeError(identifier, dataType, node, source);
+                utils::Errors::throwTypeError(identifier, dataType, node.value, source);
             }
         }
 
-        if (dataType.contains("uint") || dataType.contains("int")) {
-            node["value"]["raw"] = std::to_string(std::stoll(rValue));
-            node["value"]["value"] = std::stoll(rValue);
-            node["value"]["type"] = "int";
-            node["value"]["stringValue"] = std::to_string(std::stoll(rValue));
-            node["value"]["numberValue"] = std::to_string(std::stoll(rValue));
+        // Create result node with normalized value
+        VariableDeclarationNode result = node;
+
+        // Normalize integer values
+        if (dataType.find("uint") != std::string::npos || dataType.find("int") != std::string::npos) {
+            long long normalizedValue = std::stoll(rValue);
+            result.value = std::any(IntegerLiteralNode(std::to_string(normalizedValue), node.start, node.end));
         }
 
-        if (dataType.contains("float")) {
-            node["value"]["raw"] = std::to_string(std::stof(rValue));
-            node["value"]["value"] = std::stof(rValue);
-            node["value"]["type"] = "float";
-            node["value"]["stringValue"] = std::to_string(std::stof(rValue));
-            node["value"]["numberValue"] = std::to_string(std::stof(rValue));
+        // Normalize float values
+        if (dataType.find("float") != std::string::npos) {
+            float normalizedValue = std::stof(rValue);
+            result.value = std::any(FloatLiteralNode(std::to_string(normalizedValue), node.start, node.end));
         }
-
-        return node;
     }
+    void Variables::analyzeVariableReassignment(const VariableDeclarationNode& node, const std::string& source) {
+        std::string identifier = node.identifier;
+        std::string returnType;
+        std::string rValue;
+        std::string boolValue;
 
+        // Determine the type and value from the std::any
+        try {
+            if (node.value.type() == typeid(IntegerLiteralNode)) {
+                auto val = std::any_cast<IntegerLiteralNode>(node.value);
+                returnType = "int";
+                rValue = val.value;
+
+            } else if (node.value.type() == typeid(FloatLiteralNode)) {
+                auto val = std::any_cast<FloatLiteralNode>(node.value);
+                returnType = "float";
+                rValue = val.value;
+            } else if (node.value.type() == typeid(BooleanLiteralNode)) {
+                auto val = std::any_cast<BooleanLiteralNode>(node.value);
+                returnType = "bool";
+                rValue = val.value;
+                boolValue = (val.value == "1") ? "true" : "false";
+            } else if (node.value.type() == typeid(StringLiteralNode)) {
+                auto val = std::any_cast<StringLiteralNode>(node.value);
+                returnType = "str";
+                rValue = val.value;
+            } else if (node.value.type() == typeid(BinaryExpressionNode)) {
+                auto val = std::any_cast<BinaryExpressionNode>(node.value);
+                returnType = val.resultType;
+                rValue = val.value;
+            } else if (node.value.type() == typeid(NoneLiteralNode)) {
+                auto val = std::any_cast<NoneLiteralNode>(node.value);
+                returnType = "none";
+                rValue = "0";
+            } else {
+                throw std::runtime_error("Unsupported value type in variable declaration");
+            }
+
+        } catch (const std::bad_any_cast& e) {
+            throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
+        }
+
+        // Type checking - ensure new value matches variable's declared type
+        if (!checkDataType(node.varType, returnType)) {
+            utils::Errors::throwTypeError(identifier, node.varType, node, source);
+        }
+
+        // Range checking for integers
+        analyze64BitInteger(rValue, node.varType, identifier, source, node.value);
+
+        if (node.varType.find("uint") != std::string::npos) {
+            analyzeUnsignedInteger(rValue, node.varType, identifier, source, node.value);
+        } else if (node.varType.find("int") != std::string::npos) {
+            analyzeSignedInteger(rValue, node.varType, identifier, source, node.value);
+        } else if (node.varType.find("float") != std::string::npos) {
+            analyzeFloat(rValue, node.varType, source, node.value);
+        } else if (node.varType == "str" && returnType != "str") {
+            utils::Errors::throwTypeError(identifier, node.varType, node.value, source);
+        } else if (node.varType == "bool") {
+            if (boolValue != "true" && boolValue != "false") {
+                utils::Errors::throwTypeError(identifier, node.varType, node.value, source);
+            }
+        }
+    }
     bool Variables::checkDataType(const std::string& dataType, const std::string& returnType) {
         if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {
-            if (returnType == "int" || returnType == "float")
-                return true;
-
-            return false;
+            return returnType == "int" || returnType == "float";
         }
 
         if (dataType == "uint" || dataType == "uint8" || dataType == "uint16" || dataType == "uint32" || dataType == "uint64") {
-            if (returnType == "int" || returnType == "float")
-                return true;
-
-            return false;
+            return returnType == "int" || returnType == "float";
         }
 
         if (dataType == "float" || dataType == "float32" || dataType == "float64") {
-            if (returnType == "float" || returnType == "int")
-                return true;
-
-            return false;
+            return returnType == "float" || returnType == "int";
         }
 
         if (dataType == "bool") {
-            if (returnType == "bool")
-                return true;
-
-            return false;
+            return returnType == "bool";
         }
 
         if (dataType == "str") {
-            if (returnType == "str")
-                return true;
-
-            return false;
+            return returnType == "str";
         }
 
         return false;

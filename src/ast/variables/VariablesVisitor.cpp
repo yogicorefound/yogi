@@ -86,10 +86,9 @@ namespace cromio::visitor {
         auto node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
 
         // Perform semantic analysis
-        // auto analyzedNode = analyzeVariableDeclaration(node, source);
-
-        // Register variable in scope
+        analyzeVariableDeclaration(node, source);
         scope->declareVariable(identifier, node);
+
         return node;
     }
 
@@ -100,7 +99,7 @@ namespace cromio::visitor {
         parser->inVarMode = true;
 
         // Get new value expression
-        std::any newValue = visit(ctx->expression());
+        const std::any newValue = visit(ctx->expression());
 
         parser->inVarMode = false;
 
@@ -113,37 +112,22 @@ namespace cromio::visitor {
         }
 
         // Get variable info from scope
-        auto variable = scope->lookup(identifier);
-        if (!variable.has_value()) {
-            throwScopeError("variable '" + identifier + "' is not declared", identifier, newValue, source);
-        }
+        const auto variable = scope->lookup(identifier);
 
-        // Check if it's a constant
+        auto node = nodes::VariableDeclarationNode(identifier, "", newValue, false, start, end);
         if (variable.has_value()) {
-            try {
-                if (const auto varNode = std::any_cast<nodes::VariableDeclarationNode>(variable.value()); varNode.isConstant) {
-                    throwScopeError("cannot reassign constant variable '" + identifier + "'", identifier, varNode, source);
-                }
-            } catch (const std::bad_any_cast&) {
-                // Variable might be stored differently, continue
+            if (const auto varNode = variable.value(); varNode->isConstant) {
+                throwReassignmentError("cannot reassign constant variable '" + identifier + "'", newValue, source);
             }
+
+            node.varType = variable.value()->varType;
+
+            analyzeVariableReassignment(node, source);
+            scope->updateVariable(identifier, node);
+            return node;
         }
-
-        // Create variable reassignment node (reuse VariableDeclarationNode)
-        auto node = nodes::VariableDeclarationNode(identifier,
-                                                   "", // Type will be inferred from existing variable
-                                                   newValue,
-                                                   false,
-                                                   start,
-                                                   end);
-
-        // Perform semantic analysis
-        // auto analyzedNode = analyzeVariableReassignment(node, source);
-
-        // Update variable in scope
-        scope->updateVariable(identifier, node);
-
-        return node;
+        throwScopeError("variable '" + identifier + "' is not declared", identifier, newValue, source);
+        return 0;
     }
 
     std::any VariablesVisitor::visitVariableDataType(Grammar::VariableDataTypeContext* ctx) {

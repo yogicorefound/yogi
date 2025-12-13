@@ -21,7 +21,7 @@ namespace cromio::utils {
         static void throwScopeError(const std::string& message, const std::string& identifier, const std::any& node, const std::string& source);
         static void throwTypeError(const std::string& identifier, const std::string& dataType, const std::any& node, const std::string& source);
         static void throwTypeMismatchError(const std::string& identifier, const std::string& expectedType, const std::string& actualType, const std::any& node, const std::string& source);
-
+        static void throwReassignmentError(const std::string& message, const std::any& node, const std::string& source);
         static std::string getTypeMessage(const std::string& dataType);
 
        private:

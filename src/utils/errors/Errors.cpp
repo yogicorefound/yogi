@@ -141,6 +141,10 @@ namespace cromio::utils {
         throwError("RangeError", message, node, source);
     }
 
+    void Errors::throwReassignmentError(const std::string& message, const std::any& node, const std::string& source) {
+        throwError("ReassignmentError", message, node, source);
+    }
+
     void Errors::throwTypeError(const std::string& identifier, const std::string& dataType, const std::any& node, const std::string& source) {
         const std::string typeMsg = getTypeMessage(dataType);
         const std::string message = "'" + identifier + "' expects " + typeMsg;

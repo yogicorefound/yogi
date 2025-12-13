@@ -20,6 +20,8 @@
 namespace cromio {
     void Cromio::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
+        printAST(ast);
+
         processLLVM(ast);
     }
 

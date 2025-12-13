@@ -12,6 +12,9 @@ namespace cromio::visitor {
     class ExpressionVisitor : public virtual BaseVisitor {
        public:
         std::any visitExpression(Grammar::ExpressionContext* ctx) override;
+
+       private:
+        std::function<std::pair<double, std::string>(const std::any&)> extractValue;
     };
 } // namespace cromio::visitor
 

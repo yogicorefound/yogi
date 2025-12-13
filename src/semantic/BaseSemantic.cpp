@@ -3,6 +3,7 @@
 //
 
 #include "BaseSemantic.h"
+#include <cstdint>
 #include <string>
 #include "utils/utils.h"
 
@@ -17,48 +18,33 @@ namespace cromio::semantic {
 
     bool BaseSemantic::checkDataType(const std::string& dataType, const std::string& returnType) {
         if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {
-            if (returnType == "int" || returnType == "float")
-                return true;
-
-            return false;
+            return returnType == "int" || returnType == "float";
         }
 
         if (dataType == "uint" || dataType == "uint8" || dataType == "uint16" || dataType == "uint32" || dataType == "uint64") {
-            if (returnType == "int" || returnType == "float")
-                return true;
-
-            return false;
+            return returnType == "int" || returnType == "float";
         }
 
         if (dataType == "float" || dataType == "float32" || dataType == "float64") {
-            if (returnType == "float" || returnType == "int")
-                return true;
-
-            return false;
+            return returnType == "float" || returnType == "int";
         }
 
         if (dataType == "bool") {
-            if (returnType == "bool")
-                return true;
-
-            return false;
+            return returnType == "bool";
         }
 
         if (dataType == "str") {
-            if (returnType == "str")
-                return true;
-
-            return false;
+            return returnType == "str";
         }
 
         return false;
     }
 
-    void BaseSemantic::analyzeSignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const json& node) {
+    void BaseSemantic::analyzeSignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
         const auto value = utils::Helpers::parseInteger(rValue);
         const bool isValidNumber = utils::Helpers::isValidNumber(std::to_string(value));
 
-        // validate data type
+        // Validate data type
         if (dataType == "int8" && !isValidNumber)
             utils::Errors::throwTypeError(identifier, dataType, node, source);
 
@@ -68,7 +54,7 @@ namespace cromio::semantic {
         if ((dataType == "int32" || dataType == "int") && !isValidNumber)
             utils::Errors::throwTypeError(identifier, dataType, node, source);
 
-        // validate variable value exceeds range
+        // Validate variable value exceeds range
         if (dataType == "int8" && (value < INT8_MIN || value > INT8_MAX))
             utils::Errors::throwRangeError("Value exceeds 8-bit signed integer range", node, source);
 
@@ -79,11 +65,11 @@ namespace cromio::semantic {
             utils::Errors::throwRangeError("Value exceeds 32-bit signed integer range", node, source);
     }
 
-    void BaseSemantic::analyzeUnsignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const json& node) {
+    void BaseSemantic::analyzeUnsignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
         const bool isValidNumber = utils::Helpers::isValidNumber(rValue);
         const auto value = utils::Helpers::parseFloat(rValue);
 
-        // validate data type
+        // Validate data type
         if (dataType == "uint8" && !isValidNumber)
             utils::Errors::throwTypeError(identifier, dataType, node, source);
 
@@ -93,7 +79,7 @@ namespace cromio::semantic {
         if ((dataType == "uint32" || dataType == "uint") && !isValidNumber)
             utils::Errors::throwTypeError(identifier, dataType, node, source);
 
-        // validate variable value exceeds range
+        // Validate variable value exceeds range
         if (dataType == "uint8" && (value < 0 || value > UINT8_MAX))
             utils::Errors::throwRangeError("Value exceeds 8-bit unsigned integer range", node, source);
 
@@ -104,7 +90,7 @@ namespace cromio::semantic {
             utils::Errors::throwRangeError("Value exceeds 32-bit unsigned integer range", node, source);
     }
 
-    void BaseSemantic::analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const json& node) {
+    void BaseSemantic::analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const std::any& node) {
         if (dataType == "float" || dataType == "float32") {
             if (utils::Helpers::isGreaterSigned(rValue, FLOAT32_MAX_STR, FLOAT32_MIN_STR))
                 utils::Errors::throwRangeError("<float32> type exceeds 32-bit float range", node, source);
@@ -116,7 +102,7 @@ namespace cromio::semantic {
         }
     }
 
-    void BaseSemantic::analyze64BitInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const json& node) {
+    void BaseSemantic::analyze64BitInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
         const bool isNegative = !rValue.empty() && rValue[0] == '-';
 
         // ---------------------------------------------

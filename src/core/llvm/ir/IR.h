@@ -29,12 +29,13 @@ namespace cromio::core::ir {
         std::unique_ptr<llvm::IRBuilder<>> builder;
 
         // Symbol table: variable name -> alloca
-        std::unordered_map<std::string, llvm::AllocaInst*> symbols;
+        std::unordered_map<std::string, llvm::Value*> symbols;
 
         // Helpers
         llvm::Type* mapDataType(const std::string& typeName) const;
         llvm::Value* promoteToDouble(llvm::Value* v) const;
         llvm::Type* inferType(const std::any& node) const;
+        llvm::Value* convertType(llvm::Value* val, llvm::Type* targetType, const std::string& name, const std::string& phase) const;
 
         // Codegen utilities
         static llvm::AllocaInst* createEntryBlockAlloca(llvm::Function* function, llvm::Type* type, const std::string& name);
@@ -52,6 +53,6 @@ namespace cromio::core::ir {
         void loadAndLinkModulesFromFolder() const;
         bool linkModule(std::unique_ptr<llvm::Module> other) const;
     };
-} // namespace cromio::lowering
+} // namespace cromio::core::ir
 
 #endif // CROMIO_IR_H

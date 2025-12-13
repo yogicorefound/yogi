@@ -2,22 +2,27 @@
 // Created by Brayhan De Aza on 12/2/25.
 //
 
-#ifndef CROMIO_VARIABLES_SEMANTIC_ANALYZE_H
-#define CROMIO_VARIABLES_SEMANTIC_ANALYZE_H
+#ifndef CROMIO_VARIABLES_H
+#define CROMIO_VARIABLES_H
 
-#include "../BaseSemantic.h"
-#include "utils/utils.h"
+#include <ast/nodes/nodes.h>
+#include <string>
+#include "semantic/BaseSemantic.h"
 
 namespace cromio::semantic {
     class Variables : public virtual BaseSemantic {
        public:
+        // Analyze variable declaration without initial assignment
+        static void analyzeVariableWithoutAssignment(const visitor::nodes::VariableDeclarationNode& node, const visitor::nodes::Position& start, const visitor::nodes::Position& end);
 
-        static json analyzeVariableDeclaration(json& node, const std::string& source);
-        static json analyzeVariableWithoutAssignment(json& node, const antlr4::Token* start, const antlr4::Token* stop);
+        // Analyze variable declaration with value
+        static void analyzeVariableDeclaration(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
 
-        static json cleanASTExpression(const json& node);
-        static bool checkDataType(const std::string& dataType, const std::string& returnType);
+        static void analyzeVariableReassignment(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
+            // Check if data type matches return type
+            static bool checkDataType(const std::string& dataType, const std::string& returnType);
     };
+
 } // namespace cromio::semantic
 
-#endif // CROMIO_VARIABLES_SEMANTIC_ANALYZE_H
+#endif // CROMIO_VARIABLES_H

@@ -38,8 +38,8 @@ namespace cromio::core::ir {
                 auto it = symbols.find(n.value);
                 if (it == symbols.end())
                     throw std::runtime_error("Undefined identifier: " + n.value);
-                llvm::AllocaInst* alloc = it->second;
-                return builder->CreateLoad(alloc->getAllocatedType(), alloc, n.value + ".load");
+                llvm::Value* alloc = it->second;
+                return builder->CreateLoad(alloc->getType(), alloc, n.value + ".load");
             }
         } catch (const std::bad_any_cast& e) {
             throw std::runtime_error("Literal generation failed: " + std::string(e.what()));

@@ -49,8 +49,8 @@ namespace cromio::visitor {
             const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
             const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-            // Helper to extract numeric value from any literal node
-            auto extractValue = [](const std::any& result) -> std::pair<double, std::string> {
+            std::function<std::pair<double, std::string>(const std::any&)> extractValue;
+            extractValue = [this, &extractValue](const std::any& result) -> std::pair<double, std::string> {
                 try {
                     if (result.type() == typeid(nodes::IntegerLiteralNode)) {
                         auto node = std::any_cast<nodes::IntegerLiteralNode>(result);
@@ -73,8 +73,28 @@ namespace cromio::visitor {
                     }
                     if (result.type() == typeid(nodes::IdentifierLiteral)) {
                         auto node = std::any_cast<nodes::IdentifierLiteral>(result);
-                        // TODO: Look up identifier value from symbol table
-                        throw std::runtime_error("Undefined identifier: " + node.value);
+
+                        // Look up identifier value from symbol table
+                        if (!scope) {
+                            throw std::runtime_error("No scope available for identifier lookup: " + node.value);
+                        }
+
+                        const std::string identifier = node.value;
+
+                        if (const auto variable = scope->lookup(identifier); variable.has_value()) {
+                            const auto varNode = variable.value();
+
+                            // The value field is std::any and could contain:
+                            // - A literal node (IntegerLiteralNode, FloatLiteralNode, etc.)
+                            // - An expression node (BinaryExpressionNode)
+                            // - A primitive value (int, double, float, bool)
+
+                            // Recursively extract the value by calling extractValue on varNode->value
+                            return extractValue(varNode->value);
+                        }
+
+                        // Variable not found in scope
+                        throw std::runtime_error("Variable '" + identifier + "' is not declared");
                     }
                 } catch (const std::exception& _) {
                     throw std::runtime_error("Cannot extract numeric value");

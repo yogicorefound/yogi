@@ -5,8 +5,8 @@
 #ifndef CROMIO_BASE_SEMANTIC_H
 #define CROMIO_BASE_SEMANTIC_H
 
+#include <any>
 #include <string>
-#include "utils/utils.h"
 
 namespace cromio::semantic {
     class BaseSemantic {
@@ -20,10 +20,14 @@ namespace cromio::semantic {
         static const std::string FLOAT64_MIN_STR;
 
         static bool checkDataType(const std::string& dataType, const std::string& returnType);
-        static void analyzeSignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const json& node);
-        static void analyzeUnsignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const json& node);
-        static void analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const json& node);
-        static void analyze64BitInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const json& node);
+
+        static void analyzeSignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node);
+
+        static void analyzeUnsignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node);
+
+        static void analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const std::any& node);
+
+        static void analyze64BitInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node);
     };
 } // namespace cromio::semantic
 

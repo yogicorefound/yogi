@@ -2,7 +2,6 @@
 // Created by Brayhan De Aza on 12/13/25.
 //
 
-
 #include <core/llvm/ir/IR.h>
 
 namespace cromio::core::ir {

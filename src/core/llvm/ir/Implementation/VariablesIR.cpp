@@ -13,12 +13,10 @@ namespace cromio::core::ir {
         if (!currentFn)
             throw std::runtime_error("Must be inside a function to declare variable");
 
-        llvm::AllocaInst* allocaInst = createEntryBlockAlloca(currentFn, varType, node.identifier);
-        symbols[node.identifier] = allocaInst;
-
         // Evaluate initializer if present
+        llvm::Value* initVal = nullptr;
         if (node.value.has_value()) {
-            llvm::Value* initVal = expression(node.value);
+            initVal = expression(node.value);
             if (!initVal)
                 throw std::runtime_error("Variable initializer produced null");
 
@@ -30,8 +28,9 @@ namespace cromio::core::ir {
                     initVal = builder->CreateFPToSI(initVal, varType, "init_fp_to_int");
                 } else if (initVal->getType()->isIntegerTy() && varType->isIntegerTy()) {
                     const auto* initType = llvm::cast<llvm::IntegerType>(initVal->getType());
+                    const auto* targetType = llvm::cast<llvm::IntegerType>(varType);
 
-                    if (const auto* targetType = llvm::cast<llvm::IntegerType>(varType); initType->getBitWidth() < targetType->getBitWidth()) {
+                    if (initType->getBitWidth() < targetType->getBitWidth()) {
                         initVal = initType->getBitWidth() == 1 ? builder->CreateZExt(initVal, varType, "init_zext") : builder->CreateSExt(initVal, varType, "init_sext");
                     } else if (initType->getBitWidth() > targetType->getBitWidth()) {
                         initVal = builder->CreateTrunc(initVal, varType, "init_trunc");
@@ -42,11 +41,22 @@ namespace cromio::core::ir {
                     throw std::runtime_error("Cannot convert initializer to variable type for: " + node.identifier);
                 }
             }
-
-            builder->CreateStore(initVal, allocaInst);
+        } else {
+            // No initializer - create a default value (0 for numbers, nullptr for pointers)
+            if (varType->isIntegerTy()) {
+                initVal = llvm::ConstantInt::get(varType, 0);
+            } else if (varType->isFloatingPointTy()) {
+                initVal = llvm::ConstantFP::get(varType, 0.0);
+            } else if (varType->isPointerTy()) {
+                initVal = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(varType));
+            } else {
+                throw std::runtime_error("Unsupported type for uninitialized variable: " + node.identifier);
+            }
         }
 
-        return allocaInst;
+        // Store the SSA value directly - no alloca needed
+        symbols[node.identifier] = initVal;
+        return initVal;
     }
 
     llvm::Value* IR::variableAssignment(const visitor::nodes::VariableDeclarationNode& node) {
@@ -54,8 +64,8 @@ namespace cromio::core::ir {
         if (it == symbols.end())
             throw std::runtime_error("Assign to undefined variable: " + node.identifier);
 
-        llvm::AllocaInst* slot = it->second;
-        llvm::Type* varType = slot->getAllocatedType();
+        llvm::Value* currentVal = it->second;
+        llvm::Type* varType = currentVal->getType();
 
         llvm::Value* rhs = expression(node.value);
         if (!rhs)
@@ -69,8 +79,9 @@ namespace cromio::core::ir {
                 rhs = builder->CreateFPToSI(rhs, varType, "assign_fp_to_int");
             } else if (rhs->getType()->isIntegerTy() && varType->isIntegerTy()) {
                 const auto* Rit = llvm::cast<llvm::IntegerType>(rhs->getType());
+                auto* Vt = llvm::cast<llvm::IntegerType>(varType);
 
-                if (auto* Vt = llvm::cast<llvm::IntegerType>(varType); Rit->getBitWidth() < Vt->getBitWidth()) {
+                if (Rit->getBitWidth() < Vt->getBitWidth()) {
                     rhs = Rit->getBitWidth() == 1 ? builder->CreateZExt(rhs, Vt, "assign_zext") : builder->CreateSExt(rhs, Vt, "assign_sext");
                 } else if (Rit->getBitWidth() > Vt->getBitWidth()) {
                     rhs = builder->CreateTrunc(rhs, Vt, "assign_trunc");
@@ -82,7 +93,8 @@ namespace cromio::core::ir {
             }
         }
 
-        builder->CreateStore(rhs, slot);
+        // Update the symbol table with the new SSA value
+        symbols[node.identifier] = rhs;
         return rhs;
     }
 
