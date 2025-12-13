@@ -97,10 +97,7 @@ namespace cromio::visitor {
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         parser->inVarMode = true;
-
-        // Get new value expression
         const std::any newValue = visit(ctx->expression());
-
         parser->inVarMode = false;
 
         // Get identifier
@@ -120,9 +117,16 @@ namespace cromio::visitor {
                 throwReassignmentError("cannot reassign constant variable '" + identifier + "'", newValue, source);
             }
 
+            if (node.value.type() == typeid(nodes::IdentifierLiteral)) {
+                node.value = variable.value()->value;
+            }
+
             node.varType = variable.value()->varType;
 
+
+
             analyzeVariableReassignment(node, source);
+            std::cout << "Reassigning variable '" << identifier << "'" << std::endl;
             scope->updateVariable(identifier, node);
             return node;
         }

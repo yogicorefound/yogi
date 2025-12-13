@@ -6,8 +6,8 @@
 #define CROMIO_VARIABLES_H
 
 #include <ast/nodes/nodes.h>
+#include <semantic/scopes/Scope.h>
 #include <string>
-#include "semantic/BaseSemantic.h"
 
 namespace cromio::semantic {
     class Variables : public virtual BaseSemantic {
@@ -19,8 +19,8 @@ namespace cromio::semantic {
         static void analyzeVariableDeclaration(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
 
         static void analyzeVariableReassignment(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
-            // Check if data type matches return type
-            static bool checkDataType(const std::string& dataType, const std::string& returnType);
+        // Check if data type matches return type
+        static bool checkDataType(const std::string& dataType, const std::string& returnType);
     };
 
 } // namespace cromio::semantic

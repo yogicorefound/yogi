@@ -25,7 +25,6 @@ namespace cromio::visitor::nodes {
     // Identifier Literal
     struct IdentifierLiteral : BaseNode {
         std::string value;
-
         explicit IdentifierLiteral(const std::string& v, const Position start, const Position end) : BaseNode(Kind::IDENTIFIER_LITERAL, start, end), value(v) {}
     };
 

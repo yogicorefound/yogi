@@ -159,8 +159,9 @@ namespace cromio::semantic {
                 auto val = std::any_cast<NoneLiteralNode>(node.value);
                 returnType = "none";
                 rValue = "0";
+
             } else {
-                throw std::runtime_error("Unsupported value type in variable declaration");
+                utils::Errors::throwError("Error: ", "Unsupported value type in variable declaration", node.value, source);
             }
 
         } catch (const std::bad_any_cast& e) {
