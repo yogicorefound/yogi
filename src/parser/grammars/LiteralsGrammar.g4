@@ -4,13 +4,24 @@ options {
     tokenVocab = Tokens;
 }
 
-literal: integerLiteral
-       | floatLiteral
-       | formattedString
-       | stringLiteral
-       | booleanLiteral
-       | identifierLiteral
-       ;
+literal
+    : numberLiterals
+    | stringLiterals
+    | booleanLiteral
+    | identifierLiteral
+    ;
+
+numberLiterals
+    : integerLiteral
+    | floatLiteral
+    | identifierLiteral
+    ;
+
+stringLiterals
+    : stringLiteral
+    | formattedString
+    | identifierLiteral
+    ;
 
 formattedString
     : FORMATTED_STRING_START formattedStringContent* FORMATTED_STRING_END
@@ -21,9 +32,12 @@ formattedStringContent
     | LBRACE_IN_FSTRING expression RBRACE_IN_FSTRING
     ;
 
+stringLiteral: STRING
+
+    ;
+
 integerLiteral: INTEGER;
 floatLiteral: FLOAT;
-stringLiteral: STRING;
 booleanLiteral: BOOLEAN;
 noneLiteral: NONE;
 identifierLiteral: IDENTIFIER;

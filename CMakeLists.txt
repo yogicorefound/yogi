@@ -5,7 +5,6 @@ project(cromio VERSION 0.0.1 LANGUAGES C CXX)
 # ============================================================
 #                  MACOS & LLVM SETUP
 # ============================================================
-
 # Set macOS deployment target
 set(CMAKE_OSX_DEPLOYMENT_TARGET "26.0")
 
@@ -34,7 +33,6 @@ set(ANTLR4_RUNTIME_LIB "${CMAKE_SOURCE_DIR}/libs/antlr4/runtime/Cpp/build/runtim
 # ============================================================
 #                     LLVM INTEGRATION
 # ============================================================
-
 cmake_policy(SET CMP0075 NEW)
 cmake_policy(SET CMP0074 NEW)
 

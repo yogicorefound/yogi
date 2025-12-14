@@ -74,18 +74,30 @@ namespace cromio::visitor {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
         }
 
-        // Get initial value expression
-        const std::any value = visit(ctx->expression());
+        std::any value = visit(ctx->expression());
 
         parser->inVarMode = false;
 
         // Determine if it's a constant (const keyword)
         const bool isConstant = toUpper(identifier) == identifier;
 
-        // Create variable declaration node
+        if (value.type() == typeid(nodes::ConcatenationExpressionNode)) {
+            const auto conNode = std::any_cast<nodes::ConcatenationExpressionNode>(value);
+            value = conNode.value;
+
+        } else if (value.type() == typeid(nodes::BinaryExpressionNode)) {
+            const auto binNode = std::any_cast<nodes::BinaryExpressionNode>(value);
+            if (dataType == "int") {
+                nodes::IntegerLiteralNode intNode(std::to_string(std::stoll(binNode.value)), binNode.start, binNode.end);
+                value = intNode;
+            } else {
+                nodes::FloatLiteralNode floatNode(binNode.value, binNode.start, binNode.end);
+                value = floatNode;
+            }
+        }
+
         auto node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
 
-        // Perform semantic analysis
         analyzeVariableDeclaration(node, source);
         scope->declareVariable(identifier, node);
 
@@ -124,6 +136,8 @@ namespace cromio::visitor {
             }
 
             node.varType = variable.value()->varType;
+
+            std::cout << "node.varType " << node.varType << std::endl;
 
             analyzeVariableReassignment(node, source);
             scope->updateVariable(identifier, node);

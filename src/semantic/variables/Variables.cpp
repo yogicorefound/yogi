@@ -49,38 +49,51 @@ namespace cromio::semantic {
         std::string rValue;
         std::string stringValue;
 
-        // Determine the type and value from the std::any
         try {
             if (node.value.type() == typeid(IntegerLiteralNode)) {
                 auto val = std::any_cast<IntegerLiteralNode>(node.value);
                 returnType = "int";
                 rValue = val.value;
                 stringValue = val.value;
+
             } else if (node.value.type() == typeid(FloatLiteralNode)) {
                 auto val = std::any_cast<FloatLiteralNode>(node.value);
                 returnType = "float";
                 rValue = val.value;
                 stringValue = val.value;
+
             } else if (node.value.type() == typeid(BooleanLiteralNode)) {
                 auto val = std::any_cast<BooleanLiteralNode>(node.value);
                 returnType = "bool";
                 rValue = val.value;
                 stringValue = (val.value == "1") ? "true" : "false";
+
             } else if (node.value.type() == typeid(StringLiteralNode)) {
                 auto val = std::any_cast<StringLiteralNode>(node.value);
                 returnType = "str";
                 rValue = val.value;
                 stringValue = val.value;
+
+            } else if (node.value.type() == typeid(ConcatenationExpressionNode)) {
+                auto expressionNode = std::any_cast<ConcatenationExpressionNode>(node.value);
+                auto stringNode = std::any_cast<StringLiteralNode>(expressionNode.value);
+
+                returnType = "str";
+                rValue = stringNode.value;
+                stringValue = stringNode.value;
+
             } else if (node.value.type() == typeid(BinaryExpressionNode)) {
                 auto val = std::any_cast<BinaryExpressionNode>(node.value);
                 returnType = val.resultType;
                 rValue = val.value;
                 stringValue = val.value;
+
             } else if (node.value.type() == typeid(NoneLiteralNode)) {
                 auto val = std::any_cast<NoneLiteralNode>(node.value);
                 returnType = "none";
                 rValue = "0";
                 stringValue = "None";
+
             } else {
                 throw std::runtime_error("Unsupported value type in variable declaration");
             }
@@ -98,12 +111,16 @@ namespace cromio::semantic {
 
         if (dataType.find("uint") != std::string::npos) {
             analyzeUnsignedInteger(rValue, dataType, identifier, source, node.value);
+
         } else if (dataType.find("int") != std::string::npos) {
             analyzeSignedInteger(rValue, dataType, identifier, source, node.value);
+
         } else if (dataType.find("float") != std::string::npos) {
             analyzeFloat(rValue, dataType, source, node.value);
+
         } else if (dataType == "str" && returnType != "str") {
             utils::Errors::throwTypeError(identifier, dataType, node.value, source);
+
         } else if (dataType == "bool") {
             if (stringValue != "true" && stringValue != "false") {
                 utils::Errors::throwTypeError(identifier, dataType, node.value, source);
@@ -112,8 +129,6 @@ namespace cromio::semantic {
 
         // Create result node with normalized value
         VariableDeclarationNode result = node;
-
-        // Normalize integer values
         if (dataType.find("uint") != std::string::npos || dataType.find("int") != std::string::npos) {
             long long normalizedValue = std::stoll(rValue);
             result.value = std::any(IntegerLiteralNode(std::to_string(normalizedValue), node.start, node.end));
@@ -125,6 +140,7 @@ namespace cromio::semantic {
             result.value = std::any(FloatLiteralNode(std::to_string(normalizedValue), node.start, node.end));
         }
     }
+
     void Variables::analyzeVariableReassignment(const VariableDeclarationNode& node, const std::string& source) {
         std::string identifier = node.identifier;
         std::string returnType;
@@ -190,6 +206,7 @@ namespace cromio::semantic {
             }
         }
     }
+
     bool Variables::checkDataType(const std::string& dataType, const std::string& returnType) {
         if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {
             return returnType == "int" || returnType == "float";

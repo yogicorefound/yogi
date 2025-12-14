@@ -152,7 +152,6 @@ namespace cromio::utils {
     }
 
     void Errors::throwScopeError(const std::string& message, const std::string& identifier, const std::any& node, const std::string& source) {
-        std::cerr << "  Identifier: \033[1;33m" << identifier << "\033[0m\n\n";
         throwError("ScopeError", message, node, source);
         std::exit(1);
     }

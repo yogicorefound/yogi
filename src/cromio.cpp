@@ -3,7 +3,7 @@
 //
 
 #include <cromio.h>
-
+int* age = nullptr;
 int main(const int argc, const char* argv[]) {
     try {
         cromio::Cromio cromio(argc, argv);

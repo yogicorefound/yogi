@@ -267,6 +267,11 @@ namespace cromio::utils {
         return n > maxPos;
     }
 
+    bool Helpers::isInteger(const double number) {
+        double intPart;
+        return std::modf(number, &intPart) == 0.0;
+    }
+
     bool Helpers::isValidNumber(const std::string& str) {
         if (str.empty())
             return false;
@@ -339,6 +344,8 @@ namespace cromio::utils {
                 return "FormattedString";
             case Kind::BINARY_EXPRESSION:
                 return "BinaryExpression";
+            case Kind::CONCATENATION_EXPRESSION:
+                return "ConcatenationExpression";
             case Kind::STATEMENT:
                 return "Statement";
             case Kind::VARIABLE_DECLARATION:

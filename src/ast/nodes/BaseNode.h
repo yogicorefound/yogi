@@ -26,6 +26,7 @@ namespace cromio::visitor::nodes {
 
         // Expression
         BINARY_EXPRESSION,
+        CONCATENATION_EXPRESSION,
 
         // Statement
         VARIABLE_DECLARATION,

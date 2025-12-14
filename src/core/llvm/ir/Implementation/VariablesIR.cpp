@@ -9,8 +9,8 @@ namespace cromio::core::ir {
     llvm::Value* IR::variableDeclaration(const visitor::nodes::VariableDeclarationNode& node) {
         llvm::Type* varType = mapDataType(node.varType);
 
-        llvm::Function* currentFn = builder->GetInsertBlock()->getParent();
-        if (!currentFn)
+
+        if (const llvm::Function* currentFn = builder->GetInsertBlock()->getParent(); !currentFn)
             throw std::runtime_error("Must be inside a function to declare variable");
 
         // Evaluate initializer if present

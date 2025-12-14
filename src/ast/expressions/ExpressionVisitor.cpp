@@ -9,12 +9,28 @@
 #include <stdexcept>
 
 namespace cromio::visitor {
+
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
+        if (ctx->binaryExpression()) {
+            return visit(ctx->binaryExpression());
+        }
+
+        if (ctx->concatenationExpression()) {
+            return visit(ctx->concatenationExpression());
+        }
+
+        // Return None literal as fallback
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        return nodes::NoneLiteralNode("None", start, end);
+    }
+
+    std::any ExpressionVisitor::visitBinaryExpression(Grammar::BinaryExpressionContext* ctx) {
         // -------------------------------------------------------
         // (1) Literal → return literal node
         // -------------------------------------------------------
-        if (ctx->literal()) {
-            return visit(ctx->literal());
+        if (ctx->numberLiterals()) {
+            return visit(ctx->numberLiterals());
         }
 
         // -------------------------------------------------------
@@ -35,22 +51,22 @@ namespace cromio::visitor {
         // -------------------------------------------------------
         // (3) Parenthesized expression
         // -------------------------------------------------------
-        if (ctx->expression().size() == 1 && op.empty()) {
-            return visit(ctx->expression(0));
+        if (ctx->binaryExpression().size() == 1 && op.empty()) {
+            return visit(ctx->binaryExpression(0));
         }
 
         // -------------------------------------------------------
         // (4) Binary expression
         // -------------------------------------------------------
-        if (!op.empty() && ctx->expression().size() >= 2) {
-            std::any leftResult = visit(ctx->expression(0));
-            std::any rightResult = visit(ctx->expression(1));
+        if (!op.empty() && ctx->binaryExpression().size() >= 2) {
+            std::any leftResult = visit(ctx->binaryExpression(0));
+            std::any rightResult = visit(ctx->binaryExpression(1));
 
             const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
             const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-            std::function<std::pair<double, std::string>(const std::any&)> extractValue;
-            extractValue = [this, &extractValue](const std::any& result) -> std::pair<double, std::string> {
+            std::function<std::pair<double, std::string>(const std::any&)> extractedValue;
+            extractedValue = [this, &extractedValue](const std::any& result) -> std::pair<double, std::string> {
                 try {
                     if (result.type() == typeid(nodes::IntegerLiteralNode)) {
                         auto node = std::any_cast<nodes::IntegerLiteralNode>(result);
@@ -80,10 +96,9 @@ namespace cromio::visitor {
                         }
 
                         const std::string identifier = node.value;
-
                         if (const auto variable = scope->lookup(identifier); variable.has_value()) {
                             const auto varNode = variable.value();
-                            return extractValue(varNode->value);
+                            return extractedValue(varNode->value);
                         }
 
                         // Variable not found in scope
@@ -99,8 +114,8 @@ namespace cromio::visitor {
             std::string leftType, rightType;
 
             try {
-                auto [lv, lt] = extractValue(leftResult);
-                auto [rv, rt] = extractValue(rightResult);
+                auto [lv, lt] = extractedValue(leftResult);
+                auto [rv, rt] = extractedValue(rightResult);
                 leftValue = lv;
                 rightValue = rv;
                 leftType = lt;
@@ -162,18 +177,61 @@ namespace cromio::visitor {
             // (7) Create and return BinaryExpressionNode
             // -------------------------------------------------------
             auto node = nodes::BinaryExpressionNode(leftResult, rightResult, op, std::to_string(result), finalType, start, end);
+            // auto literalExpressionNode = nodes::BinaryExpressionLiteralNode(std::to_string(node.value), start, end);
+            //
+            // std::cout << "node.value " << std::to_string(result)<< std::endl;
+
             return node;
         }
 
         // -------------------------------------------------------
         // (8) Fallback
         // -------------------------------------------------------
-        if (!ctx->expression().empty())
-            return visit(ctx->expression(0));
+        if (!ctx->binaryExpression().empty())
+            return visit(ctx->binaryExpression(0));
 
         // Return None literal as fallback
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
         return nodes::NoneLiteralNode("None", start, end);
     }
+
+    std::any ExpressionVisitor::visitConcatenationExpression(Grammar::ConcatenationExpressionContext* ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        std::string value;
+        std::vector<nodes::StringLiteralNode> literals;
+        for (const auto expression : ctx->stringLiterals()) {
+            if (expression->identifierLiteral()) {
+                auto literal = visit(expression->identifierLiteral());
+                auto literalNode = std::any_cast<nodes::IdentifierLiteral>(literal);
+
+                auto variable = scope->lookup(literalNode.value);
+                if (!variable.has_value()) {
+                    throwScopeError("Variable '" + literalNode.value + "' is not declared", literalNode.value, literalNode, source);
+                }
+
+                auto varNode = variable.value();
+                if (varNode->varType != "str") {
+                    throwTypeError(literalNode.value, varNode->varType, literalNode, source);
+                }
+
+                auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(varNode->value);
+                value += stringLiteralNode.value;
+                literals.push_back(stringLiteralNode);
+                std::cout << "literalNode.value " << literalNode.value << std::endl;
+
+            } else {
+                auto literal = visit(expression);
+                auto literalNode = std::any_cast<nodes::StringLiteralNode>(literal);
+                value += literalNode.value;
+                literals.push_back(literalNode);
+            }
+        }
+
+        const nodes::StringLiteralNode node(value, start, end);
+        return node;
+    }
+
 } // namespace cromio::visitor

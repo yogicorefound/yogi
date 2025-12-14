@@ -7,21 +7,49 @@
 #include <ast/nodes/nodes.h>
 
 std::any cromio::visitor::LiteralsVisitor::visitLiteral(Grammar::LiteralContext* ctx) {
-    if (ctx->stringLiteral()) {
-        return visit(ctx->stringLiteral());
+    if (ctx->numberLiterals()) {
+        return visit(ctx->numberLiterals());
     }
+    if (ctx->stringLiterals()) {
+        return visit(ctx->stringLiterals());
+    }
+
+    if (ctx->booleanLiteral()) {
+        return visit(ctx->booleanLiteral());
+    }
+
+    if (ctx->identifierLiteral()) {
+        return visit(ctx->identifierLiteral());
+    }
+
+    // Return a NoneLiteralNode as default
+    const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+    const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+    return nodes::NoneLiteralNode("None", start, end);
+}
+
+std::any cromio::visitor::LiteralsVisitor::visitNumberLiterals(Grammar::NumberLiteralsContext* ctx) {
     if (ctx->integerLiteral()) {
         return visit(ctx->integerLiteral());
     }
     if (ctx->floatLiteral()) {
         return visit(ctx->floatLiteral());
     }
-    if (ctx->booleanLiteral()) {
-        return visit(ctx->booleanLiteral());
+
+    // Return a NoneLiteralNode as default
+    const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+    const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+    return nodes::NoneLiteralNode("None", start, end);
+}
+
+std::any cromio::visitor::LiteralsVisitor::visitStringLiterals(Grammar::StringLiteralsContext* ctx) {
+    if (ctx->stringLiteral()) {
+        return visit(ctx->stringLiteral());
     }
     if (ctx->formattedString()) {
         return visit(ctx->formattedString());
     }
+
     if (ctx->identifierLiteral()) {
         return visit(ctx->identifierLiteral());
     }
