@@ -113,20 +113,19 @@ namespace cromio::visitor {
 
         auto node = nodes::VariableDeclarationNode(identifier, "", newValue, false, start, end);
         if (variable.has_value()) {
-            if (const auto varNode = variable.value(); varNode->isConstant) {
+            const auto varNode = variable.value();
+            if (varNode->isConstant) {
                 throwReassignmentError("cannot reassign constant variable '" + identifier + "'", newValue, source);
             }
 
-            if (node.value.type() == typeid(nodes::IdentifierLiteral)) {
+            if (varNode->value.type() == typeid(nodes::BinaryExpressionNode)) {
+                const auto idNode = variable.value();
                 node.value = variable.value()->value;
             }
 
             node.varType = variable.value()->varType;
 
-
-
             analyzeVariableReassignment(node, source);
-            std::cout << "Reassigning variable '" << identifier << "'" << std::endl;
             scope->updateVariable(identifier, node);
             return node;
         }

@@ -83,13 +83,6 @@ namespace cromio::visitor {
 
                         if (const auto variable = scope->lookup(identifier); variable.has_value()) {
                             const auto varNode = variable.value();
-
-                            // The value field is std::any and could contain:
-                            // - A literal node (IntegerLiteralNode, FloatLiteralNode, etc.)
-                            // - An expression node (BinaryExpressionNode)
-                            // - A primitive value (int, double, float, bool)
-
-                            // Recursively extract the value by calling extractValue on varNode->value
                             return extractValue(varNode->value);
                         }
 
