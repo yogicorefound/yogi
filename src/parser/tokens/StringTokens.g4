@@ -9,6 +9,7 @@ lexer grammar StringTokens;
 
 STRING
     : '"' (ESC_SEQ | ~["\\\r\n])* '"'
+    | '\'' (ESC_SEQ | ~["\\\r\n])* '\''
     ;
 
 // F-STRING START
