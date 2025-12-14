@@ -138,21 +138,21 @@ namespace cromio::utils {
     }
 
     void Errors::throwRangeError(const std::string& message, const std::any& node, const std::string& source) {
-        throwError("RangeError", message, node, source);
+        throwError("Error", message, node, source);
     }
 
     void Errors::throwReassignmentError(const std::string& message, const std::any& node, const std::string& source) {
-        throwError("ReassignmentError", message, node, source);
+        throwError("Error", message, node, source);
     }
 
     void Errors::throwTypeError(const std::string& identifier, const std::string& dataType, const std::any& node, const std::string& source) {
         const std::string typeMsg = getTypeMessage(dataType);
         const std::string message = "'" + identifier + "' expects " + typeMsg;
-        throwError("TypeError", message, node, source);
+        throwError("Error", message, node, source);
     }
 
     void Errors::throwScopeError(const std::string& message, const std::string& identifier, const std::any& node, const std::string& source) {
-        throwError("ScopeError", message, node, source);
+        throwError("Error", message, node, source);
         std::exit(1);
     }
 
@@ -168,7 +168,7 @@ namespace cromio::utils {
             "  Actual:   " +
             actualMsg;
 
-        throwError("TypeError", message, node, source);
+        throwError("Error", message, node, source);
     }
 
     std::string Errors::getTypeMessage(const std::string& dataType) {
