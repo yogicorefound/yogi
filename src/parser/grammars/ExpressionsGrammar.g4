@@ -12,6 +12,7 @@ expression: concatenationExpression
           | numberLiterals
           ;
 
+
 concatenationExpression
     :  (stringLiterals (PLUS stringLiterals)*)+
     ;

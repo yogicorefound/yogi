@@ -16,7 +16,7 @@ program: NEWLINE* (statements NEWLINE*)* EOF;
 
 statements
     :   variables
-    |   arrayDeclaration
+    |   arrays
     |   dictionaryDeclaration
     |   expression
     ;

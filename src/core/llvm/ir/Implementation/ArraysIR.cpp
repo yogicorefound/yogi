@@ -7,7 +7,7 @@
 namespace cromio::core::ir {
 
     llvm::Value* IR::arrayDeclaration(const visitor::nodes::ArrayDeclarationNode& node) {
-        llvm::Type* elementType = mapDataType(node.elementType);
+        llvm::Type* elementType = mapDataType(node.type);
         const size_t arraySize = node.size;
 
         llvm::ArrayType* arrType = llvm::ArrayType::get(elementType, arraySize);

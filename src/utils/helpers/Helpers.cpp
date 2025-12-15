@@ -515,7 +515,7 @@ namespace cromio::utils {
                 printIndent(indent + 1);
                 std::cout << "\"identifier\": \"" << n.identifier << "\",\n";
                 printIndent(indent + 1);
-                std::cout << "\"elementType\": \"" << n.elementType << "\",\n";
+                std::cout << "\"elementType\": \"" << n.type << "\",\n";
                 printIndent(indent + 1);
                 std::cout << "\"size\": " << n.size << "\n";
                 printIndent(indent);

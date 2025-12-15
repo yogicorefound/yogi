@@ -19,6 +19,14 @@ namespace cromio::visitor {
             return visit(ctx->concatenationExpression());
         }
 
+        if (ctx->numberLiterals()) {
+            return visit(ctx->numberLiterals());
+        }
+
+        if (ctx->stringLiterals()) {
+            return visit(ctx->stringLiterals());
+        }
+
         // Return None literal as fallback
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -26,12 +34,15 @@ namespace cromio::visitor {
     }
 
     std::any ExpressionVisitor::visitBinaryExpression(Grammar::BinaryExpressionContext* ctx) {
+
         // -------------------------------------------------------
         // (1) Literal → return literal node
         // -------------------------------------------------------
         if (ctx->numberLiterals()) {
             return visit(ctx->numberLiterals());
         }
+
+
 
         // -------------------------------------------------------
         // (2) Detect operator
@@ -89,6 +100,7 @@ namespace cromio::visitor {
                     }
                     if (result.type() == typeid(nodes::IdentifierLiteral)) {
                         auto node = std::any_cast<nodes::IdentifierLiteral>(result);
+
 
                         // Look up identifier value from symbol table
                         if (!scope) {

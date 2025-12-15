@@ -32,10 +32,7 @@ formattedStringContent
     | LBRACE_IN_FSTRING expression RBRACE_IN_FSTRING
     ;
 
-stringLiteral: STRING
-
-    ;
-
+stringLiteral: STRING;
 integerLiteral: INTEGER;
 floatLiteral: FLOAT;
 booleanLiteral: BOOLEAN;

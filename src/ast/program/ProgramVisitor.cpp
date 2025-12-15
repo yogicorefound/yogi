@@ -4,7 +4,6 @@
 
 #include "ProgramVisitor.h"
 #include <ast/nodes/nodes.h>
-#include <utils/utils.h>
 
 std::any cromio::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
@@ -55,8 +54,8 @@ std::any cromio::visitor::Visitor::visitStatements(Grammar::StatementsContext* c
     }
 
     // Array declaration statement
-    if (ctx->arrayDeclaration()) {
-        const std::any arrayDeclaration = visit(ctx->arrayDeclaration());
+    if (ctx->arrays()) {
+        const std::any arrayDeclaration = visit(ctx->arrays());
         statementNode.addChild(arrayDeclaration);
         return statementNode;
     }
@@ -67,6 +66,8 @@ std::any cromio::visitor::Visitor::visitStatements(Grammar::StatementsContext* c
         statementNode.addChild(dictionaryDeclaration);
         return statementNode;
     }
+
+
 
     // Return empty statement if nothing matches
     return statementNode;

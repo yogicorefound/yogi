@@ -15,7 +15,7 @@ namespace cromio::visitor::nodes {
 
         bool isConstant; // true for 'const', false for 'var'
 
-        explicit VariableDeclarationNode(const std::string& id, const std::string& type, std::any value, const bool isConstant, const Position start, const Position end) : BaseNode(Kind::VARIABLE_DECLARATION, start, end), identifier(id), varType(type), value(std::move(value)), isConstant(isConstant) {
+        explicit VariableDeclarationNode(const std::string& identifier, const std::string& type, std::any value, const bool isConstant, const Position start, const Position end) : BaseNode(Kind::VARIABLE_DECLARATION, start, end), identifier(identifier), varType(type), value(std::move(value)), isConstant(isConstant) {
             ///
         }
     };

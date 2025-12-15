@@ -13,6 +13,14 @@ namespace cromio::semantic {
         symbols[name] = std::make_shared<visitor::nodes::VariableDeclarationNode>(info);
         return true;
     }
+    bool Scope::declareArray(const std::string& name, const visitor::nodes::ArrayDeclarationNode& info) {
+        if (arraySymbols.contains(name))
+            return false;
+
+        // Store a shared_ptr copy of the node
+        arraySymbols[name] = std::make_shared<visitor::nodes::ArrayDeclarationNode>(info);
+        return true;
+    }
 
     bool Scope::exists(const std::string& name) const {
         // Check current scope
@@ -43,6 +51,19 @@ namespace cromio::semantic {
         }
     }
 
+    void Scope::updateArray(const std::string& name, const visitor::nodes::ArrayDeclarationNode& info) {
+        // Update in current scope if it exists
+        if (arraySymbols.contains(name)) {
+            arraySymbols[name] = std::make_shared<visitor::nodes::ArrayDeclarationNode>(info);
+            return;
+        }
+
+        // Otherwise try to update in parent scope
+        if (parent) {
+            parent->updateArray(name, info);
+        }
+    }
+
     std::optional<std::shared_ptr<visitor::nodes::VariableDeclarationNode>> Scope::lookup(const std::string& name) const {
         // Check current scope
         if (symbols.contains(name))
@@ -51,6 +72,18 @@ namespace cromio::semantic {
         // Check parent scopes recursively
         if (parent)
             return parent->lookup(name);
+
+        return std::nullopt;
+    }
+
+    std::optional<std::shared_ptr<visitor::nodes::ArrayDeclarationNode>> Scope::lookupArray(const std::string& name) const {
+        // Check current scope
+        if (arraySymbols.contains(name))
+            return arraySymbols.at(name);
+
+        // Check parent scopes recursively
+        if (parent)
+            return parent->lookupArray(name);
 
         return std::nullopt;
     }

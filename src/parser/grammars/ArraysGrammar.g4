@@ -4,9 +4,29 @@ options {
     tokenVocab = Tokens;
 }
 
-import ExpressionsGrammar;
+import LiteralsGrammar;
 
-arrayDeclaration: {inSkipMode = true;} arrayType {inSkipMode = false;} IDENTIFIER EQ LBRACKET (expression (COMMA expression)*)? RBRACKET;
+arrays
+    : arrayDeclaration
+    | arrayReAssignment
+    ;
+
+arrayDeclaration: {inSkipMode = true;} arrayType {inSkipMode = false;} IDENTIFIER EQ LBRACKET (arrayItems (COMMA arrayItems)*)? RBRACKET;
+
+arrayItems
+    : stringLiteral
+    | formattedString
+    | formattedString
+    | identifierLiteral
+    | integerLiteral
+    | floatLiteral
+    | booleanLiteral
+    | noneLiteral
+    | concatenationExpression
+    | binaryExpression
+    ;
+
+arrayReAssignment: IDENTIFIER EQ LBRACKET (expression (COMMA expression)*)? RBRACKET;
 
 arrayType: arrayDataType LBRACKET arrayDeclarationTypeSize RBRACKET;
 
