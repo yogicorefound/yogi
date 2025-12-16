@@ -32,7 +32,6 @@ namespace cromio::visitor {
 
         // Create array declaration node
         std::vector<nodes::ArrayElementNode> elements;
-        size_t size;
 
         parser->inVarMode = true;
         for (auto exprCtx : ctx->arrayItems()) {
@@ -54,24 +53,15 @@ namespace cromio::visitor {
         }
         parser->inVarMode = false;
 
-        // Set array size
-        if (arraySize == "auto") {
-            size = elements.size();
-        } else {
-            try {
-                size = std::stoull(arraySize);
-
-                // Check if declared size matches actual elements
-                if (elements.size() > size) {
-                    throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arraySize + ".", start, source);
-                }
-            } catch (const std::exception&) {
-                throwError("Error", "Invalid array size, " + arraySize, elements, source);
+        // Check if declared size matches actual elements
+        if (arraySize != "auto") {
+            if (elements.size() > std::stoull(arraySize)) {
+                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arraySize + ".", start, source);
             }
         }
 
         // Register ArrayDeclarationNode in scope
-        nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, size, elements, start, end);
+        nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
         scope->declareArray(identifier, node);
 
         return node;
@@ -120,8 +110,10 @@ namespace cromio::visitor {
         parser->inVarMode = false;
 
         // Check if declared size matches actual elements
-        if (elements.size() > arrayNode->size) {
-            throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + std::to_string(arrayNode->size) + ".", start, source);
+        if (arrayNode->size != "auto") {
+            if (elements.size() > std::stoull(arrayNode->size)) {
+                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arrayNode->size + ".", start, source);
+            }
         }
 
         nodes::ArrayDeclarationNode node(identifier, arrayNode->type, arrayNode->isConstant, arrayNode->size, elements, start, end);

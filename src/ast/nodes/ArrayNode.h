@@ -20,11 +20,11 @@ namespace cromio::visitor::nodes {
     struct ArrayDeclarationNode : BaseNode {
         std::string identifier; // Array name
         std::string type; // Type of elements: "int", "float", "str", etc.
-        size_t size; // Number of elements
+        std::string size; // Number of elements
         bool isConstant;
         std::vector<ArrayElementNode> elements; // Array elements
 
-        explicit ArrayDeclarationNode(const std::string& identifier, const std::string& type, bool isConstant, size_t size, std::vector<ArrayElementNode> elements, const Position start, const Position end) : BaseNode(Kind::ARRAY_DECLARATION, start, end), identifier(identifier), type(type), isConstant(isConstant), size(size), elements(std::move(elements)) {}
+        explicit ArrayDeclarationNode(const std::string& identifier, const std::string& type, bool isConstant, std::string size, std::vector<ArrayElementNode> elements, const Position start, const Position end) : BaseNode(Kind::ARRAY_DECLARATION, start, end), identifier(identifier), type(type), isConstant(isConstant), size(size), elements(std::move(elements)) {}
     };
 
 } // namespace cromio::visitor::nodes

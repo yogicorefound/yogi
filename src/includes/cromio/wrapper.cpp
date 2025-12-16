@@ -86,10 +86,7 @@ namespace cromio {
     void Cromio::printAST(const std::any& ast) {
         if (ast.type() == typeid(visitor::nodes::ProgramNode)) {
             std::cout << "=== AST ===" << std::endl;
-
-            utils::Helpers::printNode(ast, 0);
-            std::cout << std::endl << std::endl;
-
+            utils::Helpers::printNode(ast, 1);
         } else {
             std::cerr << "Error: Expected ProgramNode at root" << std::endl;
             std::exit(1);

@@ -16,11 +16,11 @@ namespace cromio::utils {
 
     long long Helpers::parseNumberString(const std::string& raw) {
         try {
-            // Binary: 0bxxxx
+            // Binary: 0bXXXX
             if (raw.rfind("0b", 0) == 0 || raw.rfind("0B", 0) == 0)
                 return std::stoll(raw.substr(2), nullptr, 2);
 
-            // Octal: 0oxxxx
+            // Octal: 0oXXXX
             if (raw.rfind("0o", 0) == 0 || raw.rfind("0O", 0) == 0)
                 return std::stoll(raw.substr(2), nullptr, 8);
 
@@ -372,203 +372,135 @@ namespace cromio::utils {
         }
     }
 
-    // Print AST nodes in JSON-like format
-    void Helpers::printNode(const std::any& node, int indent) {
+    json Helpers::nodeToJson(const std::any& node) {
         using namespace cromio::visitor::nodes;
 
-        if (!node.has_value()) {
-            printIndent(indent);
-            std::cout << "null";
-            return;
+        if (!node.has_value())
+            return nullptr;
+
+        // -------------------------------------------------
+        // Literals
+        // -------------------------------------------------
+
+        if (node.type() == typeid(IntegerLiteralNode)) {
+            const auto& n = std::any_cast<const IntegerLiteralNode&>(node);
+            return {{"kind", "IntegerLiteral"}, {"value", n.value}};
         }
 
-        try {
-            // Integer Literal
-            if (node.type() == typeid(IntegerLiteralNode)) {
-                auto n = std::any_cast<IntegerLiteralNode>(node);
-                printIndent(indent);
-                std::cout << "{ \"kind\": \"IntegerLiteral\", \"value\": " << n.value << " }";
-            }
-            // Float Literal
-            else if (node.type() == typeid(FloatLiteralNode)) {
-                auto n = std::any_cast<FloatLiteralNode>(node);
-                printIndent(indent);
-                std::cout << "{ \"kind\": \"FloatLiteral\", \"value\": " << n.value << " }";
-            }
-            // String Literal
-            else if (node.type() == typeid(StringLiteralNode)) {
-                auto n = std::any_cast<StringLiteralNode>(node);
-                printIndent(indent);
-                std::cout << "{ \"kind\": \"StringLiteral\", \"value\": \"" << n.value << "\" }";
-            }
-            // Boolean Literal
-            else if (node.type() == typeid(BooleanLiteralNode)) {
-                auto n = std::any_cast<BooleanLiteralNode>(node);
-                printIndent(indent);
-                std::cout << "{ \"kind\": \"BooleanLiteral\", \"value\": " << (n.value == "1" ? "true" : "false") << " }";
-            }
-            // None Literal
-            else if (node.type() == typeid(NoneLiteralNode)) {
-                auto n = std::any_cast<NoneLiteralNode>(node);
-                printIndent(indent);
-                std::cout << "{ \"kind\": \"NoneLiteral\", \"value\": \"" << n.value << "\" }";
-            }
-            // Identifier Literal
-            else if (node.type() == typeid(IdentifierLiteral)) {
-                auto n = std::any_cast<IdentifierLiteral>(node);
-                printIndent(indent);
-                std::cout << "{ \"kind\": \"IdentifierLiteral\", \"value\": \"" << n.value << "\" }";
-            }
-            // Binary Expression
-            else if (node.type() == typeid(BinaryExpressionNode)) {
-                auto n = std::any_cast<BinaryExpressionNode>(node);
-                printIndent(indent);
-                std::cout << "{\n";
-                printIndent(indent + 1);
-                std::cout << "\"kind\": \"BinaryExpression\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"operator\": \"" << n.op << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"resultType\": \"" << n.resultType << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"value\": \"" << n.value << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"left\": ";
-                printNode(n.left, 0);
-                std::cout << ",\n";
-                printIndent(indent + 1);
-                std::cout << "\"right\": ";
-                printNode(n.right, 0);
-                std::cout << "\n";
-                printIndent(indent);
-                std::cout << "}";
-            }
-            // Statement Node
-            else if (node.type() == typeid(StatementNode)) {
-                auto n = std::any_cast<StatementNode>(node);
-                printIndent(indent);
-                std::cout << "{\n";
-                printIndent(indent + 1);
-                std::cout << "\"kind\": \"Statement\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"children\": [\n";
-                for (size_t i = 0; i < n.children.size(); i++) {
-                    printNode(n.children[i], indent + 2);
-                    if (i < n.children.size() - 1)
-                        std::cout << ",";
-                    std::cout << "\n";
-                }
-                printIndent(indent + 1);
-                std::cout << "]\n";
-                printIndent(indent);
-                std::cout << "}";
-            }
-            // Program Node
-            else if (node.type() == typeid(ProgramNode)) {
-                auto n = std::any_cast<ProgramNode>(node);
-                printIndent(indent);
-                std::cout << "{\n";
-                printIndent(indent + 1);
-                std::cout << "\"kind\": \"Program\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"body\": [\n";
-                for (size_t i = 0; i < n.body.size(); i++) {
-                    // Wrap StatementNode in std::any before printing
-                    std::any stmtAny = n.body[i];
-                    printNode(stmtAny, indent + 2);
-                    if (i < n.body.size() - 1)
-                        std::cout << ",";
-                    std::cout << "\n";
-                }
-                printIndent(indent + 1);
-                std::cout << "]\n";
-                printIndent(indent);
-                std::cout << "}";
-            }
-            // Variable Declaration
-            else if (node.type() == typeid(VariableDeclarationNode)) {
-                auto n = std::any_cast<VariableDeclarationNode>(node);
-                printIndent(indent);
-                std::cout << "{\n";
-                printIndent(indent + 1);
-                std::cout << "\"kind\": \"VariableDeclaration\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"identifier\": \"" << n.identifier << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"type\": \"" << n.varType << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"isConstant\": " << (n.isConstant ? "true" : "false") << ",\n";
-                printIndent(indent + 1);
-                std::cout << "\"value\": ";
-                printNode(n.value, 0);
-                std::cout << "\n";
-                printIndent(indent);
-                std::cout << "}";
-            }
-            // Array Declaration
-            else if (node.type() == typeid(ArrayDeclarationNode)) {
-                auto n = std::any_cast<ArrayDeclarationNode>(node);
-                printIndent(indent);
-                std::cout << "{\n";
-                printIndent(indent + 1);
-                std::cout << "\"kind\": \"ArrayDeclaration\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"identifier\": \"" << n.identifier << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"elementType\": \"" << n.type << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"size\": " << n.size << "\n";
-                printIndent(indent);
-                std::cout << "}";
-            }
-            // Dictionary Declaration
-            else if (node.type() == typeid(DictionaryDeclarationNode)) {
-                auto n = std::any_cast<DictionaryDeclarationNode>(node);
-                printIndent(indent);
-                std::cout << "{\n";
-                printIndent(indent + 1);
-                std::cout << "\"kind\": \"DictionaryDeclaration\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"identifier\": \"" << n.identifier << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"keyType\": \"" << n.keyType << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"valueType\": \"" << n.valueType << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"size\": " << n.size << "\n";
-                printIndent(indent);
-                std::cout << "}";
-            }
-            // Formatted String
-            else if (node.type() == typeid(FormattedStringNode)) {
-                auto n = std::any_cast<FormattedStringNode>(node);
-                printIndent(indent);
-                std::cout << "{\n";
-                printIndent(indent + 1);
-                std::cout << "\"kind\": \"FormattedString\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"value\": \"" << n.value << "\",\n";
-                printIndent(indent + 1);
-                std::cout << "\"params\": [\n";
-                for (size_t i = 0; i < n.params.size(); i++) {
-                    // Wrap BaseNode in std::any before printing
-                    std::any paramAny = n.params[i];
-                    printNode(paramAny, indent + 2);
-                    if (i < n.params.size() - 1)
-                        std::cout << ",";
-                    std::cout << "\n";
-                }
-                printIndent(indent + 1);
-                std::cout << "]\n";
-                printIndent(indent);
-                std::cout << "}";
-            } else {
-                printIndent(indent);
-                std::cout << "{ \"kind\": \"Unknown\", \"type\": \"" << node.type().name() << "\" }";
-            }
-        } catch (const std::bad_any_cast& e) {
-            printIndent(indent);
-            std::cout << "{ \"error\": \"Bad cast: " << e.what() << "\" }";
+        if (node.type() == typeid(FloatLiteralNode)) {
+            const auto& n = std::any_cast<const FloatLiteralNode&>(node);
+            return {{"kind", "FloatLiteral"}, {"value", n.value}};
         }
+
+        if (node.type() == typeid(StringLiteralNode)) {
+            const auto& n = std::any_cast<const StringLiteralNode&>(node);
+            return {{"kind", "StringLiteral"}, {"value", n.value}};
+        }
+
+        if (node.type() == typeid(BooleanLiteralNode)) {
+            const auto& n = std::any_cast<const BooleanLiteralNode&>(node);
+            return {{"kind", "BooleanLiteral"}, {"value", n.value == "1"}};
+        }
+
+        if (node.type() == typeid(NoneLiteralNode)) {
+            return {{"kind", "NoneLiteral"}};
+        }
+
+        if (node.type() == typeid(IdentifierLiteral)) {
+            const auto& n = std::any_cast<const IdentifierLiteral&>(node);
+            return {{"kind", "IdentifierLiteral"}, {"value", n.value}};
+        }
+
+        // -------------------------------------------------
+        // Array element (IMPORTANT FIX)
+        // -------------------------------------------------
+
+        if (node.type() == typeid(ArrayElementNode)) {
+            const auto& n = std::any_cast<const ArrayElementNode&>(node);
+            return nodeToJson(n.value); // unwrap
+        }
+
+        // -------------------------------------------------
+        // Expressions
+        // -------------------------------------------------
+
+        if (node.type() == typeid(BinaryExpressionNode)) {
+            const auto& n = std::any_cast<const BinaryExpressionNode&>(node);
+            return {{"kind", "BinaryExpression"}, {"operator", n.op}, {"resultType", n.resultType}, {"value", n.value}, {"left", nodeToJson(n.left)}, {"right", nodeToJson(n.right)}};
+        }
+
+        // -------------------------------------------------
+        // Statements
+        // -------------------------------------------------
+
+        if (node.type() == typeid(StatementNode)) {
+            const auto& n = std::any_cast<const StatementNode&>(node);
+
+            json children = json::array();
+            for (const auto& child : n.children)
+                children.push_back(nodeToJson(child));
+
+            return {{"kind", "Statement"}, {"children", children}};
+        }
+
+        if (node.type() == typeid(ProgramNode)) {
+            const auto& n = std::any_cast<const ProgramNode&>(node);
+
+            json body = json::array();
+            for (const auto& stmt : n.body)
+                body.push_back(nodeToJson(stmt));
+
+            return {{"kind", "Program"}, {"body", body}};
+        }
+
+        // -------------------------------------------------
+        // Declarations
+        // -------------------------------------------------
+
+        if (node.type() == typeid(VariableDeclarationNode)) {
+            const auto& n = std::any_cast<const VariableDeclarationNode&>(node);
+            return {{"kind", "VariableDeclaration"}, {"identifier", n.identifier}, {"type", n.varType}, {"isConstant", n.isConstant}, {"value", nodeToJson(n.value)}};
+        }
+
+        if (node.type() == typeid(ArrayDeclarationNode)) {
+            const auto& n = std::any_cast<const ArrayDeclarationNode&>(node);
+
+            json elements = json::array();
+            for (const auto& el : n.elements)
+                elements.push_back(nodeToJson(el));
+
+            return {{"kind", "ArrayDeclaration"}, {"identifier", n.identifier}, {"elementType", n.type}, {"size", n.size}, {"elements", elements}};
+        }
+
+        if (node.type() == typeid(DictionaryDeclarationNode)) {
+            const auto& n = std::any_cast<const DictionaryDeclarationNode&>(node);
+            return {{"kind", "DictionaryDeclaration"}, {"identifier", n.identifier}, {"keyType", n.keyType}, {"valueType", n.valueType}, {"size", n.size}};
+        }
+
+        // -------------------------------------------------
+        // Formatted String
+        // -------------------------------------------------
+
+        if (node.type() == typeid(FormattedStringNode)) {
+            const auto& n = std::any_cast<const FormattedStringNode&>(node);
+
+            json params = json::array();
+            for (const auto& p : n.params)
+                params.push_back(nodeToJson(p));
+
+            return {{"kind", "FormattedString"}, {"value", n.value}, {"params", params}};
+        }
+
+        // -------------------------------------------------
+        // Fallback
+        // -------------------------------------------------
+
+        return {{"kind", "Unknown"}, {"type", node.type().name()}};
+    }
+
+    // Print AST nodes in JSON-like format
+    void Helpers::printNode(const std::any& node, const int indent) {
+        const json ast = nodeToJson(node);
+        std::cout << ast.dump(indent) << std::endl;
     }
 } // namespace cromio::utils
