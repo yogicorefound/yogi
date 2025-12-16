@@ -1,4 +1,7 @@
-int8 a = 100
+nombre.property // ok
+(10).property // ok
+nombre.property.method() // ok
+nombre.property.method(10) // bad any cast
 
-int8[] b = [a]
-b = [1, 2, 3]
+"nombre".property // bad any cast
+nombre.method() // bad any cast

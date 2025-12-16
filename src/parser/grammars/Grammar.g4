@@ -10,13 +10,15 @@ options {
         bool inSkipMode = false;
 }
 
-import DictionaryGrammar, VariableGrammar, ArraysGrammar,  LiteralsGrammar, ExpressionsGrammar;
+import DictionaryGrammar, VariableGrammar, ArraysGrammar, MembersGrammar,  LiteralsGrammar, ExpressionsGrammar;
 
 program: NEWLINE* (statements NEWLINE*)* EOF;
 
 statements
-    :   variables
-    |   arrays
-    |   dictionaryDeclaration
-    |   expression
+    : variables
+    | arrays
+    | dictionaryDeclaration
+    | memberExpression
+    | expression
     ;
+

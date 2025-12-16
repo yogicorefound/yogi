@@ -13,7 +13,6 @@ namespace cromio::visitor::nodes {
         STATEMENT,
         DATA_TYPE,
 
-
         // Literal
         INTEGER_LITERAL,
         FLOAT_LITERAL,
@@ -28,6 +27,13 @@ namespace cromio::visitor::nodes {
         BINARY_EXPRESSION,
         CONCATENATION_EXPRESSION,
 
+        // Members
+        MEMBER_NODE,
+        MEMBER_METHOD,
+        MEMBER_PROPERTY,
+        MEMBER_ACCESS,
+        MEMBER_ELEMENT,
+
         // Statement
         VARIABLE_DECLARATION,
 
@@ -39,7 +45,7 @@ namespace cromio::visitor::nodes {
         DICTIONARY_TYPE,
 
         BLOCK,
-        MEMBER_ACCESS
+
     };
 
     struct Position {

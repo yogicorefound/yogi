@@ -371,7 +371,6 @@ namespace cromio::utils {
             std::cout << "  ";
         }
     }
-
     json Helpers::nodeToJson(const std::any& node) {
         using namespace cromio::visitor::nodes;
 
@@ -419,6 +418,11 @@ namespace cromio::utils {
             const auto& n = std::any_cast<const ArrayElementNode&>(node);
             return nodeToJson(n.value); // unwrap
         }
+
+        // -------------------------------------------------
+        // Members
+        // -------------------------------------------------
+
 
         // -------------------------------------------------
         // Expressions
@@ -497,7 +501,6 @@ namespace cromio::utils {
 
         return {{"kind", "Unknown"}, {"type", node.type().name()}};
     }
-
     // Print AST nodes in JSON-like format
     void Helpers::printNode(const std::any& node, const int indent) {
         const json ast = nodeToJson(node);

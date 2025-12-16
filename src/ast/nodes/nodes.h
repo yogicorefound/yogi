@@ -10,7 +10,7 @@
 #include "ast/nodes/DictionaryNode.h"
 #include "ast/nodes/ExpressionNode.h"
 #include "ast/nodes/LiteralNode.h"
-#include "ast/nodes/MemberAccessNode.h"
 #include "ast/nodes/ProgramNode.h"
 #include "ast/nodes/StatementNode.h"
 #include "ast/nodes/VariableNode.h"
+#include "ast/nodes/MembersNode.h"

@@ -67,7 +67,12 @@ std::any cromio::visitor::Visitor::visitStatements(Grammar::StatementsContext* c
         return statementNode;
     }
 
-
+    // Member expression statement
+    if (ctx->memberExpression()) {
+        const std::any memberExpression = visit(ctx->memberExpression());
+        statementNode.addChild(memberExpression);
+        return statementNode;
+    }
 
     // Return empty statement if nothing matches
     return statementNode;
