@@ -27,6 +27,10 @@ namespace cromio::visitor {
             return visit(ctx->stringLiterals());
         }
 
+        if (ctx->memberExpression()) {
+            return visit(ctx->memberExpression());
+        }
+
         // Return None literal as fallback
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -34,15 +38,12 @@ namespace cromio::visitor {
     }
 
     std::any ExpressionVisitor::visitBinaryExpression(Grammar::BinaryExpressionContext* ctx) {
-
         // -------------------------------------------------------
         // (1) Literal → return literal node
         // -------------------------------------------------------
         if (ctx->numberLiterals()) {
             return visit(ctx->numberLiterals());
         }
-
-
 
         // -------------------------------------------------------
         // (2) Detect operator
@@ -101,7 +102,6 @@ namespace cromio::visitor {
                     if (result.type() == typeid(nodes::IdentifierLiteral)) {
                         auto node = std::any_cast<nodes::IdentifierLiteral>(result);
 
-
                         // Look up identifier value from symbol table
                         if (!scope) {
                             throw std::runtime_error("No scope available for identifier lookup: " + node.value);
@@ -109,8 +109,8 @@ namespace cromio::visitor {
 
                         const std::string identifier = node.value;
                         if (const auto variable = scope->lookup(identifier); variable.has_value()) {
-                            const auto varNode = variable.value();
-                            return extractedValue(varNode->value);
+                            const auto varNode = std::any_cast<nodes::VariableDeclarationNode>(variable.value());
+                            return extractedValue(varNode.value);
                         }
 
                         // Variable not found in scope
@@ -224,12 +224,12 @@ namespace cromio::visitor {
                     throwScopeError("Variable '" + literalNode.value + "' is not declared", literalNode.value, literalNode, source);
                 }
 
-                auto varNode = variable.value();
-                if (varNode->varType != "str") {
-                    throwTypeError(literalNode.value, varNode->varType, literalNode, source);
+                auto varNode = std::any_cast<nodes::VariableDeclarationNode>(variable.value());
+                if (varNode.varType != "str") {
+                    throwTypeError(literalNode.value, varNode.varType, literalNode, source);
                 }
 
-                auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(varNode->value);
+                auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(varNode.value);
                 value += stringLiteralNode.value;
                 literals.push_back(stringLiteralNode);
                 std::cout << "literalNode.value " << literalNode.value << std::endl;

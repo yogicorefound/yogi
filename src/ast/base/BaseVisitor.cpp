@@ -4,17 +4,19 @@
 
 #include "BaseVisitor.h"
 
-void cromio::visitor::BaseVisitor::enterScope() {
-    const auto child = new semantic::Scope(scope);
-    scope = child;
-}
-
-void cromio::visitor::BaseVisitor::exitScope() {
-    if (scope->getParent() != nullptr) {
-        scope = scope->getParent();
+namespace cromio::visitor {
+    void BaseVisitor::enterScope() {
+        const auto child = new semantic::Scope(scope);
+        scope = child;
     }
-}
 
-cromio::semantic::Scope* cromio::visitor::BaseVisitor::getCurrentScope() const {
-    return scope;
-}
+    void BaseVisitor::exitScope() {
+        if (scope->getParent() != nullptr) {
+            scope = scope->getParent();
+        }
+    }
+
+    semantic::Scope* BaseVisitor::getCurrentScope() const {
+        return scope;
+    }
+} // namespace cromio::visitor

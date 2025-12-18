@@ -67,13 +67,17 @@ namespace cromio::semantic {
         if (itemResult.type() == typeid(visitor::nodes::IdentifierLiteral)) {
             auto id = std::any_cast<visitor::nodes::IdentifierLiteral>(itemResult);
 
-            auto varInfo = scope->lookup(id.value);
-            if (!varInfo.has_value()) {
-                utils::Errors::throwScopeError("Variable '" + id.value + "' is not declared", id.value, id, source);
+            if (const auto varInfo = scope->lookup("var:" + id.value); varInfo.has_value()) {
+                auto varNode = std::any_cast<visitor::nodes::VariableDeclarationNode>(varInfo.value());
+                return resolveItem(varNode.value, scope, source);
             }
 
-            // 🔥 RECURSION happens here
-            return resolveItem(varInfo.value()->value, scope, source);
+            if (const auto varInfo = scope->lookup("array:" + id.value); varInfo.has_value()) {
+                auto varNode = std::any_cast<visitor::nodes::ArrayDeclarationNode>(varInfo.value());
+                return resolveItem(varNode.elements, scope, source);
+            }
+
+            utils::Errors::throwScopeError("Variable '" + id.value + "' is not declared", id.value, id, source);
         }
 
         utils::Errors::throwError("Error", "Unsupported array element type", itemResult, source);

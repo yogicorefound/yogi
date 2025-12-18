@@ -5,11 +5,12 @@
 #pragma once
 
 #include "GrammarVisitor.h"
+#include "MembersByType.h"
 #include "ast/base/BaseVisitor.h"
 
 namespace cromio::visitor {
 
-    class MembersVisitor : public virtual BaseVisitor {
+    class MembersVisitor : public virtual BaseVisitor, MembersByType {
        public:
         std::any visitMemberExpression(Grammar::MemberExpressionContext* ctx) override;
         std::any visitValueAtom(Grammar::ValueAtomContext* ctx) override;

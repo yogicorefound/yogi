@@ -20,6 +20,9 @@ namespace cromio::utils {
         static long long parseNumberString(const std::string& raw);
 
         static std::string toUpper(std::string s);
+        static std::string toLower(std::string s);
+        static std::string toTitle(std::string s);
+
         static json createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop);
         static std::string parseString(const std::string& rawInput);
         static std::string trimLeadingZeros(const std::string& s);

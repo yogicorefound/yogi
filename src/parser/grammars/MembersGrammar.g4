@@ -13,16 +13,6 @@ memberExpression
     : valueAtom valuePostfix*
     ;
 
-// -------------------------
-// Atomic values
-// -------------------------
-valueAtom
-    : identifierLiteral
-    | stringLiteral
-    | numberLiterals
-    | booleanLiteral
-    | LPAREN expression RPAREN
-    ;
 
 valuePostfix
     : DOT identifierLiteral
@@ -35,4 +25,17 @@ valuePostfix
 // -------------------------
 argumentList
     : expression (COMMA expression)*
+    ;
+
+
+
+// -------------------------
+// Atomic values
+// -------------------------
+valueAtom
+    : identifierLiteral
+    | stringLiteral
+    | LPAREN booleanLiteral RPAREN
+    | LPAREN numberLiterals RPAREN
+    | LPAREN expression RPAREN
     ;

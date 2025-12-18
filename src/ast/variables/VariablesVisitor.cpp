@@ -20,10 +20,6 @@ namespace cromio::visitor {
             return visit(ctx->variableReAssignment());
         }
 
-        if (ctx->variableAccessToMember()) {
-            return visit(ctx->variableAccessToMember());
-        }
-
         // Return empty node
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -36,7 +32,7 @@ namespace cromio::visitor {
 
         // Get data type
         const auto visitDataType = visit(ctx->variableDataType());
-        const std::string dataType = std::any_cast<std::string>(visitDataType);
+        const auto dataType = std::any_cast<std::string>(visitDataType);
 
         // Get identifier
         const std::string identifier = ctx->IDENTIFIER()->getText();
@@ -64,7 +60,7 @@ namespace cromio::visitor {
 
         // Get data type
         const auto visitDataType = visit(ctx->variableDataType());
-        const std::string dataType = std::any_cast<std::string>(visitDataType);
+        const auto dataType = std::any_cast<std::string>(visitDataType);
 
         // Get identifier
         const std::string identifier = ctx->IDENTIFIER()->getText();
@@ -75,7 +71,6 @@ namespace cromio::visitor {
         }
 
         std::any value = visit(ctx->expression());
-
         parser->inVarMode = false;
 
         // Determine if it's a constant (const keyword)
@@ -116,35 +111,32 @@ namespace cromio::visitor {
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
         // Check if variable exists
-        if (!scope->exists(identifier)) {
+        // Get variable info from scope
+        const auto variable = scope->lookup(identifier);
+        if (!variable.has_value()) {
             throwScopeError("variable '" + identifier + "' is not declared", identifier, newValue, source);
         }
 
-        // Get variable info from scope
-        const auto variable = scope->lookup(identifier);
+        const auto& varNode = variable.value();
 
+        std::cout << "variable.value(): " << variable.value()->identifier << std::endl;
         auto node = nodes::VariableDeclarationNode(identifier, "", newValue, false, start, end);
-        if (variable.has_value()) {
-            const auto varNode = variable.value();
-            if (varNode->isConstant) {
-                throwReassignmentError("cannot reassign constant variable '" + identifier + "'", newValue, source);
-            }
 
-            if (varNode->value.type() == typeid(nodes::BinaryExpressionNode)) {
-                const auto idNode = variable.value();
-                node.value = variable.value()->value;
-            }
-
-            node.varType = variable.value()->varType;
-
-            std::cout << "node.varType " << node.varType << std::endl;
-
-            analyzeVariableReassignment(node, source);
-            scope->updateVariable(identifier, node);
-            return node;
+        if (varNode->isConstant) {
+            throwReassignmentError("cannot reassign constant variable '" + identifier + "'", newValue, source);
         }
-        throwScopeError("variable '" + identifier + "' is not declared", identifier, newValue, source);
-        return 0;
+
+        if (varNode->value.type() == typeid(nodes::BinaryExpressionNode)) {
+            node.value = varNode->value;
+        }
+
+        node.varType = varNode->varType;
+
+        std::cout << "node.varType " << node.varType << std::endl;
+
+        analyzeVariableReassignment(node, source);
+        scope->updateVariable("var:" + identifier, node);
+        return node;
     }
 
     std::any VariablesVisitor::visitVariableDataType(Grammar::VariableDataTypeContext* ctx) {
@@ -152,31 +144,4 @@ namespace cromio::visitor {
         return ctx->getText();
     }
 
-    std::any VariablesVisitor::visitVariableAccessToMember(Grammar::VariableAccessToMemberContext* ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-
-        // Get identifier
-        const auto identifier = ctx->IDENTIFIER()[0];
-        const std::string identifierText = identifier->getText();
-
-        // Get member
-        const auto member = ctx->IDENTIFIER()[1];
-        const std::string memberText = member->getText();
-
-        // Create a member access node (you might want to create a specific node type for this)
-        const auto identifierNode = nodes::IdentifierLiteral(identifierText, start, end);
-        const auto memberNode = nodes::IdentifierLiteral(memberText, start, end);
-
-        // For now, return as a tuple or create a MemberAccessNode
-        // This is a placeholder - you should create a proper MemberAccessNode struct
-        struct MemberAccessNode {
-            nodes::IdentifierLiteral object;
-            nodes::IdentifierLiteral member;
-            nodes::Position start;
-            nodes::Position end;
-        };
-
-        return MemberAccessNode{identifierNode, memberNode, start, end};
-    }
 } // namespace cromio::visitor

@@ -6,10 +6,9 @@
 #define CROMIO_BASE_VISITOR_H
 
 #include "GrammarVisitor.h"
+#include "llvm/IR/IRBuilder.h"
 #include "semantic/scopes/Scope.h"
 #include "semantic/semantic.h"
-#include "llvm/IR/IRBuilder.h"
-
 
 namespace cromio::visitor {
 

@@ -10,7 +10,27 @@
 
 namespace cromio::utils {
     std::string Helpers::toUpper(std::string s) {
-        std::ranges::transform(s, s.begin(), [](unsigned char c) { return std::toupper(c); });
+        std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::toupper(c); });
+        return s;
+    }
+
+    std::string Helpers::toLower(std::string s) {
+        std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::tolower(c); });
+        return s;
+    }
+
+    std::string Helpers::toTitle(std::string s) {
+        bool newWord = true;
+        for (char& c : s) {
+            if (std::isspace(static_cast<unsigned char>(c))) {
+                newWord = true;
+            } else if (newWord) {
+                c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+                newWord = false;
+            } else {
+                c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+            }
+        }
         return s;
     }
 
@@ -422,7 +442,6 @@ namespace cromio::utils {
         // -------------------------------------------------
         // Members
         // -------------------------------------------------
-
 
         // -------------------------------------------------
         // Expressions

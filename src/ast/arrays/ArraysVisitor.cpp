@@ -74,21 +74,21 @@ namespace cromio::visitor {
     std::any ArraysVisitor::visitArrayReAssignment(Grammar::ArrayReAssignmentContext* ctx) {
         const auto identifier = ctx->IDENTIFIER()->getText();
 
-        const auto array = scope->lookupArray(identifier);
+        const auto array = scope->lookup("array:" + identifier);
         if (!array.has_value()) {
             const auto message = "Error: '" + identifier + "' is not declared";
             std::cout << message << std::endl;
             std::exit(1);
         }
 
-        const auto arrayNode = array.value();
-        if (arrayNode->isConstant) {
+        const auto arrayNode = std::any_cast<nodes::ArrayDeclarationNode>(array.value());
+        if (arrayNode.isConstant) {
             throwReassignmentError("cannot reassign constant variable '" + identifier + "'", arrayNode, source);
         }
 
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        const std::string arrayType = arrayNode->type;
+        const std::string arrayType = arrayNode.type;
 
         std::vector<nodes::ArrayElementNode> elements;
 
@@ -110,13 +110,13 @@ namespace cromio::visitor {
         parser->inVarMode = false;
 
         // Check if declared size matches actual elements
-        if (arrayNode->size != "auto") {
-            if (elements.size() > std::stoull(arrayNode->size)) {
-                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arrayNode->size + ".", start, source);
+        if (arrayNode.size != "auto") {
+            if (elements.size() > std::stoull(arrayNode.size)) {
+                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arrayNode.size + ".", start, source);
             }
         }
 
-        nodes::ArrayDeclarationNode node(identifier, arrayNode->type, arrayNode->isConstant, arrayNode->size, elements, start, end);
+        nodes::ArrayDeclarationNode node(identifier, arrayNode.type, arrayNode.isConstant, arrayNode.size, elements, start, end);
         scope->updateArray(identifier, node);
 
         return node;

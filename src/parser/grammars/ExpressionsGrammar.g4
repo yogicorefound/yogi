@@ -10,6 +10,7 @@ expression: concatenationExpression
           | binaryExpression
           | stringLiterals
           | numberLiterals
+          | memberExpression
           ;
 
 
