@@ -75,41 +75,43 @@ namespace cromio::visitor {
         return members;
     }
 
-    std::any MembersByType::processStringMembers(std::shared_ptr<nodes::VariableDeclarationNode>& variable, const std::string& member, std::vector<std::any> arguments, const std::string& source) {
+    std::any MembersByType::processStringMembers(nodes::VariableDeclarationNode& variable, const std::string& member, std::vector<std::any> arguments, const std::string& source) {
         // Check if member is available for strings
         if (const auto availableMembers = strAvailableMembers(); std::ranges::find(availableMembers, member) == availableMembers.end()) {
-            std::cout << "Error: Member '" + member + "' not available for string type" << std::endl;
-            std::exit(1);
+            std::cout << "start:ine: " << variable.start.line << " startColum: " << variable.end.line << std::endl;
+            std::cout << "end:ine: " << variable.end.line << " endColum: " << variable.end.line << std::endl;
+
+            utils::Errors::throwScopeError("'" + variable.identifier + "' has no member named '" + member, member, variable, source);
         }
 
         // ✅ Check type before casting
-        if (variable->value.type() != typeid(nodes::StringLiteralNode)) {
-            std::cout << "Error: variable->value is not a StringLiteralNode (actual type: " + std::string(variable->value.type().name()) + ")";
+        if (variable.value.type() != typeid(nodes::StringLiteralNode)) {
+            std::cout << "Error: variable.value is not a StringLiteralNode (actual type: " + std::string(variable.value.type().name()) + ")";
             std::exit(1);
         }
 
-        auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(variable->value);
+        auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(variable.value);
         std::cout << "Processing string member '" << member << "' on value: " << stringLiteralNode.value << std::endl;
 
         // Properties (no arguments needed)
         if (member == "size") {
-            nodes::IntegerLiteralNode node(std::to_string(stringLiteralNode.value.size()), variable->start, variable->end);
+            nodes::IntegerLiteralNode node(std::to_string(stringLiteralNode.value.size()), variable.start, variable.end);
             return node;
         }
 
         if (member == "lower") {
-            nodes::StringLiteralNode node(utils::Helpers::toLower(stringLiteralNode.value), variable->start, variable->end);
+            nodes::StringLiteralNode node(utils::Helpers::toLower(stringLiteralNode.value), variable.start, variable.end);
             std::cout << "Lower: " << stringLiteralNode.value << std::endl;
             return node;
         }
 
         if (member == "upper") {
-            nodes::StringLiteralNode node(utils::Helpers::toUpper(stringLiteralNode.value), variable->start, variable->end);
+            nodes::StringLiteralNode node(utils::Helpers::toUpper(stringLiteralNode.value), variable.start, variable.end);
             return node;
         }
 
         if (member == "title") {
-            nodes::StringLiteralNode node(utils::Helpers::toTitle(stringLiteralNode.value), variable->start, variable->end);
+            nodes::StringLiteralNode node(utils::Helpers::toTitle(stringLiteralNode.value), variable.start, variable.end);
             return node;
         }
 
@@ -126,7 +128,7 @@ namespace cromio::visitor {
                 }
 
                 bool isIncluded = stringLiteralNode.value.contains(expression.value);
-                nodes::BooleanLiteralNode node(isIncluded ? "true" : "false", variable->start, variable->end);
+                nodes::BooleanLiteralNode node(isIncluded ? "true" : "false", variable.start, variable.end);
                 return node;
             }
             throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'includes'");
@@ -144,11 +146,11 @@ namespace cromio::visitor {
                 }
 
                 bool starts = stringLiteralNode.value.starts_with(expression.value);
-                nodes::BooleanLiteralNode node(starts ? "true" : "false", variable->start, variable->end);
+                nodes::BooleanLiteralNode node(starts ? "true" : "false", variable.start, variable.end);
                 return node;
-            } else {
-                throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'startWith'");
             }
+
+            throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'startWith'");
         }
 
         if (member == "endsWith") {
@@ -163,11 +165,11 @@ namespace cromio::visitor {
                 }
 
                 bool ends = stringLiteralNode.value.ends_with(expression.value);
-                nodes::BooleanLiteralNode node(ends ? "true" : "false", variable->start, variable->end);
+                nodes::BooleanLiteralNode node(ends ? "true" : "false", variable.start, variable.end);
                 return node;
-            } else {
-                throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'endsWith'");
             }
+
+            throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'endsWith'");
         }
 
         utils::Errors::throwScopeError("Error: member '" + member + "' not available for string type", member, variable, source);
@@ -175,22 +177,18 @@ namespace cromio::visitor {
     }
 
     // COMPREHENSIVE FIX for processMembers
-    std::any MembersByType::processMembers(std::shared_ptr<nodes::VariableDeclarationNode> variable, const std::string& member, const std::vector<std::any>& arguments, const std::string& source) {
+    std::any MembersByType::processMembers(nodes::VariableDeclarationNode& variable, const std::string& member, const std::vector<std::any>& arguments, const std::string& source) {
         std::any result;
-        // ✅ Validate inputs
-        if (!variable) {
-            throw std::runtime_error("Error: null variable pointer in processMembers");
-        }
 
         if (member.empty()) {
             throw std::runtime_error("Error: empty member name");
         }
 
-        if (variable->varType == "str") {
+        if (variable.varType == "str") {
             return processStringMembers(variable, member, arguments, source);
         }
 
-        utils::Errors::throwScopeError("Error: member '" + member + "' not available for type '" + variable->varType + "'", member, variable, source);
+        utils::Errors::throwScopeError("Error: member '" + member + "' not available for type '" + variable.varType + "'", member, variable, source);
         return {};
     }
 } // namespace cromio::visitor

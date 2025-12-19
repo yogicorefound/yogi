@@ -93,6 +93,7 @@ namespace cromio::visitor {
 
         auto node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
 
+
         analyzeVariableDeclaration(node, source);
         scope->declareVariable(identifier, node);
 

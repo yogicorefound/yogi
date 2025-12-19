@@ -19,12 +19,13 @@ namespace cromio::visitor {
             throwScopeError("variable '" + identifier.value + "' is not declared", identifier.value, atom, source);
         }
 
-        const std::shared_ptr<nodes::VariableDeclarationNode>& variable = lookupVariable.value();
+        const auto& variable = lookupVariable.value();
 
-        // ✅ Validate variable pointer
-        if (!variable) {
-            throw std::runtime_error("Error: variable pointer is null for '" + identifier.value + "'");
-        }
+
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        variable->start = start;
+        variable->end = end;
 
         // ✅ Initialize current with the variable itself as fallback
         std::any current = variable->value;
@@ -73,7 +74,8 @@ namespace cromio::visitor {
                 }
 
                 // Process as property or method
-                current = processMembers(variable, memberName, arguments, source);
+
+                current = processMembers(*variable, memberName, arguments, source);
             }
             // Standalone method call (should have identifier)
             else if (postfix->LPAREN()) {
@@ -94,7 +96,7 @@ namespace cromio::visitor {
                 }
 
                 std::cout << "Method call: " << memberName << "() with " << arguments.size() << " arguments" << std::endl;
-                current = processMembers(variable, memberName, arguments, source);
+                current = processMembers(*variable, memberName, arguments, source);
             } else {
                 // Unknown postfix type
                 throw std::runtime_error("Error: Unknown postfix type at index " + std::to_string(i) + " (text: " + postfix->getText() + ")");
