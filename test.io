@@ -1,2 +1,2 @@
 str nombre = "Brayhan"
-int numero = nombre.lowr().size
+int numero = nombre.lower().size
