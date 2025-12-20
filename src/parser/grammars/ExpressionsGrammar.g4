@@ -4,12 +4,13 @@ options {
     tokenVocab = Tokens;
 }
 
-import LiteralsGrammar;
+import LiteralsGrammar, MembersGrammar;
 
 expression: concatenationExpression
           | binaryExpression
           | numberLiterals
           | memberExpression
+          | booleanLiteral
           ;
 
 
