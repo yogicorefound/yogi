@@ -38,6 +38,14 @@ namespace cromio::utils {
         static void printNode(const std::any& node, int indent = 0);
         static void printIndent(const int indent);
         static json nodeToJson(const std::any& node);
+
+        struct ResolvedItem {
+            std::string type;
+            std::string value;
+            std::any node;
+        };
+
+        static ResolvedItem resolveItem(const std::any& itemResult);
     };
 } // namespace cromio::utils
 

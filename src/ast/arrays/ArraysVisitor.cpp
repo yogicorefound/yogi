@@ -149,7 +149,7 @@ namespace cromio::visitor {
 
         // Get array size
         const auto arraySizeResult = visit(ctx->arrayDeclarationTypeSize());
-        const std::string arraySize = std::any_cast<std::string>(arraySizeResult);
+        const auto arraySize = std::any_cast<std::string>(arraySizeResult);
 
         // Return as pair: {elementType, size}
         return std::make_pair(elementType, arraySize);

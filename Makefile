@@ -9,7 +9,7 @@ run:
 	@cd ./build && cmake ..
 	@cd ./build && make -j
 	@cd ./build && ./cromio ../test.io
-
+# -p
 
 run-tests:
 	@cd ./build && cmake .. -DENABLE_TESTING=ON

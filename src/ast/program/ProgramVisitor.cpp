@@ -13,8 +13,8 @@ std::any cromio::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     auto programNode = nodes::ProgramNode(start, end);
 
     // Visit all children and add them to the program body
-    for (antlr4::tree::ParseTree* child : ctx->children) {
-        if (std::any statement = visit(child); statement.has_value()) {
+    for (const auto child : ctx->children) {
+        if (auto statement = visit(child); statement.has_value()) {
             // Check if it's a StatementNode
             if (statement.type() == typeid(nodes::StatementNode)) {
                 auto stmtNode = std::any_cast<nodes::StatementNode>(statement);
@@ -71,6 +71,20 @@ std::any cromio::visitor::Visitor::visitStatements(Grammar::StatementsContext* c
     if (ctx->memberExpression()) {
         const std::any memberExpression = visit(ctx->memberExpression());
         statementNode.addChild(memberExpression);
+        return statementNode;
+    }
+
+    // Boolean literal statement
+    if (ctx->booleanLiteral()) {
+        const std::any booleanLiteral = visit(ctx->booleanLiteral());
+        statementNode.addChild(booleanLiteral);
+        return statementNode;
+    }
+
+    // None literal statement
+    if (ctx->noneLiteral()) {
+        const std::any booleanLiteral = visit(ctx->noneLiteral());
+        statementNode.addChild(booleanLiteral);
         return statementNode;
     }
 

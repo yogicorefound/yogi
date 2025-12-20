@@ -8,6 +8,8 @@
 #include <llvm/IR/Module.h>
 #include <any>
 
+
+
 namespace cromio {
     class Cromio final {
        public:
@@ -17,9 +19,11 @@ namespace cromio {
 
         void compile();
 
+        static visitor::nodes::ProgramNode testAST(std::string& text);
+        static void printAST(const std::any& ast);
+
        private:
         visitor::nodes::ProgramNode getAST();
-        static void printAST(const std::any& ast);
 
         // LLVM
         void processLLVM(const std::any& ast) const;

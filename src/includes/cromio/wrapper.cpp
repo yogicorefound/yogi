@@ -22,7 +22,7 @@ namespace cromio {
         const visitor::nodes::ProgramNode ast = getAST();
         printAST(ast);
 
-        processLLVM(ast);
+        // processLLVM(ast);
     }
 
     void Cromio::getContent(const int argc, const char* argv[]) {
@@ -43,6 +43,44 @@ namespace cromio {
         std::stringstream buffer;
         buffer << file.rdbuf();
         this->content = buffer.str();
+    }
+
+    visitor::nodes::ProgramNode Cromio::testAST(std::string& text) {
+        // ---------------------------------------------
+        // Feed file content into ANTLR
+        // ---------------------------------------------
+        antlr4::ANTLRInputStream input(text);
+
+        // ---------------------------------------------
+        // Feed ANTLR into Tokens
+        // ---------------------------------------------
+        Tokens lexer(&input);
+        antlr4::CommonTokenStream tokens(&lexer);
+        Grammar grammar(&tokens);
+
+        // ---------------------------------------------
+        // Setup error listeners
+        // ---------------------------------------------
+        lexer.removeErrorListeners();
+        grammar.removeErrorListeners();
+
+        utils::errors::AntlrErrorListener errorListener(text);
+        lexer.addErrorListener(&errorListener);
+        grammar.addErrorListener(&errorListener);
+
+        // ---------------------------------------------
+        // Feed Tokens into Grammar
+        // ---------------------------------------------
+        auto* tree = grammar.program();
+        visitor::Visitor visitor(text, &grammar);
+
+        // ---------------------------------------------
+        // Feed Grammar into Visitor and generate AST
+        // ---------------------------------------------
+        auto ast = visitor.visit(tree);
+        auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
+
+        return node;
     }
 
     visitor::nodes::ProgramNode Cromio::getAST() {

@@ -11,30 +11,7 @@
 namespace cromio::visitor {
 
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
-        if (ctx->binaryExpression()) {
-            return visit(ctx->binaryExpression());
-        }
-
-        if (ctx->concatenationExpression()) {
-            return visit(ctx->concatenationExpression());
-        }
-
-        if (ctx->numberLiterals()) {
-            return visit(ctx->numberLiterals());
-        }
-
-        if (ctx->stringLiterals()) {
-            return visit(ctx->stringLiterals());
-        }
-
-        if (ctx->memberExpression()) {
-            return visit(ctx->memberExpression());
-        }
-
-        // Return None literal as fallback
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        return nodes::NoneLiteralNode("None", start, end);
+        return visitChildren(ctx);
     }
 
     std::any ExpressionVisitor::visitBinaryExpression(Grammar::BinaryExpressionContext* ctx) {
@@ -42,36 +19,41 @@ namespace cromio::visitor {
         // (1) Literal → return literal node
         // -------------------------------------------------------
         if (ctx->numberLiterals()) {
-            return visit(ctx->numberLiterals());
+            auto result = visit(ctx->numberLiterals());
+            return result;
         }
 
         // -------------------------------------------------------
-        // (2) Detect operator
+        // (2) Parenthesized expression: LPAREN binaryExpression RPAREN
         // -------------------------------------------------------
-        std::string op;
-        if (ctx->PLUS())
-            op = "+";
-        else if (ctx->MINUS())
-            op = "-";
-        else if (ctx->MUL())
-            op = "*";
-        else if (ctx->DIV())
-            op = "/";
-        else if (ctx->MOD())
-            op = "%";
-
-        // -------------------------------------------------------
-        // (3) Parenthesized expression
-        // -------------------------------------------------------
-        if (ctx->binaryExpression().size() == 1 && op.empty()) {
-            return visit(ctx->binaryExpression(0));
+        if (ctx->LPAREN() && ctx->RPAREN() && ctx->binaryExpression().size() == 1) {
+            auto result = visit(ctx->binaryExpression(0));
+            return result;
         }
 
         // -------------------------------------------------------
-        // (4) Binary expression
+        // (3) Binary expression with operator
         // -------------------------------------------------------
-        if (!op.empty() && ctx->binaryExpression().size() >= 2) {
+        if (ctx->binaryExpression().size() == 2) {
+            // Detect operator
+            std::string op;
+            if (ctx->PLUS())
+                op = "+";
+            else if (ctx->MINUS())
+                op = "-";
+            else if (ctx->MUL())
+                op = "*";
+            else if (ctx->DIV())
+                op = "/";
+            else if (ctx->MOD())
+                op = "%";
+
+            if (op.empty()) {
+                throw std::runtime_error("Binary expression with 2 operands but no operator found");
+            }
+
             std::any leftResult = visit(ctx->binaryExpression(0));
+
             std::any rightResult = visit(ctx->binaryExpression(1));
 
             const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
@@ -116,8 +98,11 @@ namespace cromio::visitor {
                         // Variable not found in scope
                         throw std::runtime_error("Variable '" + identifier + "' is not declared");
                     }
-                } catch (const std::exception& _) {
-                    throw std::runtime_error("Cannot extract numeric value");
+                } catch (const std::bad_any_cast& e) {
+                    std::cout << "        >>> BAD ANY CAST ERROR: " << e.what() << std::endl;
+                    throw;
+                } catch (const std::exception& e) {
+                    throw std::runtime_error("Cannot extract numeric value: " + std::string(e.what()));
                 }
                 throw std::runtime_error("Unsupported node type in expression");
             };
@@ -132,14 +117,14 @@ namespace cromio::visitor {
                 rightValue = rv;
                 leftType = lt;
                 rightType = rt;
-            } catch (const std::exception& _) {
+            } catch (const std::exception& e) {
                 // Return error node
                 auto errorNode = nodes::BinaryExpressionNode(leftResult, rightResult, op, "0.0", "error", start, end);
                 return errorNode;
             }
 
             // -------------------------------------------------------
-            // (5) Perform arithmetic
+            // (4) Perform arithmetic
             // -------------------------------------------------------
             double result = 0.0;
 
@@ -167,7 +152,7 @@ namespace cromio::visitor {
             }
 
             // -------------------------------------------------------
-            // (6) Determine final data type
+            // (5) Determine final data type
             // -------------------------------------------------------
             auto determineType = [](const std::string& mOp, const std::string& mLeftType, const std::string& mRightType) -> std::string {
                 if (mLeftType == "float" || mRightType == "float")
@@ -186,23 +171,22 @@ namespace cromio::visitor {
             std::string finalType = determineType(op, leftType, rightType);
 
             // -------------------------------------------------------
-            // (7) Create and return BinaryExpressionNode
+            // (6) Create and return BinaryExpressionNode
             // -------------------------------------------------------
             auto node = nodes::BinaryExpressionNode(leftResult, rightResult, op, std::to_string(result), finalType, start, end);
-            // auto literalExpressionNode = nodes::BinaryExpressionLiteralNode(std::to_string(node.value), start, end);
-            //
-            // std::cout << "node.value " << std::to_string(result)<< std::endl;
-
             return node;
         }
 
         // -------------------------------------------------------
-        // (8) Fallback
+        // (7) Fallback
         // -------------------------------------------------------
-        if (!ctx->binaryExpression().empty())
+        if (!ctx->binaryExpression().empty()) {
             return visit(ctx->binaryExpression(0));
+        }
 
-        // Return None literal as fallback
+        // -------------------------------------------------------
+        // (8) Final fallback
+        // -------------------------------------------------------
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
         return nodes::NoneLiteralNode("None", start, end);
@@ -232,7 +216,6 @@ namespace cromio::visitor {
                 auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(varNode.value);
                 value += stringLiteralNode.value;
                 literals.push_back(stringLiteralNode);
-                std::cout << "literalNode.value " << literalNode.value << std::endl;
 
             } else {
                 auto literal = visit(expression);

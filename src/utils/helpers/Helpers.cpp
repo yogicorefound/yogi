@@ -4,6 +4,9 @@
 
 #include "Helpers.h"
 #include <ast/nodes/nodes.h>
+#include <utils/errors/Errors.h>
+#include <utils/helpers/Helpers.h>
+
 #include <algorithm>
 #include <string>
 #include "antlr4-runtime.h"
@@ -98,20 +101,26 @@ namespace cromio::utils {
         std::string raw = rawInput;
 
         // Helper lambdas for starts_with and ends_with (C++11 compatible)
-        auto starts_with = [](const std::string& str, const std::string& prefix) { return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0; };
-        auto ends_with = [](const std::string& str, const std::string& suffix) { return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0; };
+        auto starts_with = [](const std::string& str, const std::string& prefix) {
+            return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
+        };
+        auto ends_with = [](const std::string& str, const std::string& suffix) {
+            return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+        };
 
         // 1️⃣ Detect triple-quoted string ("""...""" or '''...''')
         bool triple = false;
         if (raw.size() >= 6) {
-            if ((starts_with(raw, R"(""")") && ends_with(raw, R"(""")")) || (starts_with(raw, "'''") && ends_with(raw, "'''"))) {
+            if ((starts_with(raw, R"(""")") && ends_with(raw, R"(""")")) ||
+                (starts_with(raw, "'''") && ends_with(raw, "'''"))) {
                 triple = true;
                 raw = raw.substr(3, raw.size() - 6);
             }
         }
 
         // 2️⃣ If not triple, strip single outer quotes
-        if (!triple && raw.size() >= 2 && ((raw.front() == '"' && raw.back() == '"') || (raw.front() == '\'' && raw.back() == '\''))) {
+        if (!triple && raw.size() >= 2 &&
+            ((raw.front() == '"' && raw.back() == '"') || (raw.front() == '\'' && raw.back() == '\''))) {
             raw = raw.substr(1, raw.size() - 2);
         }
 
@@ -181,7 +190,11 @@ namespace cromio::utils {
         return pos;
     }
 
-    json Helpers::createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop) {
+    json Helpers::createNode(
+        const std::string& raw,
+        const std::string& kind,
+        const antlr4::Token* start,
+        const antlr4::Token* stop) {
         json node;
         node["kind"] = kind;
         node["start"] = getPosition(start);
@@ -391,6 +404,7 @@ namespace cromio::utils {
             std::cout << "  ";
         }
     }
+
     json Helpers::nodeToJson(const std::any& node) {
         using namespace cromio::visitor::nodes;
 
@@ -422,7 +436,8 @@ namespace cromio::utils {
         }
 
         if (node.type() == typeid(NoneLiteralNode)) {
-            return {{"kind", "NoneLiteral"}};
+            const auto& n = std::any_cast<const NoneLiteralNode&>(node);
+            return {{"kind", "NoneLiteral"}, {"value", n.value}};
         }
 
         if (node.type() == typeid(IdentifierLiteral)) {
@@ -449,7 +464,13 @@ namespace cromio::utils {
 
         if (node.type() == typeid(BinaryExpressionNode)) {
             const auto& n = std::any_cast<const BinaryExpressionNode&>(node);
-            return {{"kind", "BinaryExpression"}, {"operator", n.op}, {"resultType", n.resultType}, {"value", n.value}, {"left", nodeToJson(n.left)}, {"right", nodeToJson(n.right)}};
+            return {
+                {"kind", "BinaryExpression"},
+                {"operator", n.op},
+                {"resultType", n.resultType},
+                {"value", n.value},
+                {"left", nodeToJson(n.left)},
+                {"right", nodeToJson(n.right)}};
         }
 
         // -------------------------------------------------
@@ -482,7 +503,12 @@ namespace cromio::utils {
 
         if (node.type() == typeid(VariableDeclarationNode)) {
             const auto& n = std::any_cast<const VariableDeclarationNode&>(node);
-            return {{"kind", "VariableDeclaration"}, {"identifier", n.identifier}, {"type", n.varType}, {"isConstant", n.isConstant}, {"value", nodeToJson(n.value)}};
+            return {
+                {"kind", "VariableDeclaration"},
+                {"identifier", n.identifier},
+                {"type", n.varType},
+                {"isConstant", n.isConstant},
+                {"value", nodeToJson(n.value)}};
         }
 
         if (node.type() == typeid(ArrayDeclarationNode)) {
@@ -492,12 +518,22 @@ namespace cromio::utils {
             for (const auto& el : n.elements)
                 elements.push_back(nodeToJson(el));
 
-            return {{"kind", "ArrayDeclaration"}, {"identifier", n.identifier}, {"elementType", n.type}, {"size", n.size}, {"elements", elements}};
+            return {
+                {"kind", "ArrayDeclaration"},
+                {"identifier", n.identifier},
+                {"elementType", n.type},
+                {"size", n.size},
+                {"elements", elements}};
         }
 
         if (node.type() == typeid(DictionaryDeclarationNode)) {
             const auto& n = std::any_cast<const DictionaryDeclarationNode&>(node);
-            return {{"kind", "DictionaryDeclaration"}, {"identifier", n.identifier}, {"keyType", n.keyType}, {"valueType", n.valueType}, {"size", n.size}};
+            return {
+                {"kind", "DictionaryDeclaration"},
+                {"identifier", n.identifier},
+                {"keyType", n.keyType},
+                {"valueType", n.valueType},
+                {"size", n.size}};
         }
 
         // -------------------------------------------------
@@ -525,4 +561,34 @@ namespace cromio::utils {
         const json ast = nodeToJson(node);
         std::cout << ast.dump(indent) << std::endl;
     }
+
+    Helpers::ResolvedItem Helpers::resolveItem(const std::any& itemResult) {
+        if (itemResult.type() == typeid(visitor::nodes::IntegerLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(itemResult);
+            return {"int", n.value, itemResult};
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::FloatLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::FloatLiteralNode>(itemResult);
+            return {"float", n.value, itemResult};
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::StringLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::StringLiteralNode>(itemResult);
+            return {"str", n.value, itemResult};
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::BooleanLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(itemResult);
+            return {"bool", n.value, itemResult};
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::BinaryExpressionNode)) {
+            auto n = std::any_cast<visitor::nodes::BinaryExpressionNode>(itemResult);
+            return {n.resultType, n.value, itemResult};
+        }
+
+        return {}; // unreachable
+    }
+
 } // namespace cromio::utils

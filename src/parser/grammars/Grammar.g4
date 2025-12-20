@@ -15,10 +15,12 @@ import DictionaryGrammar, VariableGrammar, ArraysGrammar, MembersGrammar,  Liter
 program: NEWLINE* (statements NEWLINE*)* EOF;
 
 statements
-    : variables
+    : expression
+    | variables
     | arrays
     | dictionaryDeclaration
     | memberExpression
-    | expression
+    | booleanLiteral
+    | noneLiteral
     ;
 

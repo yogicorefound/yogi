@@ -4,6 +4,6 @@
 
 #include "libs/catch2/catch_amalgamated.hpp"
 
-TEST_CASE("my test") {
-    REQUIRE(1 + 1 == 2);
+TEST_CASE("variables", "[VARIABLE]" ) {
+    REQUIRE(1 + 10 == 11);
 }

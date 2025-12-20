@@ -8,7 +8,6 @@ import LiteralsGrammar;
 
 expression: concatenationExpression
           | binaryExpression
-          | stringLiterals
           | numberLiterals
           | memberExpression
           ;
@@ -25,7 +24,3 @@ binaryExpression
     | binaryExpression (MUL | DIV | MOD) binaryExpression
     | binaryExpression (PLUS | MINUS) binaryExpression
     ;
-
-
-// 0311-000-89
-// 579-946-7392

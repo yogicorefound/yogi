@@ -1,7 +1,7 @@
 ---
 BasedOnStyle: LLVM
 AccessModifierOffset: -1
-AlignAfterOpenBracket: Align
+#AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: false
 AlignConsecutiveAssignments: false
 AlignConsecutiveBitFields: false
@@ -9,7 +9,7 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Left
 AlignOperands: DontAlign
 AlignTrailingComments: false
-AllowAllArgumentsOnNextLine: true
+AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortEnumsOnASingleLine: true
@@ -27,7 +27,6 @@ BinPackParameters: false
 BreakBeforeBinaryOperators: None
 NamespaceIndentation: All
 
-
 # *** THIS is the important one ***
 BreakBeforeBraces: Attach
 
@@ -36,7 +35,10 @@ BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: false
-ColumnLimit: 1000000
+
+# 🔴 Critical change — enables wrapping
+ColumnLimit: 150
+
 CommentPragmas: '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
@@ -47,10 +49,12 @@ DeriveLineEnding: true
 DerivePointerAlignment: false
 DisableFormat: false
 FixNamespaceComments: true
+
 ForEachMacros:
   - FOR_EACH
   - FOR_EACH_R
   - FOR_EACH_RANGE
+
 IncludeBlocks: Preserve
 IncludeCategories:
   - Regex: '^<.*\.h(pp)?>'
@@ -59,6 +63,7 @@ IncludeCategories:
     Priority: 2
   - Regex: '.*'
     Priority: 3
+
 IndentCaseLabels: true
 IndentCaseBlocks: false
 IndentGotoLabels: true
@@ -78,14 +83,21 @@ ObjCBlockIndentWidth: 2
 ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: false
+
+
+AlignAfterOpenBracket: AlwaysBreak
+
+
+# 🔴 Encourage breaking long call expressions
 PenaltyBreakAssignment: 2
-PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakBeforeFirstCallParameter: 1000
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 200
+
 PointerAlignment: Left
 ReflowComments: true
 SortIncludes: true

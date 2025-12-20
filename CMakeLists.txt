@@ -66,6 +66,7 @@ if (NOT ENABLE_TESTING)
     file(GLOB_RECURSE PROD_SOURCES
             "${SOURCES_DIR}/*.cpp"
             "${GENERATED_DIR}/*.cpp"
+            "${TESTS_DIR}/*.cpp"
     )
 
     add_executable(cromio ${PROD_SOURCES})
@@ -115,6 +116,7 @@ if (ENABLE_TESTING)
     file(GLOB_RECURSE PROD_SOURCES_NO_MAIN
             "${SOURCES_DIR}/*.cpp"
             "${GENERATED_DIR}/*.cpp"
+            "${TESTS_DIR}/*.cpp"
     )
     # Exclude both main.cpp and cromio.cpp (whichever contains main)
     list(FILTER PROD_SOURCES_NO_MAIN EXCLUDE REGEX ".*(main|cromio)\\.cpp$")
