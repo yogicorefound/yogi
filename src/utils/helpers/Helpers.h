@@ -36,8 +36,21 @@ namespace cromio::utils {
         static bool isInteger(double number);
 
         static void printNode(const std::any& node, int indent = 0);
-        static void printIndent(const int indent);
+        static void printIndent(int indent);
         static json nodeToJson(const std::any& node);
+
+        struct DecimalFloat {
+            bool negative;
+            std::string mantissa; // digits only
+            int exponent; // base-10 exponent
+        };
+
+        static DecimalFloat parseDecimalFloat(const std::string& s);
+        static bool isGreaterThanFloatMax(const std::string&);
+        static bool isLessThanFloatMin(const std::string& literal);
+        static bool isAbsGreaterThan(const DecimalFloat& v, const std::string& maxMantissa, int maxExponent);
+        static bool fitsInFloat32(const std::string& literal);
+        static bool fitsInFloat64(const std::string& literal);
 
         struct ResolvedItem {
             std::string type;

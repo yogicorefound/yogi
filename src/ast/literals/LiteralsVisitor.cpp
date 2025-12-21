@@ -5,6 +5,7 @@
 #include "LiteralsVisitor.h"
 
 #include <ast/nodes/nodes.h>
+#include <catch2/catch_amalgamated.hpp>
 
 std::any cromio::visitor::LiteralsVisitor::visitLiteral(Grammar::LiteralContext* ctx) {
     if (ctx->numberLiterals()) {
@@ -64,7 +65,7 @@ std::any cromio::visitor::LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerL
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    const auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
+    auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
     return node;
 }
 
@@ -72,7 +73,11 @@ std::any cromio::visitor::LiteralsVisitor::visitFloatLiteral(Grammar::FloatLiter
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    const auto node = nodes::FloatLiteralNode(ctx->getText(), start, end);
+    auto node = nodes::FloatLiteralNode(ctx->getText(), start, end);
+    if (!fitsInFloat64(ctx->getText())) {
+        throwScopeError("<float> type is not in 64-bit range", ctx->getText(), node, source);
+    }
+
     return node;
 }
 
@@ -81,7 +86,7 @@ std::any cromio::visitor::LiteralsVisitor::visitStringLiteral(Grammar::StringLit
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    const auto node = nodes::StringLiteralNode(value, start, end);
+    auto node = nodes::StringLiteralNode(value, start, end);
     return node;
 }
 
@@ -91,7 +96,7 @@ std::any cromio::visitor::LiteralsVisitor::visitBooleanLiteral(Grammar::BooleanL
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    const auto node = nodes::BooleanLiteralNode(value, start, end);
+    auto node = nodes::BooleanLiteralNode(value, start, end);
     return node;
 }
 
@@ -100,7 +105,7 @@ std::any cromio::visitor::LiteralsVisitor::visitNoneLiteral(Grammar::NoneLiteral
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    const auto node = nodes::NoneLiteralNode(value, start, end);
+    auto node = nodes::NoneLiteralNode(value, start, end);
     return node;
 }
 
@@ -109,7 +114,7 @@ std::any cromio::visitor::LiteralsVisitor::visitIdentifierLiteral(Grammar::Ident
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    const auto node = nodes::IdentifierLiteral(identifier, start, end);
+    auto node = nodes::IdentifierLiteral(identifier, start, end);
     return node;
 }
 
@@ -163,10 +168,10 @@ std::any cromio::visitor::LiteralsVisitor::visitFormattedStringContent(Grammar::
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        const auto node = nodes::StringLiteralNode(ctx->getText(), start, end);
+        auto node = nodes::StringLiteralNode(ctx->getText(), start, end);
         return node;
     }
 
     // Return empty if nothing matches
-    return std::any();
+    return {};
 }

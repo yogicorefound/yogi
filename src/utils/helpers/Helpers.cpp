@@ -5,7 +5,6 @@
 #include "Helpers.h"
 #include <ast/nodes/nodes.h>
 #include <utils/errors/Errors.h>
-#include <utils/helpers/Helpers.h>
 
 #include <algorithm>
 #include <string>
@@ -111,16 +110,14 @@ namespace cromio::utils {
         // 1️⃣ Detect triple-quoted string ("""...""" or '''...''')
         bool triple = false;
         if (raw.size() >= 6) {
-            if ((starts_with(raw, R"(""")") && ends_with(raw, R"(""")")) ||
-                (starts_with(raw, "'''") && ends_with(raw, "'''"))) {
+            if ((starts_with(raw, R"(""")") && ends_with(raw, R"(""")")) || (starts_with(raw, "'''") && ends_with(raw, "'''"))) {
                 triple = true;
                 raw = raw.substr(3, raw.size() - 6);
             }
         }
 
         // 2️⃣ If not triple, strip single outer quotes
-        if (!triple && raw.size() >= 2 &&
-            ((raw.front() == '"' && raw.back() == '"') || (raw.front() == '\'' && raw.back() == '\''))) {
+        if (!triple && raw.size() >= 2 && ((raw.front() == '"' && raw.back() == '"') || (raw.front() == '\'' && raw.back() == '\''))) {
             raw = raw.substr(1, raw.size() - 2);
         }
 
@@ -190,11 +187,7 @@ namespace cromio::utils {
         return pos;
     }
 
-    json Helpers::createNode(
-        const std::string& raw,
-        const std::string& kind,
-        const antlr4::Token* start,
-        const antlr4::Token* stop) {
+    json Helpers::createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop) {
         json node;
         node["kind"] = kind;
         node["start"] = getPosition(start);
@@ -272,14 +265,151 @@ namespace cromio::utils {
     }
 
     bool Helpers::isGreaterUnsigned(const std::string& num, const std::string& max) {
+        // 1️⃣ Quitar ceros a la izquierda
+        auto normalize = [](const std::string& s) -> std::string {
+            const size_t pos = s.find_first_not_of('0');
+            if (pos == std::string::npos)
+                return "0";
+            return s.substr(pos);
+        };
+
+        std::string a = normalize(num);
+        std::string b = normalize(max);
+
+        // 2️⃣ Comparar longitud
+        if (a.size() != b.size())
+            return a.size() > b.size();
+
+        // 3️⃣ Comparación lexicográfica (segura para decimal)
+        return a > b;
+    }
+
+    bool Helpers::isAbsGreaterThan(const DecimalFloat& v, const std::string& maxMantissa, const int maxExponent) {
+        if (v.exponent != maxExponent)
+            return v.exponent > maxExponent;
+
+        if (v.mantissa.size() != maxMantissa.size())
+            return v.mantissa.size() > maxMantissa.size();
+
+        return v.mantissa > maxMantissa;
+    }
+
+    bool Helpers::fitsInFloat32(const std::string& literal) {
+        DecimalFloat v = parseDecimalFloat(literal);
+
+        // float32 max: 3.402823466e38
+        constexpr int MAX_EFFECTIVE_EXP = 38;
+        const std::string MAX_MANTISSA = "3402823466"; // 10-digit mantissa
+
+        int effExp = v.exponent + static_cast<int>(v.mantissa.size()) - 1;
+
+        if (effExp < MAX_EFFECTIVE_EXP)
+            return true; // seguro que cabe
+
+        if (effExp > MAX_EFFECTIVE_EXP)
+            return false; // seguro que NO cabe
+
+        // effExp == MAX_EFFECTIVE_EXP → comparar mantissa lexicográficamente
+        std::string lhs = v.mantissa;
+        std::string rhs = MAX_MANTISSA;
+
+        // pad con ceros a la derecha para tener mismo tamaño
+        if (lhs.size() < rhs.size())
+            lhs.append(rhs.size() - lhs.size(), '0');
+        else if (rhs.size() < lhs.size())
+            rhs.append(lhs.size() - rhs.size(), '0');
+
+        return lhs <= rhs; // verdadero solo si no supera el máximo
+    }
+
+    bool Helpers::fitsInFloat64(const std::string& literal) {
+        DecimalFloat v = parseDecimalFloat(literal);
+
+        // float64 max exponent ≈ 308 (1.7976931348623157e+308)
+        constexpr int MAX_EFFECTIVE_EXP = 308;
+
+        int effExp = v.exponent + static_cast<int>(v.mantissa.size()) - 1;
+
+        return effExp <= MAX_EFFECTIVE_EXP;
+    }
+
+    Helpers::DecimalFloat Helpers::parseDecimalFloat(const std::string& s) {
+        DecimalFloat out{};
+        size_t i = 0;
+
+        out.negative = s[i] == '-';
+        if (s[i] == '+' || s[i] == '-')
+            i++;
+
+        std::string intPart, fracPart;
+        while (i < s.size() && isdigit(s[i]))
+            intPart += s[i++];
+
+        if (i < s.size() && s[i] == '.') {
+            i++;
+            while (i < s.size() && isdigit(s[i]))
+                fracPart += s[i++];
+        }
+
+        int exp = 0;
+        if (i < s.size() && (s[i] == 'e' || s[i] == 'E')) {
+            i++;
+            int sign = 1;
+            if (s[i] == '+' || s[i] == '-') {
+                sign = s[i] == '-' ? -1 : 1;
+                i++;
+            }
+            while (i < s.size() && isdigit(s[i]))
+                exp = exp * 10 + (s[i++] - '0');
+            exp *= sign;
+        }
+
+        out.mantissa = intPart + fracPart;
+        out.exponent = exp - static_cast<int>(fracPart.size());
+
         // remove leading zeros
-        std::string a = num;
-        a.erase(0, a.find_first_not_of('0'));
+        size_t pos = out.mantissa.find_first_not_of('0');
+        out.mantissa = pos == std::string::npos ? "0" : out.mantissa.substr(pos);
 
-        if (a.size() != max.size())
-            return a.size() > max.size();
+        return out;
+    }
 
-        return a > max;
+    bool Helpers::isGreaterThanFloatMax(const std::string& literal) {
+        if (literal.starts_with('-'))
+            return false; // negative never overflows max
+
+        const DecimalFloat v = parseDecimalFloat(literal);
+
+        // FLOAT_MAX = 3.402823466e+38
+        const std::string maxMantissa = "3402823466";
+
+        if (constexpr int maxExponent = 29; v.exponent != maxExponent)
+            return v.exponent > maxExponent;
+
+        if (v.mantissa.size() != maxMantissa.size())
+            return v.mantissa.size() > maxMantissa.size();
+
+        return v.mantissa > maxMantissa;
+    }
+
+    bool Helpers::isLessThanFloatMin(const std::string& literal) {
+        if (literal.empty() || literal[0] != '-')
+            return false;
+
+        DecimalFloat v = parseDecimalFloat(literal);
+
+        // float max magnitude = 3.402823466e+38
+        static const std::string MAX_MANTISSA = "3402823466";
+        static constexpr int MAX_EXPONENT = 29;
+
+        // Compare absolute value
+        if (v.exponent != MAX_EXPONENT)
+            return v.exponent > MAX_EXPONENT;
+
+        if (v.mantissa.size() != MAX_MANTISSA.size())
+            return v.mantissa.size() > MAX_MANTISSA.size();
+
+        return v.mantissa > MAX_MANTISSA;
     }
 
     bool Helpers::isGreaterSigned(const std::string& num, const std::string& maxPos, const std::string& maxNeg) {
@@ -518,12 +648,7 @@ namespace cromio::utils {
             for (const auto& el : n.elements)
                 elements.push_back(nodeToJson(el));
 
-            return {
-                {"kind", "ArrayDeclaration"},
-                {"identifier", n.identifier},
-                {"elementType", n.type},
-                {"size", n.size},
-                {"elements", elements}};
+            return {{"kind", "ArrayDeclaration"}, {"identifier", n.identifier}, {"elementType", n.type}, {"size", n.size}, {"elements", elements}};
         }
 
         if (node.type() == typeid(DictionaryDeclarationNode)) {

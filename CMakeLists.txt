@@ -66,7 +66,7 @@ if (NOT ENABLE_TESTING)
     file(GLOB_RECURSE PROD_SOURCES
             "${SOURCES_DIR}/*.cpp"
             "${GENERATED_DIR}/*.cpp"
-            "${TESTS_DIR}/*.cpp"
+#            "${TESTS_DIR}/*.cpp"
     )
 
     add_executable(cromio ${PROD_SOURCES})

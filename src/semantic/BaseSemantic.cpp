@@ -40,7 +40,12 @@ namespace cromio::semantic {
         return false;
     }
 
-    void BaseSemantic::analyzeSignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
+    void BaseSemantic::analyzeSignedInteger(
+        const std::string& rValue,
+        const std::string& dataType,
+        const std::string& identifier,
+        const std::string& source,
+        const std::any& node) {
         const auto value = utils::Helpers::parseInteger(rValue);
         const bool isValidNumber = utils::Helpers::isValidNumber(std::to_string(value));
 
@@ -65,7 +70,12 @@ namespace cromio::semantic {
             utils::Errors::throwRangeError("Value exceeds 32-bit signed integer range", node, source);
     }
 
-    void BaseSemantic::analyzeUnsignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
+    void BaseSemantic::analyzeUnsignedInteger(
+        const std::string& rValue,
+        const std::string& dataType,
+        const std::string& identifier,
+        const std::string& source,
+        const std::any& node) {
         const bool isValidNumber = utils::Helpers::isValidNumber(rValue);
         const auto value = utils::Helpers::parseFloat(rValue);
 
@@ -92,17 +102,34 @@ namespace cromio::semantic {
 
     void BaseSemantic::analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const std::any& node) {
         if (dataType == "float" || dataType == "float32") {
-            if (utils::Helpers::isGreaterSigned(rValue, FLOAT32_MAX_STR, FLOAT32_MIN_STR))
+            const auto fitIn32 = utils::Helpers::fitsInFloat64(rValue);
+            std::cout << "fitIn32: " << fitIn32 << " " << rValue << std::endl;
+            if (!utils::Helpers::fitsInFloat32(rValue)) {
                 utils::Errors::throwRangeError("<float32> type exceeds 32-bit float range", node, source);
+            }
+
+            // if (utils::Helpers::isGreaterSigned(rValue, FLOAT32_MAX_STR, FLOAT32_MIN_STR))
+            //     utils::Errors::throwRangeError("<float32> type exceeds 32-bit float range", node, source);
         }
 
         if (dataType == "float64") {
-            if (utils::Helpers::isGreaterSigned(rValue, FLOAT64_MAX_STR, FLOAT64_MIN_STR))
+            const auto fitIn64 = utils::Helpers::fitsInFloat64(rValue);
+            std::cout << "fitIn64: " << fitIn64 << std::endl;
+            if (!fitIn64) {
                 utils::Errors::throwRangeError("<float64> type exceeds 64-bit float range", node, source);
+            }
+
+            // if (utils::Helpers::isGreaterSigned(rValue, FLOAT64_MAX_STR, FLOAT64_MIN_STR))
+            //     utils::Errors::throwRangeError("<float64> type exceeds 64-bit float range", node, source);
         }
     }
 
-    void BaseSemantic::analyze64BitInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
+    void BaseSemantic::analyze64BitInteger(
+        const std::string& rValue,
+        const std::string& dataType,
+        const std::string& identifier,
+        const std::string& source,
+        const std::any& node) {
         const bool isNegative = !rValue.empty() && rValue[0] == '-';
 
         // ---------------------------------------------
@@ -127,7 +154,7 @@ namespace cromio::semantic {
             if (isNegative)
                 utils::Errors::throwRangeError("<uint64> cannot be negative", node, source);
 
-            if (utils::Helpers::isGreaterUnsigned(rValue, UINT64_MAX_STR))
+            if (utils::Helpers::isGreaterUnsigned(rValue, std::to_string(UINT64_MAX)))
                 utils::Errors::throwRangeError("<uint64> type exceeds unsigned 64-bit range", node, source);
         }
     }

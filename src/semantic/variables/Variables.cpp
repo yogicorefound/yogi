@@ -107,7 +107,7 @@ namespace cromio::semantic {
         }
 
         // Range checking for integers
-        analyze64BitInteger(rValue, dataType, identifier, source, node.value);
+        // analyze64BitInteger(rValue, dataType, identifier, source, node.value);
 
         if (dataType.find("uint") != std::string::npos) {
             analyzeUnsignedInteger(rValue, dataType, identifier, source, node.value);
@@ -130,14 +130,12 @@ namespace cromio::semantic {
         // Create result node with normalized value
         VariableDeclarationNode result = node;
         if (dataType.find("uint") != std::string::npos || dataType.find("int") != std::string::npos) {
-            long long normalizedValue = std::stoll(rValue);
-            result.value = std::any(IntegerLiteralNode(std::to_string(normalizedValue), node.start, node.end));
+            result.value = std::any(IntegerLiteralNode(rValue, node.start, node.end));
         }
 
         // Normalize float values
         if (dataType.find("float") != std::string::npos) {
-            float normalizedValue = std::stof(rValue);
-            result.value = std::any(FloatLiteralNode(std::to_string(normalizedValue), node.start, node.end));
+            result.value = std::any(FloatLiteralNode(rValue, node.start, node.end));
         }
     }
 

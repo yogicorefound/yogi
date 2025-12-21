@@ -71,8 +71,11 @@ namespace cromio::visitor {
         }
 
         std::any value = visit(ctx->expression());
-        parser->inVarMode = false;
 
+        // auto valueNode = std::any_cast<nodes::BinaryExpressionNode>(value);
+        std::cout << value.type().name() << std::endl;
+
+        parser->inVarMode = false;
         // Determine if it's a constant (const keyword)
         const bool isConstant = toUpper(identifier) == identifier;
 
@@ -83,7 +86,30 @@ namespace cromio::visitor {
         } else if (value.type() == typeid(nodes::BinaryExpressionNode)) {
             const auto binNode = std::any_cast<nodes::BinaryExpressionNode>(value);
             if (dataType == "int") {
-                nodes::IntegerLiteralNode intNode(std::to_string(std::stoll(binNode.value)), binNode.start, binNode.end);
+                nodes::IntegerLiteralNode intNode(std::to_string(parseNumberString(binNode.value)), binNode.start, binNode.end);
+                value = intNode;
+            } else {
+                nodes::FloatLiteralNode floatNode(std::to_string(parseNumberString(binNode.value)), binNode.start, binNode.end);
+                value = floatNode;
+            }
+
+        } else if (value.type() == typeid(nodes::IntegerLiteralNode)) {
+            const auto binNode = std::any_cast<nodes::IntegerLiteralNode>(value);
+
+            if (dataType == "int") {
+                nodes::IntegerLiteralNode intNode(binNode.value, binNode.start, binNode.end);
+                value = intNode;
+            } else {
+                nodes::FloatLiteralNode floatNode(binNode.value, binNode.start, binNode.end);
+                value = floatNode;
+            }
+
+            std::cout << "binNode.value" << std::endl;
+        } else if (value.type() == typeid(nodes::FloatLiteralNode)) {
+            const auto binNode = std::any_cast<nodes::FloatLiteralNode>(value);
+
+            if (dataType == "int") {
+                nodes::IntegerLiteralNode intNode(binNode.value, binNode.start, binNode.end);
                 value = intNode;
             } else {
                 nodes::FloatLiteralNode floatNode(binNode.value, binNode.start, binNode.end);
@@ -91,8 +117,11 @@ namespace cromio::visitor {
             }
         }
 
-        auto node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
+        const auto v = value;
+        const auto [varType, reVlue, varName] = Helpers::resolveItem(v);
+        std::cout << "binNode.value " << reVlue << std::endl;
 
+        auto node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
 
         analyzeVariableDeclaration(node, source);
         scope->declareVariable(identifier, node);
@@ -119,8 +148,6 @@ namespace cromio::visitor {
         }
 
         const auto& varNode = variable.value();
-
-        std::cout << "variable.value(): " << variable.value()->identifier << std::endl;
         auto node = nodes::VariableDeclarationNode(identifier, "", newValue, false, start, end);
 
         if (varNode->isConstant) {
@@ -132,8 +159,6 @@ namespace cromio::visitor {
         }
 
         node.varType = varNode->varType;
-
-        std::cout << "node.varType " << node.varType << std::endl;
 
         analyzeVariableReassignment(node, source);
         scope->updateVariable("var:" + identifier, node);
