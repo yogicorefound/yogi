@@ -7,14 +7,16 @@
 
 #include "antlr4-runtime.h"
 #include "libs/json.hpp"
+#include "math/math.h"
 
 using json = nlohmann::ordered_json;
 
 namespace cromio::utils {
-    class Helpers {
+    class Helpers : public helpers::Math {
         static json getPosition(const antlr4::Token* token);
 
        public:
+
         static long long parseInteger(std::string raw);
         static double parseFloat(std::string raw);
         static long long parseNumberString(const std::string& raw);
@@ -25,38 +27,10 @@ namespace cromio::utils {
 
         static json createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop);
         static std::string parseString(const std::string& rawInput);
-        static std::string trimLeadingZeros(const std::string& s);
-
-        static bool exceedsInt64(const std::string& raw, bool isUnsigned);
-        static bool exceedsUInt64(const std::string& raw);
-        static bool strGreater(const std::string& a, const std::string& b);
-        static bool isGreaterUnsigned(const std::string& num, const std::string& max);
-        static bool isGreaterSigned(const std::string& num, const std::string& maxPos, const std::string& maxNeg);
-        static bool isValidNumber(const std::string& str);
-        static bool isInteger(double number);
 
         static void printNode(const std::any& node, int indent = 0);
         static void printIndent(int indent);
         static json nodeToJson(const std::any& node);
-
-        struct DecimalFloat {
-            bool negative;
-            std::string mantissa; // digits only
-            int exponent; // base-10 exponent
-        };
-
-        static DecimalFloat parseDecimalFloat(const std::string& s);
-        static bool isGreaterThanFloatMax(const std::string&);
-        static bool isLessThanFloatMin(const std::string& literal);
-        static bool isAbsGreaterThan(const DecimalFloat& v, const std::string& maxMantissa, int maxExponent);
-        static bool fitsInFloat32(const std::string& literal);
-        static bool fitsInFloat64(const std::string& literal);
-
-        struct ResolvedItem {
-            std::string type;
-            std::string value;
-            std::any node;
-        };
 
         static ResolvedItem resolveItem(const std::any& itemResult);
     };

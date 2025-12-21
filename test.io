@@ -1,2 +1,2 @@
-float64 max = 1e100
+int max = 100
 

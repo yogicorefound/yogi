@@ -66,6 +66,10 @@ std::any cromio::visitor::LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerL
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
     auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
+    // if ((ctx->getText())) {
+    //     throwScopeError("<float> type is not in 64-bit range", ctx->getText(), node, source);
+    // }
+
     return node;
 }
 
