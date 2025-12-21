@@ -60,14 +60,14 @@ namespace cromio::semantic {
             utils::Errors::throwTypeError(identifier, dataType, node, source);
 
         // Validate variable value exceeds range
-        if (dataType == "int8" && (value < INT8_MIN || value > INT8_MAX))
+        if (dataType == "int8" && !utils::Helpers::fitsInInteger(rValue, 8))
             utils::Errors::throwRangeError("Value exceeds 8-bit signed integer range", node, source);
 
-        if (dataType == "int16" && (value < INT16_MIN || value > INT16_MAX))
+        if (dataType == "int16" && !utils::Helpers::fitsInInteger(rValue, 16))
             utils::Errors::throwRangeError("Value exceeds 16-bit signed integer range", node, source);
 
         std::cout << "Value: " << rValue << std::endl;
-        if ((dataType == "int32" || dataType == "int") && !utils::Helpers::fitsInInt32(rValue))
+        if ((dataType == "int32" || dataType == "int") && !utils::Helpers::fitsInInteger(rValue, 32))
             utils::Errors::throwRangeError("Value exceeds 32-bit signed integer range", node, source);
     }
 

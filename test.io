@@ -1,2 +1,2 @@
-int max = 100
+int max = 1000000
 
