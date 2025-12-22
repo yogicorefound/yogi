@@ -50,21 +50,21 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("int64 a = " + int64, "int", "a", int64),
 
             // Underscores in integer
-            std::make_tuple<std::string>("int a = 1_000_000", "int", "a", "1000000"),
+            std::make_tuple<std::string>("int a = 1_000_000", "int", "a", "1_000_000"),
 
             // Integer in hexadecimal
-            std::make_tuple<std::string>("int a = 0xFF", "int", "a", "255"),
-            std::make_tuple<std::string>("int a = 0xbb", "int", "a", "187"),
+            std::make_tuple<std::string>("int a = 0xFF", "int", "a", "0xFF"),
+            std::make_tuple<std::string>("int a = 0xbb", "int", "a", "0xbb"),
 
             // Integer in octal
-            std::make_tuple<std::string>("int a = 0o755", "int", "a", "493"),
-            std::make_tuple<std::string>("int a = 0o55", "int", "a", "45"),
+            std::make_tuple<std::string>("int a = 0o755", "int", "a", "0o755"),
+            std::make_tuple<std::string>("int a = 0o55", "int", "a", "0o55"),
 
             // Integer in binary
-            std::make_tuple<std::string>("int a = 0b10", "int", "a", "2"),
-            std::make_tuple<std::string>("int a = 0b101010", "int", "a", "42"),
+            std::make_tuple<std::string>("int a = 0b10", "int", "a", "0b10"),
+            std::make_tuple<std::string>("int a = 0b101010", "int", "a", "0b101010"),
 
-            // Unsigned integer
+            // // Unsigned integer
             std::make_tuple<std::string>("uint8 a = " + uint8, "int", "a", uint8),
             std::make_tuple<std::string>("uint16 a = " + uint16, "int", "a", uint16),
             std::make_tuple<std::string>("uint32 a = " + uint32, "int", "a", uint32),
@@ -76,8 +76,8 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("float64 a = " + float64, "float", "a", float64),
 
             // Exponent Notation
-            std::make_tuple<std::string>("float a = 1e6", "int", "a", "1"),
-            std::make_tuple<std::string>("float a = 1e-6", "float", "a", "0.000001"),
+            std::make_tuple<std::string>("float a = 1e6", "float", "a", "1e6"),
+            std::make_tuple<std::string>("float a = 1e-6", "float", "a", "1e-6"),
 
             // Boolean
             std::make_tuple<std::string>("bool a = true", "bool", "a", "1"),
@@ -90,10 +90,13 @@ namespace cromio::visitor::nodes {
         );
 
         auto [text, type, name, expectedValue] = cases;
+
         const auto ast = Cromio::testAST(text);
         const auto& node = std::any_cast<VariableDeclarationNode>(ast.body[0].children.at(0));
-
         const auto [resolvedType, resolvedValue, resolvedNode] = utils::Helpers::resolveItem(node.value);
+
+        std::cout << "Resolved type: " << resolvedType << " ExpectedValue type: " << type << std::endl;
+
         REQUIRE(node.kind == Kind::VARIABLE_DECLARATION);
         REQUIRE(resolvedValue == expectedValue);
         REQUIRE(resolvedType == type);

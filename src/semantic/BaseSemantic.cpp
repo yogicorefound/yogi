@@ -103,25 +103,15 @@ namespace cromio::semantic {
 
     void BaseSemantic::analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const std::any& node) {
         if (dataType == "float" || dataType == "float32") {
-            const auto fitIn32 = utils::Helpers::fitsInFloat64(rValue);
-            std::cout << "fitIn32: " << fitIn32 << " " << rValue << std::endl;
             if (!utils::Helpers::fitsInFloat32(rValue)) {
                 utils::Errors::throwRangeError("<float32> type exceeds 32-bit float range", node, source);
             }
-
-            // if (utils::Helpers::isGreaterSigned(rValue, FLOAT32_MAX_STR, FLOAT32_MIN_STR))
-            //     utils::Errors::throwRangeError("<float32> type exceeds 32-bit float range", node, source);
         }
 
         if (dataType == "float64") {
-            const auto fitIn64 = utils::Helpers::fitsInFloat64(rValue);
-            std::cout << "fitIn64: " << fitIn64 << std::endl;
-            if (!fitIn64) {
+            if (const auto fitIn64 = utils::Helpers::fitsInFloat64(rValue); !fitIn64) {
                 utils::Errors::throwRangeError("<float64> type exceeds 64-bit float range", node, source);
             }
-
-            // if (utils::Helpers::isGreaterSigned(rValue, FLOAT64_MAX_STR, FLOAT64_MIN_STR))
-            //     utils::Errors::throwRangeError("<float64> type exceeds 64-bit float range", node, source);
         }
     }
 

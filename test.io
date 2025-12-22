@@ -1,2 +1,2 @@
-uint max = 256
+int8 max = 10
 
