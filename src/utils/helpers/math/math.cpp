@@ -7,6 +7,8 @@
 #include <cmath>
 #include <string>
 #include "antlr4-runtime.h"
+#include <stdexcept>
+
 
 namespace cromio::utils::helpers {
     bool Math::strGreater(const std::string& a, const std::string& b) {
@@ -34,9 +36,10 @@ namespace cromio::utils::helpers {
         return strGreater(s, U64_MAX);
     }
 
+
+    // Parse integer literal (decimal o exponencial)
     Math::DecimalInteger Math::parseDecimalInteger(const std::string& literal) {
         DecimalInteger out;
-
         std::string s = literal;
         bool negative = false;
 
@@ -61,66 +64,49 @@ namespace cromio::utils::helpers {
 
         if (negative)
             out.mantissa = "-" + out.mantissa;
-
         return out;
     }
 
+
+    // Calcula el exponente efectivo para integer
     int Math::effectiveExponent(const DecimalInteger& v) {
-        if (v.mantissa == "0")
+        std::string digits = v.mantissa;
+        if (!digits.empty() && digits[0] == '-')
+            digits = digits.substr(1);
+        if (digits == "0")
             return 0;
-        return v.exponent + static_cast<int>(v.mantissa.size()) - 1;
+        return v.exponent + static_cast<int>(digits.size()) - 1;
     }
 
+    // Función universal: fitsInInteger
     bool Math::fitsInInteger(const std::string& numLiteral, int bitSize) {
-        const DecimalInteger v = parseDecimalInteger(numLiteral);
-
-        if (bitSize != 8 && bitSize != 16 && bitSize != 32 && bitSize != 64) {
-            throw std::invalid_argument("Unsupported bit size");
-        }
+        DecimalInteger v = parseDecimalInteger(numLiteral);
 
         int64_t maxVal = getSignedMax(bitSize);
         int64_t minVal = getSignedMin(bitSize);
 
-        // calcular exponente efectivo
+        bool isNegative = !v.mantissa.empty() && v.mantissa[0] == '-';
+        std::string digits = isNegative ? v.mantissa.substr(1) : v.mantissa;
+
         int effExp = effectiveExponent(v);
 
-        // exponente máximo del número límite
-        int64_t absMax = std::abs(maxVal);
-        int expMax = static_cast<int>(std::to_string(absMax).size() - 1);
+        // obtener exponente máximo del límite
+        int64_t absMax = isNegative ? -minVal : maxVal;
+        std::string rhs = std::to_string(absMax);
+        int expMax = static_cast<int>(rhs.size() - 1);
 
-        if (v.mantissa[0] == '-') {
-            // número negativo
-            if (effExp > expMax)
-                return false;
-            if (effExp < expMax)
-                return true;
+        if (effExp < expMax)
+            return true;
+        if (effExp > expMax)
+            return false;
 
-            // effExp == expMax → comparar mantissa
-            std::string lhs = v.mantissa.substr(1); // eliminar signo
-            std::string rhs = std::to_string(std::abs(minVal));
-            if (lhs.size() < rhs.size())
-                lhs.append(rhs.size() - lhs.size(), '0');
-            else if (rhs.size() < lhs.size())
-                rhs.append(lhs.size() - rhs.size(), '0');
+        // effExp == expMax → comparar mantissa lexicográficamente
+        if (digits.size() < rhs.size())
+            digits.append(rhs.size() - digits.size(), '0');
+        else if (rhs.size() < digits.size())
+            rhs.append(digits.size() - rhs.size(), '0');
 
-            return lhs <= rhs;
-        } else {
-            // número positivo
-            if (effExp > expMax)
-                return false;
-            if (effExp < expMax)
-                return true;
-
-            std::string lhs = v.mantissa;
-            std::string rhs = std::to_string(maxVal);
-
-            if (lhs.size() < rhs.size())
-                lhs.append(rhs.size() - lhs.size(), '0');
-            else if (rhs.size() < lhs.size())
-                rhs.append(lhs.size() - rhs.size(), '0');
-
-            return lhs <= rhs;
-        }
+        return digits <= rhs;
     }
 
     bool Math::fitsInInt32(const std::string& literal) {

@@ -1,2 +1,2 @@
-int max = 1000000
+uint max = 256
 

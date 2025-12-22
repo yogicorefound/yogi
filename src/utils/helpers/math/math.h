@@ -6,6 +6,7 @@
 
 #include <any>
 #include <string>
+#include <stdexcept>
 
 namespace cromio::utils::helpers {
     class Math {
@@ -20,7 +21,7 @@ namespace cromio::utils::helpers {
         static bool isInteger(double number);
 
         struct DecimalInteger {
-            std::string mantissa; // todos los dígitos sin ceros a la izquierda
+            std::string mantissa; // sin ceros a la izquierda
             int exponent; // para notación exponencial
         };
 
@@ -49,6 +50,7 @@ namespace cromio::utils::helpers {
             std::any node;
         };
 
+        // Límites signed por bit size
         static int64_t getSignedMax(int bitSize) {
             switch (bitSize) {
                 case 8:
@@ -60,7 +62,7 @@ namespace cromio::utils::helpers {
                 case 64:
                     return 9223372036854775807LL;
                 default:
-                    return 0; // invalid
+                    throw std::invalid_argument("Unsupported bit size");
             }
         }
 
@@ -75,7 +77,7 @@ namespace cromio::utils::helpers {
                 case 64:
                     return -9223372036854775807LL - 1;
                 default:
-                    return 0; // invalid
+                    throw std::invalid_argument("Unsupported bit size");
             }
         }
     };
