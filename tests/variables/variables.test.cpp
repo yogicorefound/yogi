@@ -3,7 +3,10 @@
 //
 
 #include <utils/helpers/Helpers.h>
+#include <bitset>
 #include <random>
+#include <sstream>
+#include <string>
 #include "includes/cromio/cromio.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
@@ -23,6 +26,32 @@ double randomDouble(const double min, const double max) {
     return dist(gen);
 }
 
+std::string toHex(const uint64_t value) {
+    std::stringstream ss;
+    ss << std::hex << value;
+    return "0x" + ss.str();
+}
+
+template <typename T>
+std::string toBinary(T value) {
+    return "0b" + std::bitset<sizeof(T) * 8>(value).to_string();
+}
+
+std::string toOctal(const uint64_t value) {
+    std::stringstream ss;
+    ss << std::oct << value;
+    return "0o" + ss.str();
+}
+
+template <typename T>
+std::string toExponent(T value, int precision = 6) {
+    std::stringstream ss;
+    ss.setf(std::ios::scientific);
+    ss.precision(precision);
+    ss << value;
+    return ss.str();
+}
+
 namespace cromio::visitor::nodes {
     // Random  signed integer values
     std::string int8 = std::to_string(randomInt(INT8_MIN, INT8_MAX));
@@ -40,6 +69,26 @@ namespace cromio::visitor::nodes {
     std::string float32 = std::to_string(randomDouble(0, 2000));
     std::string float64 = std::to_string(randomDouble(0, 2000));
 
+    // Random boolean values
+    std::string bool1 = std::to_string(randomInt(0, 1));
+    std::string bool2 = std::to_string(randomInt(0, 1));
+
+    // Random hex value
+    std::string hex1 = toHex(randomInt(0, INT16_MAX));
+    std::string hex2 = toHex(randomInt(0, INT16_MAX));
+
+    // Random binary value
+    std::string bin1 = toBinary(randomInt(0, INT8_MAX));
+    std::string bin2 = toBinary(randomInt(0, INT8_MAX));
+
+    // Random octal value
+    std::string oct1 = toOctal(randomInt(0, INT16_MAX));
+    std::string oct2 = toOctal(randomInt(0, INT16_MAX));
+
+    // Random exponent value
+    std::string exp1 = toExponent(randomDouble(0, 2000));
+    std::string exp2 = toExponent(randomDouble(0, 2000));
+
     TEST_CASE("variables evaluation", "[VARIABLE]", ) {
         const auto cases = GENERATE(
             // Signed integer
@@ -53,16 +102,16 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("int a = 1_000_000", "int", "a", "1_000_000"),
 
             // Integer in hexadecimal
-            std::make_tuple<std::string>("int a = 0xFF", "int", "a", "0xFF"),
-            std::make_tuple<std::string>("int a = 0xbb", "int", "a", "0xbb"),
+            std::make_tuple<std::string>("int a = " + hex1, "int", "a", std::to_string(utils::Helpers::parseNumberString(hex1))),
+            std::make_tuple<std::string>("int a = " + hex2, "int", "a", std::to_string(utils::Helpers::parseNumberString(hex2))),
 
             // Integer in octal
-            std::make_tuple<std::string>("int a = 0o755", "int", "a", "0o755"),
-            std::make_tuple<std::string>("int a = 0o55", "int", "a", "0o55"),
+            std::make_tuple<std::string>("int a = " + oct1, "int", "a", std::to_string(utils::Helpers::parseNumberString(oct1))),
+            std::make_tuple<std::string>("int a = " + oct2, "int", "a", std::to_string(utils::Helpers::parseNumberString(oct2))),
 
             // Integer in binary
-            std::make_tuple<std::string>("int a = 0b10", "int", "a", "0b10"),
-            std::make_tuple<std::string>("int a = 0b101010", "int", "a", "0b101010"),
+            std::make_tuple<std::string>("int a = " + bin1, "int", "a", std::to_string(utils::Helpers::parseNumberString(bin1))),
+            std::make_tuple<std::string>("int a = " + bin2, "int", "a", std::to_string(utils::Helpers::parseNumberString(bin2))),
 
             // // Unsigned integer
             std::make_tuple<std::string>("uint8 a = " + uint8, "int", "a", uint8),
@@ -76,8 +125,8 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("float64 a = " + float64, "float", "a", float64),
 
             // Exponent Notation
-            std::make_tuple<std::string>("float a = 1e6", "float", "a", "1e6"),
-            std::make_tuple<std::string>("float a = 1e-6", "float", "a", "1e-6"),
+            std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
+            std::make_tuple<std::string>("float a = " + exp2, "float", "a", exp2),
 
             // Boolean
             std::make_tuple<std::string>("bool a = true", "bool", "a", "1"),
@@ -94,8 +143,6 @@ namespace cromio::visitor::nodes {
         const auto ast = Cromio::testAST(text);
         const auto& node = std::any_cast<VariableDeclarationNode>(ast.body[0].children.at(0));
         const auto [resolvedType, resolvedValue, resolvedNode] = utils::Helpers::resolveItem(node.value);
-
-        std::cout << "Resolved type: " << resolvedType << " ExpectedValue type: " << type << std::endl;
 
         REQUIRE(node.kind == Kind::VARIABLE_DECLARATION);
         REQUIRE(resolvedValue == expectedValue);

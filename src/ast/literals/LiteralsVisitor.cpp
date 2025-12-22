@@ -65,11 +65,12 @@ std::any cromio::visitor::LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerL
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
-    // if ((ctx->getText())) {
-    //     throwScopeError("<float> type is not in 64-bit range", ctx->getText(), node, source);
-    // }
+    if (ctx->getText().starts_with("0b") || ctx->getText().starts_with("0x") || ctx->getText().starts_with("0o")) {
+        auto node = nodes::IntegerLiteralNode(std::to_string(parseNumberString(ctx->getText())), start, end);
+        return node;
+    }
 
+    auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
     return node;
 }
 

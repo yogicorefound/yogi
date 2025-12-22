@@ -66,7 +66,6 @@ namespace cromio::semantic {
         if (dataType == "int16" && !utils::Helpers::fitsInInteger(rValue, 16))
             utils::Errors::throwRangeError("Value exceeds 16-bit signed integer range", node, source);
 
-        std::cout << "Value: " << rValue << std::endl;
         if ((dataType == "int32" || dataType == "int") && !utils::Helpers::fitsInInteger(rValue, 32))
             utils::Errors::throwRangeError("Value exceeds 32-bit signed integer range", node, source);
     }
