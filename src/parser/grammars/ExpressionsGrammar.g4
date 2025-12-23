@@ -6,11 +6,13 @@ options {
 
 import LiteralsGrammar, MembersGrammar;
 
-expression: concatenationExpression
-          | binaryExpression
+expression
+          : booleanLiteral
           | numberLiterals
+          | identifierLiteral
+          | concatenationExpression
+          | binaryExpression
           | memberExpression
-          | booleanLiteral
           ;
 
 
@@ -21,6 +23,7 @@ concatenationExpression
 
 binaryExpression
     : numberLiterals
+    | identifierLiteral
     | LPAREN binaryExpression RPAREN
     | binaryExpression (MUL | DIV | MOD) binaryExpression
     | binaryExpression (PLUS | MINUS) binaryExpression

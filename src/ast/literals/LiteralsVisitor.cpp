@@ -65,8 +65,8 @@ std::any cromio::visitor::LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerL
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    if (ctx->getText().starts_with("0b") || ctx->getText().starts_with("0x") || ctx->getText().starts_with("0o")) {
-        auto node = nodes::IntegerLiteralNode(std::to_string(parseNumberString(ctx->getText())), start, end);
+    if (ctx->getText().starts_with("0b") || ctx->getText().starts_with("0x") || ctx->getText().starts_with("0o") || ctx->getText().contains("_")) {
+        auto node = nodes::IntegerLiteralNode(std::to_string(parseInteger(ctx->getText())), start, end);
         return node;
     }
 
@@ -77,6 +77,14 @@ std::any cromio::visitor::LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerL
 std::any cromio::visitor::LiteralsVisitor::visitFloatLiteral(Grammar::FloatLiteralContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+    std::cout << "Float: " << ctx->getText() << std::endl;
+
+    if (ctx->getText().contains("_")) {
+        // ctx->getText()
+        auto node = nodes::IntegerLiteralNode(std::to_string(parseFloat(ctx->getText())), start, end);
+        return node;
+    }
 
     auto node = nodes::FloatLiteralNode(ctx->getText(), start, end);
     if (!fitsInFloat64(ctx->getText())) {

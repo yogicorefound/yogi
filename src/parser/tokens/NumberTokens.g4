@@ -10,10 +10,11 @@ FLOAT
     | [+-]? DIGIT+ '.' DIGIT* EXPONENT?
     | '.' DIGIT+ EXPONENT?
     | [+-]? '0x' DIGIT+ 'p' [+-]? DIGIT+
+
     ;
 
 FLOAT_UNDERSCORE_EXPONENT
-    : DIGIT+ (UNDERSCORE? DIGIT)* '.' DIGIT* (UNDERSCORE? DIGIT)* EXPONENT? -> type(FLOAT)
+    : [+-]? (DIGIT UNDERSCORE*)* '.' DIGIT* (UNDERSCORE* DIGIT)* EXPONENT? -> type(FLOAT)
     ;
 
 FLOAT_HEX
@@ -27,5 +28,5 @@ INTEGER
     | [+-]? '0o' OCT_DIGIT+ // Octal
     | [+-]? '0b' BINARY_DIGIT+ // Binary
     | [+-]? DIGIT+  EXPONENT?
-    | DIGIT+ (UNDERSCORE? DIGIT)*
+    | [+-]? DIGIT+ (UNDERSCORE* DIGIT)*
     ;

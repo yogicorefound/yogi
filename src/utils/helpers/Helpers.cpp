@@ -10,6 +10,7 @@
 #include <string>
 #include "antlr4-runtime.h"
 
+
 namespace cromio::utils {
     std::string Helpers::toUpper(std::string s) {
         std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::toupper(c); });
@@ -199,27 +200,26 @@ namespace cromio::utils {
         return node;
     }
 
-
-
     double Helpers::parseFloat(std::string raw) {
         bool isNegative = false;
 
-        // Detect negative sign
         if (!raw.empty() && raw[0] == '-') {
             isNegative = true;
             raw = raw.substr(1);
         }
 
+        // Remove all underscores
         std::erase(raw, '_');
 
-        double value = 0.0;
-        value = std::stod(raw);
+        double value = std::stod(raw);
 
         if (isNegative)
             value = -value;
+
+        std::cout << value << std::endl;
+
         return value;
     }
-
     // Helper function to get kind name as string
     std::string getKindName(const visitor::nodes::Kind kind) {
         using Kind = visitor::nodes::Kind;

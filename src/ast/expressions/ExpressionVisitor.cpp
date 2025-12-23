@@ -11,6 +11,7 @@
 namespace cromio::visitor {
 
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
+        const auto expression = visitChildren(ctx);
         return visitChildren(ctx);
     }
 
@@ -20,6 +21,11 @@ namespace cromio::visitor {
         // -------------------------------------------------------
         if (ctx->numberLiterals()) {
             auto result = visit(ctx->numberLiterals());
+            return result;
+        }
+
+        if (ctx->identifierLiteral()) {
+            auto result = visit(ctx->identifierLiteral());
             return result;
         }
 

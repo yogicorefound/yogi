@@ -13,15 +13,21 @@ variables
     |   variableReAssignment
     ;
 
-variableDeclaration: variableDataType IDENTIFIER EQ {inVarMode= true;} expression {inVarMode = false;};
+variableDeclaration: variableDataType IDENTIFIER EQ {inVarMode= true;} variableValue {inVarMode = false;};
 
 
 variableDeclarationWithoutAssignment: variableDataType IDENTIFIER;
 
-variableReAssignment: IDENTIFIER EQ expression;
-//
-//variableAccessToMember
-//    : {inSkipMode = true;} IDENTIFIER DOT IDENTIFIER {inSkipMode = false;};
+variableReAssignment: IDENTIFIER EQ variableValue;
+
+variableValue
+    : identifierLiteral
+    | numberLiterals
+    | booleanLiteral
+    | concatenationExpression
+    | binaryExpression
+    | memberExpression
+    ;
 
 variableDataType: INTEGER_TYPES | UNSIGNED_INTEGER_TYPES | FLOAT_TYPES | BOOLEAN_TYPES | STRING_TYPES;
 

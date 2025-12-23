@@ -1,2 +1,4 @@
-int8 max = 10
+int _8 = 4
+float b = _8
+
 

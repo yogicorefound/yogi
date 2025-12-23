@@ -52,6 +52,33 @@ std::string toExponent(T value, int precision = 6) {
     return ss.str();
 }
 
+std::string toUnderscore(const std::string& number) {
+    std::string s = number;
+    bool neg = false;
+
+    if (!s.empty() && s[0] == '-') {
+        neg = true;
+        s.erase(0, 1);
+    }
+
+    std::string out;
+    int count = 0;
+
+    for (int i = static_cast<int>(s.size()) - 1; i >= 0; --i) {
+        out.insert(out.begin(), s[i]);
+        count++;
+        if (count == 3 && i != 0) {
+            out.insert(out.begin(), '_');
+            count = 0;
+        }
+    }
+
+    if (neg)
+        out.insert(out.begin(), '-');
+
+    return out;
+}
+
 namespace cromio::visitor::nodes {
     // Random  signed integer values
     std::string int8 = std::to_string(randomInt(INT8_MIN, INT8_MAX));
@@ -69,9 +96,13 @@ namespace cromio::visitor::nodes {
     std::string float32 = std::to_string(randomDouble(0, 2000));
     std::string float64 = std::to_string(randomDouble(0, 2000));
 
+    // Random underscore float value
+    std::string underscoreFloat1 = toUnderscore(float32);
+    std::string underscoreFloat2 = toUnderscore(float64);
+
     // Random boolean values
-    std::string bool1 = std::to_string(randomInt(0, 1));
-    std::string bool2 = std::to_string(randomInt(0, 1));
+    std::string bool1 = randomInt(0, 1) == 1 ? "true" : "false";
+    std::string bool2 = randomInt(0, 1) == 1 ? "true" : "false";
 
     // Random hex value
     std::string hex1 = toHex(randomInt(0, INT16_MAX));
@@ -89,6 +120,10 @@ namespace cromio::visitor::nodes {
     std::string exp1 = toExponent(randomDouble(0, 2000));
     std::string exp2 = toExponent(randomDouble(0, 2000));
 
+    // Random underscore value
+    std::string underscore1 = toUnderscore(std::to_string(randomInt(INT8_MIN, INT8_MAX)));
+    std::string underscore2 = toUnderscore(std::to_string(randomInt(INT16_MIN, INT16_MAX)));
+
     TEST_CASE("variables evaluation", "[VARIABLE]", ) {
         const auto cases = GENERATE(
             // Signed integer
@@ -99,7 +134,8 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("int64 a = " + int64, "int", "a", int64),
 
             // Underscores in integer
-            std::make_tuple<std::string>("int a = 1_000_000", "int", "a", "1_000_000"),
+            std::make_tuple<std::string>("int a = " + underscore1, "int", "a", underscore1),
+            std::make_tuple<std::string>("int a = " + underscore2, "int", "a", underscore2),
 
             // Integer in hexadecimal
             std::make_tuple<std::string>("int a = " + hex1, "int", "a", std::to_string(utils::Helpers::parseNumberString(hex1))),
@@ -123,14 +159,16 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("float a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float32 a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float64 a = " + float64, "float", "a", float64),
+            std::make_tuple<std::string>("float a = " + underscoreFloat1, "float", "a", float32),
+            std::make_tuple<std::string>("float64 a = " + underscoreFloat2, "float", "a", float64),
 
             // Exponent Notation
             std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
             std::make_tuple<std::string>("float a = " + exp2, "float", "a", exp2),
 
             // Boolean
-            std::make_tuple<std::string>("bool a = true", "bool", "a", "1"),
-            std::make_tuple<std::string>("bool a = false", "bool", "a", "0"),
+            std::make_tuple<std::string>("bool a = " + bool1, "bool", "a", bool1 == "true" ? "1" : "0"),
+            std::make_tuple<std::string>("bool a = " + bool2, "bool", "a", bool2 == "true" ? "1" : "0"),
 
             // String
             std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),

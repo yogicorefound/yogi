@@ -55,6 +55,8 @@ namespace cromio::visitor {
     std::any VariablesVisitor::visitVariableDeclaration(Grammar::VariableDeclarationContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        // Get identifier
+        const std::string identifier = ctx->IDENTIFIER()->getText();
 
         parser->inVarMode = true;
 
@@ -62,15 +64,13 @@ namespace cromio::visitor {
         const auto visitDataType = visit(ctx->variableDataType());
         const auto dataType = std::any_cast<std::string>(visitDataType);
 
-        // Get identifier
-        const std::string identifier = ctx->IDENTIFIER()->getText();
 
         // // Check if variable already exists in current scope
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
         }
 
-        std::any value = visit(ctx->expression());
+        std::any value = visit(ctx->variableValue());
 
         parser->inVarMode = false;
         // Determine if it's a constant (const keyword)
@@ -111,7 +111,17 @@ namespace cromio::visitor {
                 nodes::FloatLiteralNode floatNode(binNode.value, binNode.start, binNode.end);
                 value = floatNode;
             }
+        } else if (value.type() == typeid(nodes::IdentifierLiteral)) {
+            const auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(value);
+            const auto variable = scope->lookup(identifierNode.value);
+            if (!variable.has_value()) {
+                throwScopeError("variable '" + identifierNode.value + "' is not declared", identifierNode.value, value, source);
+            }
+
+            const auto varNode = variable.value();
+            value = varNode->value;
         }
+
 
         const auto v = value;
         const auto [varType, reVlue, varName] = Helpers::resolveItem(v);
@@ -123,16 +133,22 @@ namespace cromio::visitor {
         return node;
     }
 
+    std::any VariablesVisitor::visitVariableValue(Grammar::VariableValueContext* ctx) {
+        return visitChildren(ctx);
+    }
+
     std::any VariablesVisitor::visitVariableReAssignment(Grammar::VariableReAssignmentContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
+        const std::string identifier = ctx->IDENTIFIER()->getText();
+
         parser->inVarMode = true;
-        const std::any newValue = visit(ctx->expression());
+        const std::any newValue = visit(ctx->variableValue());
         parser->inVarMode = false;
 
         // Get identifier
-        const std::string identifier = ctx->IDENTIFIER()->getText();
+
 
         // Check if variable exists
         // Get variable info from scope
