@@ -216,8 +216,6 @@ namespace cromio::utils {
         if (isNegative)
             value = -value;
 
-        std::cout << value << std::endl;
-
         return value;
     }
     // Helper function to get kind name as string

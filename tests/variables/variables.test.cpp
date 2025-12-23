@@ -134,8 +134,8 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("int64 a = " + int64, "int", "a", int64),
 
             // Underscores in integer
-            std::make_tuple<std::string>("int a = " + underscore1, "int", "a", underscore1),
-            std::make_tuple<std::string>("int a = " + underscore2, "int", "a", underscore2),
+            std::make_tuple<std::string>("int a = " + underscore1, "int", "a", std::to_string(utils::Helpers::parseInteger(underscore1))),
+            std::make_tuple<std::string>("int a = " + underscore2, "int", "a", std::to_string(utils::Helpers::parseInteger(underscore2))),
 
             // Integer in hexadecimal
             std::make_tuple<std::string>("int a = " + hex1, "int", "a", std::to_string(utils::Helpers::parseNumberString(hex1))),
@@ -159,8 +159,8 @@ namespace cromio::visitor::nodes {
             std::make_tuple<std::string>("float a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float32 a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float64 a = " + float64, "float", "a", float64),
-            std::make_tuple<std::string>("float a = " + underscoreFloat1, "float", "a", float32),
-            std::make_tuple<std::string>("float64 a = " + underscoreFloat2, "float", "a", float64),
+            std::make_tuple<std::string>("float a = " + underscoreFloat1, "float", "a", std::to_string(utils::Helpers::parseFloat(float32))),
+            std::make_tuple<std::string>("float64 a = " + underscoreFloat2, "float", "a", std::to_string(utils::Helpers::parseFloat(float64))),
 
             // Exponent Notation
             std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
@@ -172,7 +172,8 @@ namespace cromio::visitor::nodes {
 
             // String
             std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),
-            std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation")
+            std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
+            std::make_tuple<std::string>("str a = f\"Hello, {world!!!}\"", "str", "a", "Hello, world!!!")
 
         );
 

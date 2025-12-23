@@ -1,4 +1,2 @@
-int _8 = 4
-float b = _8
-
+str a = f"Hello, {"hola " + "adios"} {1-5}"
 

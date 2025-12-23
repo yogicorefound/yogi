@@ -78,8 +78,6 @@ std::any cromio::visitor::LiteralsVisitor::visitFloatLiteral(Grammar::FloatLiter
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-    std::cout << "Float: " << ctx->getText() << std::endl;
-
     if (ctx->getText().contains("_")) {
         // ctx->getText()
         auto node = nodes::IntegerLiteralNode(std::to_string(parseFloat(ctx->getText())), start, end);
@@ -136,29 +134,35 @@ std::any cromio::visitor::LiteralsVisitor::visitFormattedString(Grammar::Formatt
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
     // Create the formatted string node
-    auto node = nodes::FormattedStringNode(ctx->getText(), start, end);
+    auto node = nodes::StringLiteralNode("", start, end);
 
     // Process all formatted string content parts
     for (const auto child : ctx->formattedStringContent()) {
         if (auto result = visit(child); result.has_value()) {
+            std::cout << "Formatted string content: " << result.type().name() << std::endl;
             try {
                 // Try to cast to different node types and add to params
                 if (result.type() == typeid(nodes::StringLiteralNode)) {
                     auto contentNode = std::any_cast<nodes::StringLiteralNode>(result);
-                    node.params.push_back(contentNode);
+                    node.value += contentNode.value;
                 } else if (result.type() == typeid(nodes::IntegerLiteralNode)) {
                     auto contentNode = std::any_cast<nodes::IntegerLiteralNode>(result);
-                    node.params.push_back(contentNode);
+                    node.value += contentNode.value;
                 } else if (result.type() == typeid(nodes::FloatLiteralNode)) {
                     auto contentNode = std::any_cast<nodes::FloatLiteralNode>(result);
-                    node.params.push_back(contentNode);
+                    node.value += contentNode.value;
                 } else if (result.type() == typeid(nodes::BooleanLiteralNode)) {
                     auto contentNode = std::any_cast<nodes::BooleanLiteralNode>(result);
-                    node.params.push_back(contentNode);
+                    node.value += contentNode.value;
                 } else if (result.type() == typeid(nodes::IdentifierLiteral)) {
                     auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
-                    node.params.push_back(contentNode);
+                    node.value += contentNode.value;
+                } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
+                    auto contentNode = std::any_cast<nodes::BinaryExpressionNode>(result);
+                    node.value += contentNode.value;
                 }
+
+
                 // Add more types as needed (expressions, etc.)
             } catch (const std::bad_any_cast& _) {
                 // ReSharper disable once CppRedundantControlFlowJump
@@ -166,7 +170,7 @@ std::any cromio::visitor::LiteralsVisitor::visitFormattedString(Grammar::Formatt
             }
         }
     }
-
+    std::cout << "Formatted string params: " << node.value<< std::endl;
     return node;
 }
 
