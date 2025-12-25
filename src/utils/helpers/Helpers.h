@@ -15,10 +15,10 @@ namespace yogi::utils {
         static json getPosition(const antlr4::Token* token);
 
        public:
-
         static long long parseInteger(std::string raw);
         static double parseFloat(std::string raw);
         static long long parseNumberString(const std::string& raw);
+        static std::string formatFloatNumberDecimal(const std::string& text, int maxDecimals);
 
         static std::string toUpper(std::string s);
         static std::string toLower(std::string s);
@@ -34,4 +34,3 @@ namespace yogi::utils {
         static ResolvedItem resolveItem(const std::any& itemResult);
     };
 } // namespace yogi::utils
-

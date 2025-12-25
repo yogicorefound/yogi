@@ -10,8 +10,41 @@
 #include <string>
 #include "antlr4-runtime.h"
 
-
+#include <iomanip>
+#include <sstream>
 namespace yogi::utils {
+
+    std::string Helpers::formatFloatNumberDecimal(const std::string& text, const int maxDecimals = -1) {
+        double value;
+        try {
+            value = std::stod(text);
+        } catch (...) {
+            return text; // si no es número válido
+        }
+
+        std::ostringstream oss;
+
+        if (maxDecimals >= 0) {
+            oss << std::fixed << std::setprecision(maxDecimals) << value;
+        } else {
+            oss << value;
+        }
+
+        std::string result = oss.str();
+
+        // Eliminar ceros finales
+        if (result.find('.') != std::string::npos) {
+            result.erase(result.find_last_not_of('0') + 1);
+
+            // Eliminar el punto si quedó solo
+            if (result.back() == '.') {
+                result.pop_back();
+            }
+        }
+
+        return result;
+    }
+
     std::string Helpers::toUpper(std::string s) {
         std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::toupper(c); });
         return s;

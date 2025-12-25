@@ -139,11 +139,8 @@ namespace yogi::visitor {
         auto node = nodes::StringLiteralNode("", start, end);
 
         // Process all formatted string content parts
-
         for (const auto child : ctx->formattedStringContent()) {
             if (auto result = visit(child); result.has_value()) {
-                std::cout << "contentNode.value: " << result.type().name() << std::endl;
-
                 try {
                     // Try to cast to different node types and add to params
                     if (result.type() == typeid(nodes::StringLiteralNode)) {
@@ -162,8 +159,12 @@ namespace yogi::visitor {
                         auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
                         node.value += contentNode.value;
                     } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
-                        auto contentNode = std::any_cast<nodes::BinaryExpressionNode>(result);
-                        node.value += contentNode.value;
+                        if (const auto contentNode = std::any_cast<nodes::BinaryExpressionNode>(result); contentNode.resultType == "int") {
+                            node.value += contentNode.value;
+
+                        } else {
+                            node.value += formatFloatNumberDecimal(contentNode.value, -1);
+                        }
                     }
 
                     // Add more types as needed (expressions, etc.)
