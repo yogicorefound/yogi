@@ -8,7 +8,7 @@
 #include "semantic/BaseSemantic.h"
 #include "utils/utils.h"
 
-namespace cromio::semantic {
+namespace yogi::semantic {
     class Arrays : public virtual BaseSemantic {
        public:
         static json analyzeArrayDeclaration(const json& node, const std::string& source);
@@ -24,4 +24,4 @@ namespace cromio::semantic {
 
         static ResolvedItem resolveItem(const std::any& itemResult, Scope* scope, const std::string& source);
     };
-} // namespace cromio::semantic
+} // namespace yogi::semantic

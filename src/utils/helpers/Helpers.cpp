@@ -11,7 +11,7 @@
 #include "antlr4-runtime.h"
 
 
-namespace cromio::utils {
+namespace yogi::utils {
     std::string Helpers::toUpper(std::string s) {
         std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::toupper(c); });
         return s;
@@ -267,7 +267,7 @@ namespace cromio::utils {
     }
 
     json Helpers::nodeToJson(const std::any& node) {
-        using namespace cromio::visitor::nodes;
+        using namespace yogi::visitor::nodes;
 
         if (!node.has_value())
             return nullptr;
@@ -447,4 +447,4 @@ namespace cromio::utils {
         return {}; // unreachable
     }
 
-} // namespace cromio::utils
+} // namespace yogi::utils

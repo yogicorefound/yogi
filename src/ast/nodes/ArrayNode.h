@@ -7,7 +7,7 @@
 #include "BaseNode.h"
 #include "StatementNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
     // Array Element (for array initialization)
     struct ArrayElementNode : BaseNode {
         std::string type;
@@ -27,4 +27,4 @@ namespace cromio::visitor::nodes {
         explicit ArrayDeclarationNode(const std::string& identifier, const std::string& type, bool isConstant, std::string size, std::vector<ArrayElementNode> elements, const Position start, const Position end) : BaseNode(Kind::ARRAY_DECLARATION, start, end), identifier(identifier), type(type), isConstant(isConstant), size(size), elements(std::move(elements)) {}
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

@@ -14,7 +14,7 @@
 #include "Tokens.h"
 #include "antlr4-runtime.h"
 
-// cromio headers
+// yogi headers
 #include "ast/ast.h"
 #include "ast/nodes/nodes.h"
 #include "core/core.h"

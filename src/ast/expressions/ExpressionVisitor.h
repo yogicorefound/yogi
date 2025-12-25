@@ -2,13 +2,12 @@
 // Created by Brayhan De Aza on 12/4/25.
 //
 
-#ifndef CROMIO_EXPRESSION_VISITOR_H
-#define CROMIO_EXPRESSION_VISITOR_H
+#pragma once
 
 #include "GrammarVisitor.h"
 #include "ast/base/BaseVisitor.h"
 
-namespace cromio::visitor {
+namespace yogi::visitor {
     class ExpressionVisitor : public virtual BaseVisitor {
        public:
         std::any visitExpression(Grammar::ExpressionContext* ctx) override;
@@ -18,6 +17,4 @@ namespace cromio::visitor {
        private:
         std::function<std::pair<double, std::string>(const std::any&)> extractValue;
     };
-} // namespace cromio::visitor
-
-#endif // CROMIO_EXPRESSION_VISITOR_H
+} // namespace yogi::visitor

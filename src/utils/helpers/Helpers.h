@@ -2,8 +2,7 @@
 // Created by Brayhan De Aza on 10/19/25.
 //
 
-#ifndef CROMIO_HELPERS_H
-#define CROMIO_HELPERS_H
+#pragma once
 
 #include "antlr4-runtime.h"
 #include "libs/json.hpp"
@@ -11,7 +10,7 @@
 
 using json = nlohmann::ordered_json;
 
-namespace cromio::utils {
+namespace yogi::utils {
     class Helpers : public helpers::Math {
         static json getPosition(const antlr4::Token* token);
 
@@ -34,6 +33,5 @@ namespace cromio::utils {
 
         static ResolvedItem resolveItem(const std::any& itemResult);
     };
-} // namespace cromio::utils
+} // namespace yogi::utils
 
-#endif // CROMIO_HELPERS_H

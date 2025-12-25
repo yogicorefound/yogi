@@ -2,11 +2,9 @@
 // Created by Brayhan De Aza on 10/19/25.
 //
 
-#ifndef CROMIO_UTILS_H
-#define CROMIO_UTILS_H
+#pragma once
 
 #include "utils/errors/Errors.h"
 #include "utils/errors/AntlrErrorListener.h"
 #include "utils/helpers/Helpers.h"
 
-#endif // CROMIO_UTILS_H

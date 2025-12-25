@@ -6,7 +6,7 @@
 #include <ast/nodes/nodes.h>
 #include "semantic/semantic.h"
 
-namespace cromio::visitor {
+namespace yogi::visitor {
     std::any VariablesVisitor::visitVariables(Grammar::VariablesContext* ctx) {
         if (ctx->variableDeclaration()) {
             return visit(ctx->variableDeclaration());
@@ -192,4 +192,4 @@ namespace cromio::visitor {
         return ctx->getText();
     }
 
-} // namespace cromio::visitor
+} // namespace yogi::visitor

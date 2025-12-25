@@ -4,8 +4,8 @@
 
 #include <core/llvm/ir/IR.h>
 
-namespace cromio::core::ir {
-    using namespace cromio::visitor::nodes;
+namespace yogi::core::ir {
+    using namespace yogi::visitor::nodes;
 
     llvm::Value* IR::expression(const std::any& node) {
         if (!node.has_value())
@@ -103,4 +103,4 @@ namespace cromio::core::ir {
         throw std::runtime_error("Invalid expression node");
     }
 
-} // namespace cromio::core::ir
+} // namespace yogi::core::ir

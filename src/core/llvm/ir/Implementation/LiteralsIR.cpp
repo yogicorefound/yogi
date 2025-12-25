@@ -4,7 +4,7 @@
 
 #include <core/llvm/ir/IR.h>
 
-namespace cromio::core::ir {
+namespace yogi::core::ir {
 
     llvm::Value* IR::literal(const std::any& node) {
         if (!node.has_value())
@@ -48,4 +48,4 @@ namespace cromio::core::ir {
         throw std::runtime_error("Unknown literal type");
     }
 
-} // namespace cromio::core::ir
+} // namespace yogi::core::ir

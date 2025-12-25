@@ -2,13 +2,12 @@
 // Created by Brayhan De Aza on 11/30/25.
 //
 
-#ifndef CROMIO_ANTLR_ERROR_LISTENER_H
-#define CROMIO_ANTLR_ERROR_LISTENER_H
+#pragma once
 
 #include <string>
 #include "antlr4-runtime.h"
 
-namespace cromio::utils::errors {
+namespace yogi::utils::errors {
     class AntlrErrorListener final : public antlr4::BaseErrorListener {
        public:
         explicit AntlrErrorListener(const std::string& source);
@@ -18,6 +17,5 @@ namespace cromio::utils::errors {
         std::vector<std::string> lines;
     };
 
-} // namespace cromio::utils
+} // namespace yogi::utils
 
-#endif // CROMIO_ANTLR_ERROR_LISTENER_H

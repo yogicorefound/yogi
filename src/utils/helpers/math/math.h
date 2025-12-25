@@ -8,7 +8,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace cromio::utils::helpers {
+namespace yogi::utils::helpers {
     class Math {
        public:
         static std::string trimLeadingZeros(const std::string& s);
@@ -81,4 +81,4 @@ namespace cromio::utils::helpers {
             }
         }
     };
-} // namespace cromio::utils::helpers
+} // namespace yogi::utils::helpers

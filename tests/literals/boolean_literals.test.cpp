@@ -4,10 +4,10 @@
 
 #include <utils/helpers/Helpers.h>
 #include <cmath>
-#include "includes/cromio/cromio.h"
+#include "includes/yogi/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
-using namespace cromio::visitor::nodes;
+using namespace yogi::visitor::nodes;
 
 TEST_CASE("Boolean evaluation", "[BOOLEAN_LITERAL]") {
     const auto bool_cases = GENERATE(std::make_tuple("true", true), std::make_tuple("false", false));
@@ -15,7 +15,7 @@ TEST_CASE("Boolean evaluation", "[BOOLEAN_LITERAL]") {
     const auto [c, expected_value] = bool_cases;
     std::string text = c;
 
-    const auto ast = cromio::Cromio::testAST(text);
+    const auto ast = yogi::Yogi::testAST(text);
     const auto& node = std::any_cast<BooleanLiteralNode>(ast.body[0].children.at(0));
 
     INFO("Boolean kind");

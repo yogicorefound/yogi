@@ -7,7 +7,7 @@
 #include "BaseNode.h"
 #include "StatementNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
     // Program Node (root of AST - holds all top-level statements)
     struct ProgramNode : BaseNode {
         std::vector<StatementNode> body;  // All top-level statements
@@ -22,4 +22,4 @@ namespace cromio::visitor::nodes {
         }
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

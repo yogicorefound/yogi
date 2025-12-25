@@ -16,7 +16,7 @@
 #include <fstream>
 #include <optional>
 
-namespace cromio::lowering {
+namespace yogi::lowering {
     std::vector<uint8_t> CodeEmitter::toMemory(const llvm::Module& module) {
         llvm::SmallVector<char, 0> buffer;
         llvm::raw_svector_ostream stream(buffer);
@@ -119,4 +119,4 @@ namespace cromio::lowering {
         // Clean up temporary object file
         std::remove(tempObjPath.c_str());
     }
-} // namespace cromio::lowering
+} // namespace yogi::lowering

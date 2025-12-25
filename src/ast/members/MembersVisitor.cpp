@@ -1,7 +1,7 @@
 #include "MembersVisitor.h"
 #include <ast/nodes/nodes.h>
 
-namespace cromio::visitor {
+namespace yogi::visitor {
 
     std::any MembersVisitor::visitMemberExpression(Grammar::MemberExpressionContext* ctx) {
         // 1️⃣ Base value (identifier, literal, or parenthesized expression)
@@ -136,4 +136,4 @@ namespace cromio::visitor {
         return visitChildren(ctx);
     }
 
-} // namespace cromio::visitor
+} // namespace yogi::visitor

@@ -9,7 +9,7 @@
 #include <sstream>
 #include <vector>
 
-namespace cromio::utils {
+namespace yogi::utils {
 
     // ------------------- Helper to extract position from any node -------------------
     struct NodePosition {
@@ -20,7 +20,7 @@ namespace cromio::utils {
     };
 
     NodePosition extractPosition(const std::any& node) {
-        using namespace cromio::visitor::nodes;
+        using namespace yogi::visitor::nodes;
 
         try {
             // Try to extract BaseNode
@@ -221,4 +221,4 @@ namespace cromio::utils {
         return "'" + dataType + "'";
     }
 
-} // namespace cromio::utils
+} // namespace yogi::utils

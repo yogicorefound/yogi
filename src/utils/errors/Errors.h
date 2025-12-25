@@ -2,15 +2,14 @@
 // Created by Brayhan De Aza on 11/29/25.
 //
 
-#ifndef CROMIO_ERROR_H
-#define CROMIO_ERROR_H
+#pragma once
 
 #include <ast/nodes/nodes.h>
 #include <any>
 #include <string>
 // #include "AntlrErrorListener.h"
 
-namespace cromio::utils {
+namespace yogi::utils {
 
     struct NodePosition; // Forward declaration
 
@@ -28,6 +27,5 @@ namespace cromio::utils {
         static void printContext(const NodePosition& pos, const std::string& source, const std::string& hint);
     };
 
-} // namespace cromio::utils
+} // namespace yogi::utils
 
-#endif // CROMIO_ERROR_H

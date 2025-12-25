@@ -1,9 +1,7 @@
 //
 // Created by Brayhan De Aza on 12/2/25.
 //
-
-#ifndef CROMIO_SCOPE_H
-#define CROMIO_SCOPE_H
+#pragma once
 
 #include <ast/nodes/nodes.h>
 #include <utils/utils.h>
@@ -13,7 +11,7 @@
 #include <unordered_map>
 #include "semantic/BaseSemantic.h"
 
-namespace cromio::semantic {
+namespace yogi::semantic {
     class Scope : public virtual BaseSemantic {
        public:
         explicit Scope(Scope* parent = nullptr) : parent(parent) {}
@@ -51,6 +49,4 @@ namespace cromio::semantic {
         Scope* parent;
     };
 
-} // namespace cromio::semantic
-
-#endif // CROMIO_SCOPE_H
+} // namespace yogi::semantic

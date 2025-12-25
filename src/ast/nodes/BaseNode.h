@@ -6,7 +6,7 @@
 
 #include <cstddef>
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
 
     enum class Kind {
         PROGRAM,
@@ -65,4 +65,4 @@ namespace cromio::visitor::nodes {
         }
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

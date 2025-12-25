@@ -8,7 +8,7 @@ build: clean grammar runtime run
 run:
 	@cd ./build && cmake ..
 	@cd ./build && make -j
-	@cd ./build && ./cromio ../test.io
+	@cd ./build && ./yogi ../test.io
 # -p
 
 run-tests:

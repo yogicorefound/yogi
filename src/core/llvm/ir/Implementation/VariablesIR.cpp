@@ -4,7 +4,7 @@
 
 #include <core/llvm/ir/IR.h>
 
-namespace cromio::core::ir {
+namespace yogi::core::ir {
 
     llvm::Value* IR::variableDeclaration(const visitor::nodes::VariableDeclarationNode& node) {
         llvm::Type* varType = mapDataType(node.varType);
@@ -98,4 +98,4 @@ namespace cromio::core::ir {
         return rhs;
     }
 
-} // namespace cromio::core::ir
+} // namespace yogi::core::ir

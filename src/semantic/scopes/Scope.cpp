@@ -4,7 +4,7 @@
 
 #include "Scope.h"
 
-namespace cromio::semantic {
+namespace yogi::semantic {
     bool Scope::declareVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info) {
         if (symbols.contains(name))
             return false;
@@ -109,4 +109,4 @@ namespace cromio::semantic {
         return std::nullopt;
     }
 
-} // namespace cromio::semantic
+} // namespace yogi::semantic

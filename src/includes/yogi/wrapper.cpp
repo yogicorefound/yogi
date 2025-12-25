@@ -17,15 +17,15 @@
 #include <sstream>
 #include <string>
 
-namespace cromio {
-    void Cromio::compile() {
+namespace yogi {
+    void Yogi::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
         printAST(ast);
 
         // processLLVM(ast);
     }
 
-    void Cromio::getContent(const int argc, const char* argv[]) {
+    void Yogi::getContent(const int argc, const char* argv[]) {
         if (argc < 2) {
             std::cerr << "Usage: " << argv[0] << " <input-file>" << std::endl;
             std::exit(1);
@@ -45,7 +45,7 @@ namespace cromio {
         this->content = buffer.str();
     }
 
-    visitor::nodes::ProgramNode Cromio::testAST(std::string& text) {
+    visitor::nodes::ProgramNode Yogi::testAST(std::string& text) {
         // ---------------------------------------------
         // Feed file content into ANTLR
         // ---------------------------------------------
@@ -83,7 +83,7 @@ namespace cromio {
         return node;
     }
 
-    visitor::nodes::ProgramNode Cromio::getAST() {
+    visitor::nodes::ProgramNode Yogi::getAST() {
         // ---------------------------------------------
         // Feed file content into ANTLR
         // ---------------------------------------------
@@ -121,7 +121,7 @@ namespace cromio {
         return node;
     }
 
-    void Cromio::printAST(const std::any& ast) {
+    void Yogi::printAST(const std::any& ast) {
         if (ast.type() == typeid(visitor::nodes::ProgramNode)) {
             std::cout << "=== AST ===" << std::endl;
             utils::Helpers::printNode(ast, 1);
@@ -131,7 +131,7 @@ namespace cromio {
         }
     }
 
-    void Cromio::processLLVM(const std::any& ast) const {
+    void Yogi::processLLVM(const std::any& ast) const {
         const auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
         core::ir::IR ir(fileName);
@@ -147,4 +147,4 @@ namespace cromio {
         lowering::CodeEmitter::toExecutable(module, baseName);
     }
 
-} // namespace cromio
+} // namespace yogi

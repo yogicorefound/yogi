@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(cromio VERSION 0.0.1 LANGUAGES C CXX)
+project(yogi VERSION 0.0.1 LANGUAGES C CXX)
 
 # ============================================================
 #                       OPTIONS
@@ -66,12 +66,12 @@ if (NOT ENABLE_TESTING)
     file(GLOB_RECURSE PROD_SOURCES
             "${SOURCES_DIR}/*.cpp"
             "${GENERATED_DIR}/*.cpp"
-#            "${TESTS_DIR}/*.cpp"
+            "${TESTS_DIR}/*.cpp"
     )
 
-    add_executable(cromio ${PROD_SOURCES})
+    add_executable(yogi ${PROD_SOURCES})
 
-    target_include_directories(cromio PRIVATE
+    target_include_directories(yogi PRIVATE
             ${CMAKE_SOURCE_DIR}
             ${SOURCES_DIR}
             ${GENERATED_DIR}
@@ -81,14 +81,14 @@ if (NOT ENABLE_TESTING)
             ${LLVM_ROOT}/include
     )
 
-    target_link_directories(cromio PRIVATE
+    target_link_directories(yogi PRIVATE
             ${ANTLR4_RUNTIME_LIB}
             ${LLVM_ROOT}/lib
     )
 
-    target_link_options(cromio PRIVATE "LINKER:-no_warn_duplicate_libraries")
+    target_link_options(yogi PRIVATE "LINKER:-no_warn_duplicate_libraries")
 
-    target_link_libraries(cromio
+    target_link_libraries(yogi
             antlr4-runtime
             "${ANTLR4_RUNTIME_LIB}/libantlr4-runtime.4.13.2.dylib"
             ${llvm_libs}
@@ -100,8 +100,8 @@ if (NOT ENABLE_TESTING)
     set(DEFAULT_FILE "${CMAKE_SOURCE_DIR}/test.io")
 
     add_custom_target(run
-            COMMAND cromio ${DEFAULT_FILE}
-            DEPENDS cromio
+            COMMAND yogi ${DEFAULT_FILE}
+            DEPENDS yogi
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 endif ()
@@ -118,16 +118,16 @@ if (ENABLE_TESTING)
             "${GENERATED_DIR}/*.cpp"
             "${TESTS_DIR}/*.cpp"
     )
-    # Exclude both main.cpp and cromio.cpp (whichever contains main)
-    list(FILTER PROD_SOURCES_NO_MAIN EXCLUDE REGEX ".*(main|cromio)\\.cpp$")
+    # Exclude both main.cpp and yogi.cpp (whichever contains main)
+    list(FILTER PROD_SOURCES_NO_MAIN EXCLUDE REGEX ".*(main|yogi)\\.cpp$")
 
-    add_executable(cromio_tests
+    add_executable(yogi_tests
             ${TEST_SOURCES}
             ${PROD_SOURCES_NO_MAIN}
             ${CMAKE_SOURCE_DIR}/libs/catch2/catch_amalgamated.cpp
     )
 
-    target_include_directories(cromio_tests PRIVATE
+    target_include_directories(yogi_tests PRIVATE
             ${CMAKE_SOURCE_DIR}
             ${SOURCES_DIR}
             ${TESTS_DIR}
@@ -139,22 +139,22 @@ if (ENABLE_TESTING)
             ${LLVM_ROOT}/include
     )
 
-    target_link_directories(cromio_tests PRIVATE
+    target_link_directories(yogi_tests PRIVATE
             ${ANTLR4_RUNTIME_LIB}
             ${LLVM_ROOT}/lib
     )
 
-    target_link_options(cromio_tests PRIVATE "LINKER:-no_warn_duplicate_libraries")
+    target_link_options(yogi_tests PRIVATE "LINKER:-no_warn_duplicate_libraries")
 
-    target_link_libraries(cromio_tests
+    target_link_libraries(yogi_tests
             antlr4-runtime
             "${ANTLR4_RUNTIME_LIB}/libantlr4-runtime.4.13.2.dylib"
             ${llvm_libs}
     )
 
     add_custom_target(run-tests
-            COMMAND cromio_tests
-            DEPENDS cromio_tests
+            COMMAND yogi_tests
+            DEPENDS yogi_tests
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 endif ()

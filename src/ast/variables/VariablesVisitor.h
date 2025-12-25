@@ -2,13 +2,12 @@
 // Created by Brayhan De Aza on 10/19/25.
 //
 
-#ifndef CROMIO_VARIABLES_VISITOR_H
-#define CROMIO_VARIABLES_VISITOR_H
+#pragma once
 
 #include "GrammarVisitor.h"
 #include "ast/base/BaseVisitor.h"
 
-namespace cromio::visitor {
+namespace yogi::visitor {
     class VariablesVisitor : public virtual BaseVisitor {
        public:
         std::any visitVariableDeclaration(Grammar::VariableDeclarationContext* ctx) override;
@@ -18,6 +17,4 @@ namespace cromio::visitor {
         std::any visitVariables(Grammar::VariablesContext* ctx) override;
         std::any visitVariableValue(Grammar::VariableValueContext* ctx) override;
     };
-} // namespace cromio::visitor
-
-#endif // CROMIO_VARIABLES_VISITOR_H
+} // namespace yogi::visitor

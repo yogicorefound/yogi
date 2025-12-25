@@ -6,7 +6,7 @@
 
 #include "BaseNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
     // Dictionary Key-Value Pair
     struct DictionaryPairNode : BaseNode {
         std::any key; // Key (usually string or identifier)
@@ -38,4 +38,4 @@ namespace cromio::visitor::nodes {
         DictionaryTypeNode(const std::string& k, const std::string& v, const Position& start, const Position& end) : BaseNode(Kind::DICTIONARY_TYPE, start, end), keyType(k), valueType(v) {}
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

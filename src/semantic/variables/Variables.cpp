@@ -9,8 +9,8 @@
 #include "semantic/BaseSemantic.h"
 #include "utils/utils.h"
 
-namespace cromio::semantic {
-    using namespace cromio::visitor::nodes;
+namespace yogi::semantic {
+    using namespace yogi::visitor::nodes;
 
     void Variables::analyzeVariableWithoutAssignment(const VariableDeclarationNode& node, const Position& start, const Position& end) {
         const std::string& type = node.varType;
@@ -229,4 +229,4 @@ namespace cromio::semantic {
         return false;
     }
 
-} // namespace cromio::semantic
+} // namespace yogi::semantic

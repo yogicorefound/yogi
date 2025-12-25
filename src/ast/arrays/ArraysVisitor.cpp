@@ -6,7 +6,7 @@
 #include "semantic/BaseSemantic.h"
 #include "semantic/semantic.h"
 
-namespace cromio::visitor {
+namespace yogi::visitor {
     std::any ArraysVisitor::visitArrays(Grammar::ArraysContext* ctx) {
         return visitChildren(ctx);
     }
@@ -160,4 +160,4 @@ namespace cromio::visitor {
         return ctx->getText();
     }
 
-} // namespace cromio::visitor
+} // namespace yogi::visitor

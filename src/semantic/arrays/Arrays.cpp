@@ -6,7 +6,7 @@
 #include <charconv>
 #include "semantic/variables/Variables.h"
 
-namespace cromio::semantic {
+namespace yogi::semantic {
     json Arrays::analyzeArrayDeclaration(const json& node, const std::string& source) {
         const std::string type = node["Type"]["raw"];
         const std::string size = node["Type"]["size"];
@@ -207,4 +207,4 @@ namespace cromio::semantic {
         return false;
     }
 
-} // namespace cromio::semantic
+} // namespace yogi::semantic

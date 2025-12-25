@@ -6,7 +6,7 @@
 
 #include "BaseNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
     // Variable Declaration Statement
     struct VariableDeclarationNode : BaseNode {
         std::string identifier; // Variable name
@@ -20,4 +20,4 @@ namespace cromio::visitor::nodes {
         }
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

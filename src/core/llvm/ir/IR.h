@@ -2,8 +2,7 @@
 // Created by Brayhan De Aza on 11/24/25.
 //
 
-#ifndef CROMIO_IR_H
-#define CROMIO_IR_H
+#pragma once
 
 #include <ast/nodes/nodes.h>
 #include <any>
@@ -14,7 +13,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 
-namespace cromio::core::ir {
+namespace yogi::core::ir {
     class IR {
        public:
         explicit IR(const std::string& moduleName);
@@ -53,6 +52,4 @@ namespace cromio::core::ir {
         void loadAndLinkModulesFromFolder() const;
         bool linkModule(std::unique_ptr<llvm::Module> other) const;
     };
-} // namespace cromio::core::ir
-
-#endif // CROMIO_IR_H
+} // namespace yogi::core::ir

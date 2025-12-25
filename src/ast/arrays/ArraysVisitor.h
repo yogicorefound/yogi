@@ -2,14 +2,13 @@
 // Created by Brayhan De Aza on 10/19/25.
 //
 
-#ifndef CROMIO_ARRAYS_VISITOR_H
-#define CROMIO_ARRAYS_VISITOR_H
+#pragma once
 
 #include "GrammarVisitor.h"
 #include "ast/base/BaseVisitor.h"
 #include "semantic/semantic.h"
 
-namespace cromio::visitor {
+namespace yogi::visitor {
     class ArraysVisitor : public virtual BaseVisitor {
        public:
         std::any visitArrays(Grammar::ArraysContext* ctx) override;
@@ -20,6 +19,5 @@ namespace cromio::visitor {
         std::any visitArrayType(Grammar::ArrayTypeContext* ctx) override;
         std::any visitArrayDataType(Grammar::ArrayDataTypeContext* ctx) override;
     };
-} // namespace cromio::visitor
+} // namespace yogi::visitor
 
-#endif // CROMIO_ARRAYS_VISITOR_H

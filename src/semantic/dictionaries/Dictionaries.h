@@ -3,15 +3,14 @@
 // Created by Brayhan De Aza on 12/2/25.
 //
 
-#ifndef CROMIO_DICTIONARIES_SEMANTIC_ANALYZE_H
-#define CROMIO_DICTIONARIES_SEMANTIC_ANALYZE_H
+#pragma once
 
 #include "ast/nodes/nodes.h"
 #include "semantic/BaseSemantic.h"
 #include "semantic/scopes/Scope.h"
 #include "utils/utils.h"
 
-namespace cromio::semantic {
+namespace yogi::semantic {
 
     class Dictionaries : public virtual BaseSemantic {
        public:
@@ -21,6 +20,5 @@ namespace cromio::semantic {
         static void analyzeDictionaryItem(const std::shared_ptr<visitor::nodes::DictionaryDeclarationNode>& decl, visitor::nodes::DictionaryPairNode& pair, Scope* scope, const std::string& source);
     };
 
-} // namespace cromio::semantic
+} // namespace yogi::semantic
 
-#endif // CROMIO_DICTIONARIES_SEMANTIC_ANALYZE_H

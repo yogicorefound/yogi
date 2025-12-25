@@ -5,7 +5,7 @@
 #include "ProgramVisitor.h"
 #include <ast/nodes/nodes.h>
 
-std::any cromio::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
+std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
@@ -32,7 +32,7 @@ std::any cromio::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     return programNode;
 }
 
-std::any cromio::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx) {
+std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 

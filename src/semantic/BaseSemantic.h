@@ -2,13 +2,12 @@
 // Created by Brayhan De Aza on 11/27/25.
 //
 
-#ifndef CROMIO_BASE_SEMANTIC_H
-#define CROMIO_BASE_SEMANTIC_H
+#pragma once
 
 #include <any>
 #include <string>
 
-namespace cromio::semantic {
+namespace yogi::semantic {
     class BaseSemantic {
        public:
         static const std::string INT64_MAX_STR;
@@ -29,6 +28,4 @@ namespace cromio::semantic {
 
         static void analyze64BitInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node);
     };
-} // namespace cromio::semantic
-
-#endif // CROMIO_BASE_SEMANTIC_H
+} // namespace yogi::semantic

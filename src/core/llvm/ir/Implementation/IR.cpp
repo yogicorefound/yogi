@@ -11,8 +11,8 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/Linker/Linker.h"
 
-namespace cromio::core::ir {
-    using namespace cromio::visitor::nodes;
+namespace yogi::core::ir {
+    using namespace yogi::visitor::nodes;
 
     IR::IR(const std::string& moduleName) {
         context = std::make_unique<llvm::LLVMContext>();
@@ -215,4 +215,4 @@ namespace cromio::core::ir {
 
         return fn;
     }
-} // namespace cromio::core::ir
+} // namespace yogi::core::ir

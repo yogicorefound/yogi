@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace cromio::visitor {
+namespace yogi::visitor {
     MembersByType::ResolvedItem MembersByType::resolveItem(const std::any& itemResult, semantic::Scope* scope, const std::string& source) {
         if (itemResult.type() == typeid(nodes::IntegerLiteralNode)) {
             auto n = std::any_cast<nodes::IntegerLiteralNode>(itemResult);
@@ -199,4 +199,4 @@ namespace cromio::visitor {
         utils::Errors::throwScopeError("Error: member '" + member + "' not available for type '" + variable.varType + "'", member, variable, source);
         return {};
     }
-} // namespace cromio::visitor
+} // namespace yogi::visitor

@@ -8,7 +8,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace cromio::visitor {
+namespace yogi::visitor {
 
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
         const auto expression = visitChildren(ctx);
@@ -235,4 +235,4 @@ namespace cromio::visitor {
         return node;
     }
 
-} // namespace cromio::visitor
+} // namespace yogi::visitor

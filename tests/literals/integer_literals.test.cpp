@@ -4,10 +4,10 @@
 
 #include <utils/helpers/Helpers.h>
 #include <cmath>
-#include "includes/cromio/cromio.h"
+#include "includes/yogi/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
-using namespace cromio::visitor::nodes;
+using namespace yogi::visitor::nodes;
 
 TEST_CASE("Integer literal evaluation", "[INTEGER_LITERAL]") {
     const auto int_cases = GENERATE(
@@ -19,7 +19,7 @@ TEST_CASE("Integer literal evaluation", "[INTEGER_LITERAL]") {
     const auto [c, expected_value] = int_cases;
     std::string text = c;
 
-    const auto ast = cromio::Cromio::testAST(text);
+    const auto ast = yogi::Yogi::testAST(text);
     const auto& node = std::any_cast<IntegerLiteralNode>(ast.body[0].children.at(0));
 
     INFO("Integer value");

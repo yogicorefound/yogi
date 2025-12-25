@@ -8,7 +8,7 @@
 #include "MembersByType.h"
 #include "ast/base/BaseVisitor.h"
 
-namespace cromio::visitor {
+namespace yogi::visitor {
 
     class MembersVisitor : public virtual BaseVisitor, MembersByType {
        public:
@@ -18,4 +18,4 @@ namespace cromio::visitor {
         std::any visitValuePostfix(Grammar::ValuePostfixContext* ctx) override;
     };
 
-} // namespace cromio::visitor
+} // namespace yogi::visitor

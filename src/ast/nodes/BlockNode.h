@@ -7,7 +7,7 @@
 #include "BaseNode.h"
 #include "StatementNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
     // Block Node (holds multiple statements)
     struct BlockNode : BaseNode {
         std::vector<StatementNode> statements;  // List of statements
@@ -22,5 +22,5 @@ namespace cromio::visitor::nodes {
         }
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes
 

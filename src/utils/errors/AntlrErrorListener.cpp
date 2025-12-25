@@ -4,7 +4,7 @@
 
 #include "AntlrErrorListener.h"
 
-namespace cromio::utils::errors {
+namespace yogi::utils::errors {
     AntlrErrorListener::AntlrErrorListener(const std::string& source) {
         // Split content into lines
         std::string line;
@@ -35,4 +35,4 @@ namespace cromio::utils::errors {
 
         std::exit(1);
     }
-} // namespace cromio::utils::errors
+} // namespace yogi::utils::errors

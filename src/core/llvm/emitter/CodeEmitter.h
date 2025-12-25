@@ -2,14 +2,13 @@
 // Created by Brayhan De Aza on 11/27/25.
 //
 
-#ifndef CROMIO_CODE_EMITTER_H
-#define CROMIO_CODE_EMITTER_H
+#pragma once
 
 #include <llvm/IR/Module.h>
 #include <string>
 #include <vector>
 
-namespace cromio::lowering {
+namespace yogi::lowering {
     class CodeEmitter {
        public:
         // Generate LLVM bitcode into a vector of bytes (in memory)
@@ -28,6 +27,4 @@ namespace cromio::lowering {
         static void toExecutable(llvm::Module* module, const std::string& outputPath);
     };
 
-} // namespace cromio::lowering
-
-#endif // CROMIO_CODE_EMITTER_H
+} // namespace yogi::lowering

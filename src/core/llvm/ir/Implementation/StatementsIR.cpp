@@ -4,7 +4,7 @@
 
 #include <core/llvm/ir/IR.h>
 
-namespace cromio::core::ir {
+namespace yogi::core::ir {
 
     llvm::Value* IR::statement(const visitor::nodes::StatementNode& node) {
         llvm::Value* lastVal = nullptr;
@@ -32,4 +32,4 @@ namespace cromio::core::ir {
         return lastVal;
     }
 
-} // namespace cromio::core::ir
+} // namespace yogi::core::ir

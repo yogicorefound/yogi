@@ -8,12 +8,10 @@
 #include <llvm/IR/Module.h>
 #include <any>
 
-
-
-namespace cromio {
-    class Cromio final {
+namespace yogi {
+    class Yogi final {
        public:
-        Cromio(const int argc, const char* argv[]) {
+        Yogi(const int argc, const char* argv[]) {
             getContent(argc, argv);
         }
 
@@ -32,4 +30,4 @@ namespace cromio {
         std::string content;
         std::string fileName;
     };
-} // namespace cromio
+} // namespace yogi

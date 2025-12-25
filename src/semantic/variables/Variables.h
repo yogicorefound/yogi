@@ -2,14 +2,13 @@
 // Created by Brayhan De Aza on 12/2/25.
 //
 
-#ifndef CROMIO_VARIABLES_H
-#define CROMIO_VARIABLES_H
+#pragma once
 
 #include <ast/nodes/nodes.h>
 #include <semantic/scopes/Scope.h>
 #include <string>
 
-namespace cromio::semantic {
+namespace yogi::semantic {
     class Variables : public virtual BaseSemantic {
        public:
         // Analyze variable declaration without initial assignment
@@ -23,6 +22,4 @@ namespace cromio::semantic {
         static bool checkDataType(const std::string& dataType, const std::string& returnType);
     };
 
-} // namespace cromio::semantic
-
-#endif // CROMIO_VARIABLES_H
+} // namespace yogi::semantic

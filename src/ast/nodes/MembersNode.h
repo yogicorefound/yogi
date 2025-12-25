@@ -6,7 +6,7 @@
 
 #include "BaseNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
 
     struct MemberExpressionNode : BaseNode {
         std::any object; // expresión base
@@ -17,4 +17,4 @@ namespace cromio::visitor::nodes {
         MemberExpressionNode(std::any object, std::string member, std::vector<std::any> arguments, bool isCall, Position start, Position end) : BaseNode(isCall ? Kind::MEMBER_METHOD : Kind::MEMBER_ACCESS, start, end), object(std::move(object)), member(std::move(member)), arguments(std::move(arguments)), isCall(isCall) {}
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

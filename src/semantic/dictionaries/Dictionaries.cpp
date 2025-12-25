@@ -5,7 +5,7 @@
 
 #include "Dictionaries.h"
 
-namespace cromio::semantic {
+namespace yogi::semantic {
 
 
-} // namespace cromio::semantic
+} // namespace yogi::semantic

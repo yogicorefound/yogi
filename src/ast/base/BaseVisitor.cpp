@@ -4,7 +4,7 @@
 
 #include "BaseVisitor.h"
 
-namespace cromio::visitor {
+namespace yogi::visitor {
     void BaseVisitor::enterScope() {
         const auto child = new semantic::Scope(scope);
         scope = child;
@@ -19,4 +19,4 @@ namespace cromio::visitor {
     semantic::Scope* BaseVisitor::getCurrentScope() const {
         return scope;
     }
-} // namespace cromio::visitor
+} // namespace yogi::visitor

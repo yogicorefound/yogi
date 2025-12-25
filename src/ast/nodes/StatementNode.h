@@ -8,7 +8,7 @@
 #include <any>
 #include "BaseNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
     // Statement Node (holds mixed types: expressions, literals, declarations, etc.)
     struct StatementNode : BaseNode {
         std::vector<std::any> children; // Can hold any mix of node types
@@ -39,4 +39,4 @@ namespace cromio::visitor::nodes {
         }
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

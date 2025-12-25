@@ -7,79 +7,79 @@
 #include <random>
 #include <sstream>
 #include <string>
-#include "includes/cromio/cromio.h"
+#include "includes/yogi/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
-long long randomInt(const long long min, const long long max) {
-    static std::random_device rd; // non-deterministic seed
-    static std::mt19937 gen(rd()); // Mersenne Twister engine
-    std::uniform_int_distribution dist(min, max);
+namespace yogi::visitor::nodes {
+    long long randomInt(const long long min, const long long max) {
+        static std::random_device rd; // non-deterministic seed
+        static std::mt19937 gen(rd()); // Mersenne Twister engine
+        std::uniform_int_distribution dist(min, max);
 
-    return dist(gen);
-}
-
-double randomDouble(const double min, const double max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_real_distribution dist(min, max);
-
-    return dist(gen);
-}
-
-std::string toHex(const uint64_t value) {
-    std::stringstream ss;
-    ss << std::hex << value;
-    return "0x" + ss.str();
-}
-
-template <typename T>
-std::string toBinary(T value) {
-    return "0b" + std::bitset<sizeof(T) * 8>(value).to_string();
-}
-
-std::string toOctal(const uint64_t value) {
-    std::stringstream ss;
-    ss << std::oct << value;
-    return "0o" + ss.str();
-}
-
-template <typename T>
-std::string toExponent(T value, int precision = 6) {
-    std::stringstream ss;
-    ss.setf(std::ios::scientific);
-    ss.precision(precision);
-    ss << value;
-    return ss.str();
-}
-
-std::string toUnderscore(const std::string& number) {
-    std::string s = number;
-    bool neg = false;
-
-    if (!s.empty() && s[0] == '-') {
-        neg = true;
-        s.erase(0, 1);
+        return dist(gen);
     }
 
-    std::string out;
-    int count = 0;
+    double randomDouble(const double min, const double max) {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_real_distribution dist(min, max);
 
-    for (int i = static_cast<int>(s.size()) - 1; i >= 0; --i) {
-        out.insert(out.begin(), s[i]);
-        count++;
-        if (count == 3 && i != 0) {
-            out.insert(out.begin(), '_');
-            count = 0;
+        return dist(gen);
+    }
+
+    std::string toHex(const uint64_t value) {
+        std::stringstream ss;
+        ss << std::hex << value;
+        return "0x" + ss.str();
+    }
+
+    template <typename T>
+    std::string toBinary(T value) {
+        return "0b" + std::bitset<sizeof(T) * 8>(value).to_string();
+    }
+
+    std::string toOctal(const uint64_t value) {
+        std::stringstream ss;
+        ss << std::oct << value;
+        return "0o" + ss.str();
+    }
+
+    template <typename T>
+    std::string toExponent(T value, int precision = 6) {
+        std::stringstream ss;
+        ss.setf(std::ios::scientific);
+        ss.precision(precision);
+        ss << value;
+        return ss.str();
+    }
+
+    std::string toUnderscore(const std::string& number) {
+        std::string s = number;
+        bool neg = false;
+
+        if (!s.empty() && s[0] == '-') {
+            neg = true;
+            s.erase(0, 1);
         }
+
+        std::string out;
+        int count = 0;
+
+        for (int i = static_cast<int>(s.size()) - 1; i >= 0; --i) {
+            out.insert(out.begin(), s[i]);
+            count++;
+            if (count == 3 && i != 0) {
+                out.insert(out.begin(), '_');
+                count = 0;
+            }
+        }
+
+        if (neg)
+            out.insert(out.begin(), '-');
+
+        return out;
     }
 
-    if (neg)
-        out.insert(out.begin(), '-');
-
-    return out;
-}
-
-namespace cromio::visitor::nodes {
     // Random  signed integer values
     std::string int8 = std::to_string(randomInt(INT8_MIN, INT8_MAX));
     std::string int16 = std::to_string(randomInt(INT16_MIN, INT16_MAX));
@@ -173,13 +173,13 @@ namespace cromio::visitor::nodes {
             // String
             std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),
             std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
-            std::make_tuple<std::string>("str a = f\"Hello, {world!!!}\"", "str", "a", "Hello, world!!!")
+            std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!")
 
         );
 
         auto [text, type, name, expectedValue] = cases;
 
-        const auto ast = Cromio::testAST(text);
+        const auto ast = Yogi::testAST(text);
         const auto& node = std::any_cast<VariableDeclarationNode>(ast.body[0].children.at(0));
         const auto [resolvedType, resolvedValue, resolvedNode] = utils::Helpers::resolveItem(node.value);
 
@@ -187,6 +187,6 @@ namespace cromio::visitor::nodes {
         REQUIRE(resolvedValue == expectedValue);
         REQUIRE(resolvedType == type);
         REQUIRE(resolvedNode.type() == node.value.type());
-    }
 
-} // namespace cromio::visitor::nodes
+    } // namespace yogi::visitor::nodes
+} // namespace yogi::visitor::nodes

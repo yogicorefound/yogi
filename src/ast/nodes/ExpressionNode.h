@@ -11,7 +11,7 @@
 #include <any>
 
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
     struct BinaryExpressionNode : BaseNode {
         std::any left; // Can be any literal or expression node
         std::any right; // Can be any literal or expression node
@@ -36,4 +36,4 @@ namespace cromio::visitor::nodes {
         explicit ConcatenationExpressionNode(StringLiteralNode value, std::vector<StringLiteralNode> literals, const Position start, const Position end) : BaseNode(Kind::CONCATENATION_EXPRESSION, start, end), value(std::move(value)), literals(std::move(literals)) {}
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

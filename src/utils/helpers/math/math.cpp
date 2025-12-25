@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 
-namespace cromio::utils::helpers {
+namespace yogi::utils::helpers {
     bool Math::strGreater(const std::string& a, const std::string& b) {
         return a.compare(b) > 0;
     }
@@ -387,4 +387,4 @@ namespace cromio::utils::helpers {
         return v.mantissa > MAX_MANTISSA;
     }
 
-} // namespace cromio::utils::helpers
+} // namespace yogi::utils::helpers

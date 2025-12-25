@@ -7,7 +7,7 @@
 #include <vector>
 #include "BaseNode.h"
 
-namespace cromio::visitor::nodes {
+namespace yogi::visitor::nodes {
 
     // Integer Literal
     struct IntegerLiteralNode : BaseNode {
@@ -57,4 +57,4 @@ namespace cromio::visitor::nodes {
         explicit FormattedStringNode(const std::string& v, const Position start, const Position end) : BaseNode(Kind::FORMATTED_STRING, start, end), value(v) {}
     };
 
-} // namespace cromio::visitor::nodes
+} // namespace yogi::visitor::nodes

@@ -5,8 +5,8 @@
 #include "DictionaryVisitor.h"
 #include "ast/nodes/nodes.h"
 
-namespace cromio::visitor {
-    using namespace cromio::visitor::nodes;
+namespace yogi::visitor {
+    using namespace yogi::visitor::nodes;
 
     Position makeStart(const antlr4::ParserRuleContext* ctx) {
         return {ctx->start->getLine(), ctx->start->getCharPositionInLine()};
@@ -81,4 +81,4 @@ namespace cromio::visitor {
         return std::shared_ptr<DataTypeNode>(node);
     }
 
-} // namespace cromio::visitor
+} // namespace yogi::visitor

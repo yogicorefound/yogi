@@ -7,7 +7,7 @@
 #include <string>
 #include "utils/utils.h"
 
-namespace cromio::semantic {
+namespace yogi::semantic {
     const std::string BaseSemantic::INT64_MAX_STR = "9223372036854775807";
     const std::string BaseSemantic::INT64_MIN_STR = "9223372036854775808"; // abs value
     const std::string BaseSemantic::UINT64_MAX_STR = "18446744073709551615";
@@ -149,4 +149,4 @@ namespace cromio::semantic {
         }
     }
 
-} // namespace cromio::semantic
+} // namespace yogi::semantic

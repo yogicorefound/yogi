@@ -4,7 +4,7 @@
 
 #include <core/llvm/ir/IR.h>
 
-namespace cromio::core::ir {
+namespace yogi::core::ir {
 
     llvm::Value* IR::arrayDeclaration(const visitor::nodes::ArrayDeclarationNode& node) {
         llvm::Type* elementType = mapDataType(node.type);
@@ -52,4 +52,4 @@ namespace cromio::core::ir {
         return allocaInst;
     }
 
-} // namespace cromio::core::ir
+} // namespace yogi::core::ir
