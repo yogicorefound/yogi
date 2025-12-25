@@ -21,7 +21,7 @@ namespace cromio::semantic {
         // variables
         bool declareVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info);
         void updateVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info);
-        std::optional<std::shared_ptr<visitor::nodes::VariableDeclarationNode>> lookup(const std::string& name) const;
+        std::optional<std::shared_ptr<visitor::nodes::VariableDeclarationNode>> lookupVariable(const std::string& name) const;
 
         // arrays
         bool declareArray(const std::string& name, const visitor::nodes::ArrayDeclarationNode& info);
@@ -41,10 +41,14 @@ namespace cromio::semantic {
             return parent;
         }
 
+
        private:
+        struct ScopeNode {
+            visitor::nodes::Kind kind;
+            std::shared_ptr<std::any> value;
+        };
+        std::unordered_map<std::string, ScopeNode> symbols = {};
         Scope* parent;
-        std::unordered_map<std::string, std::shared_ptr<visitor::nodes::VariableDeclarationNode>> symbols = {};
-        std::unordered_map<std::string, std::shared_ptr<visitor::nodes::ArrayDeclarationNode>> arraySymbols = {};
     };
 
 } // namespace cromio::semantic

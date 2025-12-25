@@ -14,7 +14,7 @@ namespace cromio::visitor {
 
         const auto identifier = std::any_cast<nodes::IdentifierLiteral>(atom);
 
-        const auto lookupVariable = scope->lookup(identifier.value);
+        const auto lookupVariable = scope->lookupVariable(identifier.value);
         if (!lookupVariable.has_value()) {
             throwScopeError("variable '" + identifier.value + "' is not declared", identifier.value, atom, source);
         }

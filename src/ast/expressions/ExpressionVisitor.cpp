@@ -96,7 +96,7 @@ namespace cromio::visitor {
                         }
 
                         const std::string identifier = node.value;
-                        if (const auto variable = scope->lookup(identifier); variable.has_value()) {
+                        if (const auto variable = scope->lookupVariable(identifier); variable.has_value()) {
                             const auto varNode = std::any_cast<nodes::VariableDeclarationNode>(variable.value());
                             return extractedValue(varNode.value);
                         }
@@ -209,7 +209,7 @@ namespace cromio::visitor {
                 auto literal = visit(expression->identifierLiteral());
                 auto literalNode = std::any_cast<nodes::IdentifierLiteral>(literal);
 
-                auto variable = scope->lookup(literalNode.value);
+                auto variable = scope->lookupVariable(literalNode.value);
                 if (!variable.has_value()) {
                     throwScopeError("Variable '" + literalNode.value + "' is not declared", literalNode.value, literalNode, source);
                 }

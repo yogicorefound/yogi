@@ -9,16 +9,22 @@ namespace cromio::semantic {
         if (symbols.contains(name))
             return false;
 
-        // Store a shared_ptr copy of the node
-        symbols[name] = std::make_shared<visitor::nodes::VariableDeclarationNode>(info);
+        // Store a shared_ptr of the node directly
+        auto node_ptr = std::make_shared<visitor::nodes::VariableDeclarationNode>(info);
+        symbols[name] = ScopeNode{
+            visitor::nodes::Kind::VARIABLE_DECLARATION,
+            std::make_shared<std::any>(node_ptr) // store shared_ptr<VariableDeclarationNode> in std::any
+        };
+
         return true;
     }
+
     bool Scope::declareArray(const std::string& name, const visitor::nodes::ArrayDeclarationNode& info) {
-        if (arraySymbols.contains(name))
+        if (symbols.contains(name))
             return false;
 
         // Store a shared_ptr copy of the node
-        arraySymbols[name] = std::make_shared<visitor::nodes::ArrayDeclarationNode>(info);
+        symbols[name] = ScopeNode{visitor::nodes::Kind::ARRAY_DECLARATION, std::make_shared<std::any>(info)};
         return true;
     }
 
@@ -41,7 +47,7 @@ namespace cromio::semantic {
     void Scope::updateVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info) {
         // Update in current scope if it exists
         if (symbols.contains(name)) {
-            symbols[name] = std::make_shared<visitor::nodes::VariableDeclarationNode>(info);
+            symbols[name] = ScopeNode{visitor::nodes::Kind::VARIABLE_DECLARATION, std::make_shared<std::any>(info)};
             return;
         }
 
@@ -53,8 +59,8 @@ namespace cromio::semantic {
 
     void Scope::updateArray(const std::string& name, const visitor::nodes::ArrayDeclarationNode& info) {
         // Update in current scope if it exists
-        if (arraySymbols.contains(name)) {
-            arraySymbols[name] = std::make_shared<visitor::nodes::ArrayDeclarationNode>(info);
+        if (symbols.contains(name)) {
+            symbols[name] = ScopeNode{visitor::nodes::Kind::ARRAY_DECLARATION, std::make_shared<std::any>(info)};
             return;
         }
 
@@ -64,22 +70,37 @@ namespace cromio::semantic {
         }
     }
 
-    std::optional<std::shared_ptr<visitor::nodes::VariableDeclarationNode>> Scope::lookup(const std::string& name) const {
+    std::optional<std::shared_ptr<visitor::nodes::VariableDeclarationNode>> Scope::lookupVariable(const std::string& name) const {
         // Check current scope
-        if (symbols.contains(name))
-            return symbols.at(name);
+        if (symbols.contains(name)) {
+            const auto [kind, value] = symbols.at(name);
+
+            if (kind != visitor::nodes::Kind::VARIABLE_DECLARATION) {
+                return nullptr;
+            }
+
+            const auto node = std::any_cast<std::shared_ptr<visitor::nodes::VariableDeclarationNode>>(*value);
+            return node;
+        }
 
         // Check parent scopes recursively
         if (parent)
-            return parent->lookup(name);
+            return parent->lookupVariable(name);
 
         return std::nullopt;
     }
 
     std::optional<std::shared_ptr<visitor::nodes::ArrayDeclarationNode>> Scope::lookupArray(const std::string& name) const {
         // Check current scope
-        if (arraySymbols.contains(name))
-            return arraySymbols.at(name);
+
+        if (symbols.contains(name)) {
+            const auto [kind, value] = symbols.at(name);
+            if (kind != visitor::nodes::Kind::ARRAY_DECLARATION) {
+                return std::nullopt;
+            }
+
+            return std::any_cast<std::shared_ptr<visitor::nodes::ArrayDeclarationNode>>(value);
+        }
 
         // Check parent scopes recursively
         if (parent)

@@ -14,13 +14,21 @@ namespace cromio::semantic {
 
         const auto items = node["value"]["items"];
         if (const int length = items.size(); size != "auto" && length > std::stoi(size)) {
-            utils::Errors::throwRangeError("Expected array size of " + size + ", but received " + std::to_string(length) + " elements.", node["value"], source);
+            utils::Errors::
+                throwRangeError("Expected array size of " + size + ", but received " + std::to_string(length) + " elements.", node["value"], source);
         }
 
         return node;
     }
 
-    void Arrays::analyzeArrayItems(const std::string& identifier, const std::string& returnType, const std::string& rValue, const std::string& boolValue, const std::string& dataType, const std::any& node, const std::string& source) {
+    void Arrays::analyzeArrayItems(
+        const std::string& identifier,
+        const std::string& returnType,
+        const std::string& rValue,
+        const std::string& boolValue,
+        const std::string& dataType,
+        const std::any& node,
+        const std::string& source) {
         analyze64BitInteger(rValue, dataType, identifier, source, node);
 
         if (dataType.find("uint") != std::string::npos) {
@@ -67,12 +75,12 @@ namespace cromio::semantic {
         if (itemResult.type() == typeid(visitor::nodes::IdentifierLiteral)) {
             auto id = std::any_cast<visitor::nodes::IdentifierLiteral>(itemResult);
 
-            if (const auto varInfo = scope->lookup("var:" + id.value); varInfo.has_value()) {
+            if (const auto varInfo = scope->lookupVariable(id.value); varInfo.has_value()) {
                 auto varNode = std::any_cast<visitor::nodes::VariableDeclarationNode>(varInfo.value());
                 return resolveItem(varNode.value, scope, source);
             }
 
-            if (const auto varInfo = scope->lookup("array:" + id.value); varInfo.has_value()) {
+            if (const auto varInfo = scope->lookupArray(id.value); varInfo.has_value()) {
                 auto varNode = std::any_cast<visitor::nodes::ArrayDeclarationNode>(varInfo.value());
                 return resolveItem(varNode.elements, scope, source);
             }
@@ -85,7 +93,15 @@ namespace cromio::semantic {
         return {}; // unreachable
     }
 
-    void Arrays::processArrayItems(const std::string& arrayType, std::string& itemType, std::any& itemValue, std::string& boolValue, std::string& rValue, const std::any& itemResult, Scope* scope, const std::string& source) {
+    void Arrays::processArrayItems(
+        const std::string& arrayType,
+        std::string& itemType,
+        std::any& itemValue,
+        std::string& boolValue,
+        std::string& rValue,
+        const std::any& itemResult,
+        Scope* scope,
+        const std::string& source) {
         const auto [type, value, node] = resolveItem(itemResult, scope, source);
 
         itemType = type;

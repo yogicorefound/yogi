@@ -74,7 +74,7 @@ namespace cromio::visitor {
     std::any ArraysVisitor::visitArrayReAssignment(Grammar::ArrayReAssignmentContext* ctx) {
         const auto identifier = ctx->IDENTIFIER()->getText();
 
-        const auto array = scope->lookup("array:" + identifier);
+        const auto array = scope->lookupArray("array:" + identifier);
         if (!array.has_value()) {
             const auto message = "Error: '" + identifier + "' is not declared";
             std::cout << message << std::endl;

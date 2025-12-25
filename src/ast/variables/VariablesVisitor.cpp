@@ -64,7 +64,6 @@ namespace cromio::visitor {
         const auto visitDataType = visit(ctx->variableDataType());
         const auto dataType = std::any_cast<std::string>(visitDataType);
 
-
         // // Check if variable already exists in current scope
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
@@ -113,7 +112,7 @@ namespace cromio::visitor {
             }
         } else if (value.type() == typeid(nodes::IdentifierLiteral)) {
             const auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(value);
-            const auto variable = scope->lookup(identifierNode.value);
+            const auto variable = scope->lookupVariable(identifierNode.value);
             if (!variable.has_value()) {
                 throwScopeError("variable '" + identifierNode.value + "' is not declared", identifierNode.value, value, source);
             }
@@ -121,7 +120,6 @@ namespace cromio::visitor {
             const auto varNode = variable.value();
             value = varNode->value;
         }
-
 
         const auto v = value;
         const auto [varType, reVlue, varName] = Helpers::resolveItem(v);
@@ -134,7 +132,21 @@ namespace cromio::visitor {
     }
 
     std::any VariablesVisitor::visitVariableValue(Grammar::VariableValueContext* ctx) {
-        return visitChildren(ctx);
+        auto node = visitChildren(ctx);
+
+        if (node.type() == typeid(nodes::IdentifierLiteral)) {
+            const auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(node);
+            const auto variable = scope->lookupVariable(identifierNode.value);
+            std::cout << "visitVariableValues: " << identifierNode.value << std::endl;
+            if (!variable.has_value()) {
+                throwScopeError("variable '" + identifierNode.value + "' is not declared", identifierNode.value, node, source);
+            }
+
+            const auto varNode = variable.value();
+            return varNode->value;
+        }
+
+        return node;
     }
 
     std::any VariablesVisitor::visitVariableReAssignment(Grammar::VariableReAssignmentContext* ctx) {
@@ -145,14 +157,14 @@ namespace cromio::visitor {
 
         parser->inVarMode = true;
         const std::any newValue = visit(ctx->variableValue());
+        std::cout << newValue.type().name() << std::endl;
         parser->inVarMode = false;
 
         // Get identifier
 
-
         // Check if variable exists
         // Get variable info from scope
-        const auto variable = scope->lookup(identifier);
+        const auto variable = scope->lookupVariable(identifier);
         if (!variable.has_value()) {
             throwScopeError("variable '" + identifier + "' is not declared", identifier, newValue, source);
         }

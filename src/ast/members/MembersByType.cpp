@@ -36,12 +36,12 @@ namespace cromio::visitor {
         if (itemResult.type() == typeid(nodes::IdentifierLiteral)) {
             auto id = std::any_cast<nodes::IdentifierLiteral>(itemResult);
 
-            if (const auto varInfo = scope->lookup("var:" + id.value); varInfo.has_value()) {
+            if (const auto varInfo = scope->lookupVariable(id.value); varInfo.has_value()) {
                 auto varNode = std::any_cast<nodes::VariableDeclarationNode>(varInfo.value());
                 return resolveItem(varNode.value, scope, source);
             }
 
-            if (const auto varInfo = scope->lookup("array:" + id.value); varInfo.has_value()) {
+            if (const auto varInfo = scope->lookupArray(id.value); varInfo.has_value()) {
                 auto varNode = std::any_cast<nodes::ArrayDeclarationNode>(varInfo.value());
                 return resolveItem(varNode.elements, scope, source);
             }
@@ -75,7 +75,11 @@ namespace cromio::visitor {
         return members;
     }
 
-    std::any MembersByType::processStringMembers(nodes::VariableDeclarationNode& variable, const std::string& member, std::vector<std::any> arguments, const std::string& source) {
+    std::any MembersByType::processStringMembers(
+        nodes::VariableDeclarationNode& variable,
+        const std::string& member,
+        std::vector<std::any> arguments,
+        const std::string& source) {
         // Check if member is available for strings
         if (const auto availableMembers = strAvailableMembers(); std::ranges::find(availableMembers, member) == availableMembers.end()) {
             std::cout << "start:ine: " << variable.start.line << " startColum: " << variable.end.line << std::endl;
@@ -177,7 +181,11 @@ namespace cromio::visitor {
     }
 
     // COMPREHENSIVE FIX for processMembers
-    std::any MembersByType::processMembers(nodes::VariableDeclarationNode& variable, const std::string& member, const std::vector<std::any>& arguments, const std::string& source) {
+    std::any MembersByType::processMembers(
+        nodes::VariableDeclarationNode& variable,
+        const std::string& member,
+        const std::vector<std::any>& arguments,
+        const std::string& source) {
         std::any result;
 
         if (member.empty()) {
