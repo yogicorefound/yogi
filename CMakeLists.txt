@@ -6,6 +6,7 @@ project(yogi VERSION 0.0.1 LANGUAGES C CXX)
 #                       OPTIONS
 # ============================================================
 option(ENABLE_TESTING "Build test executable" OFF)
+option(ENABLE_TESTING_FOR_TYPES_HINTS "Build test executable" ON)
 
 # ============================================================
 #                  MACOS & LLVM SETUP
@@ -63,13 +64,23 @@ add_definitions(${LLVM_DEFINITIONS})
 #                PRODUCTION SOURCES & EXECUTABLE
 # ============================================================
 if (NOT ENABLE_TESTING)
-    file(GLOB_RECURSE PROD_SOURCES
-            "${SOURCES_DIR}/*.cpp"
-            "${GENERATED_DIR}/*.cpp"
-            "${TESTS_DIR}/*.cpp"
-    )
+    IF (ENABLE_TESTING_FOR_TYPES_HINTS)
+        file(GLOB_RECURSE PROD_SOURCES
+                "${SOURCES_DIR}/*.cpp"
+                "${GENERATED_DIR}/*.cpp"
+                "${TESTS_DIR}/*.cpp"
+        )
+        add_executable(yogi ${PROD_SOURCES})
+    ENDIF ()
 
-    add_executable(yogi ${PROD_SOURCES})
+    IF (NOT ENABLE_TESTING_FOR_TYPES_HINTS)
+        file(GLOB_RECURSE PROD_SOURCES
+                "${SOURCES_DIR}/*.cpp"
+                "${GENERATED_DIR}/*.cpp"
+        )
+        add_executable(yogi ${PROD_SOURCES})
+    ENDIF ()
+
 
     target_include_directories(yogi PRIVATE
             ${CMAKE_SOURCE_DIR}

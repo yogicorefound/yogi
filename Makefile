@@ -6,7 +6,7 @@ test: clean grammar runtime run-tests
 build: clean grammar runtime run
 
 run:
-	@cd ./build && cmake ..
+	@cd ./build && cmake .. -DENABLE_TESTING_FOR_TYPES_HINTS=OFF
 	@cd ./build && make -j
 	@cd ./build && ./yogi ../test.io
 # -p
