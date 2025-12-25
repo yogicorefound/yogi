@@ -1,3 +1,3 @@
 str a = f"Hello, {"hola " + "adios"} {1-5}"
-str b = a
+str b = a + " adios " + a
 

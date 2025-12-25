@@ -17,8 +17,11 @@ expression
 
 
 concatenationExpression
-    :  (stringLiterals (PLUS stringLiterals)*)+
+    :  ((stringLiterals | identifierLiteral) (PLUS (stringLiterals | identifierLiteral))*)+
+
     ;
+
+
 
 
 binaryExpression

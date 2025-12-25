@@ -214,12 +214,12 @@ namespace cromio::visitor {
                     throwScopeError("Variable '" + literalNode.value + "' is not declared", literalNode.value, literalNode, source);
                 }
 
-                auto varNode = std::any_cast<nodes::VariableDeclarationNode>(variable.value());
-                if (varNode.varType != "str") {
-                    throwTypeError(literalNode.value, varNode.varType, literalNode, source);
+                auto varNode = variable.value();
+                if (varNode->varType != "str") {
+                    throwTypeError(literalNode.value, varNode->varType, literalNode, source);
                 }
 
-                auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(varNode.value);
+                auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(varNode->value);
                 value += stringLiteralNode.value;
                 literals.push_back(stringLiteralNode);
 
