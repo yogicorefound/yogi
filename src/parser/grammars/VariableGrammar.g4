@@ -15,7 +15,6 @@ variables
 
 variableDeclaration: variableDataType IDENTIFIER EQ {inVarMode= true;} variableValue {inVarMode = false;};
 
-
 variableDeclarationWithoutAssignment: variableDataType IDENTIFIER;
 
 variableReAssignment: IDENTIFIER EQ variableValue;

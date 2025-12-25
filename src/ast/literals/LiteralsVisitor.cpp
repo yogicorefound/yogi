@@ -137,8 +137,11 @@ std::any cromio::visitor::LiteralsVisitor::visitFormattedString(Grammar::Formatt
     auto node = nodes::StringLiteralNode("", start, end);
 
     // Process all formatted string content parts
+
     for (const auto child : ctx->formattedStringContent()) {
         if (auto result = visit(child); result.has_value()) {
+            std::cout << "contentNode.value: " << result.type().name() << std::endl;
+
             try {
                 // Try to cast to different node types and add to params
                 if (result.type() == typeid(nodes::StringLiteralNode)) {
