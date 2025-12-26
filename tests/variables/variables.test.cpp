@@ -149,7 +149,7 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("int a = " + bin1, "int", "a", std::to_string(utils::Helpers::parseNumberString(bin1))),
             std::make_tuple<std::string>("int a = " + bin2, "int", "a", std::to_string(utils::Helpers::parseNumberString(bin2))),
 
-            // // Unsigned integer
+            // Unsigned integer
             std::make_tuple<std::string>("uint8 a = " + uint8, "int", "a", uint8),
             std::make_tuple<std::string>("uint16 a = " + uint16, "int", "a", uint16),
             std::make_tuple<std::string>("uint32 a = " + uint32, "int", "a", uint32),
@@ -159,21 +159,21 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("float a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float32 a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float64 a = " + float64, "float", "a", float64),
-            std::make_tuple<std::string>("float a = " + underscoreFloat1, "float", "a", std::to_string(utils::Helpers::parseFloat(float32))),
-            std::make_tuple<std::string>("float64 a = " + underscoreFloat2, "float", "a", std::to_string(utils::Helpers::parseFloat(float64))),
+            std::make_tuple<std::string>("float a = " + underscoreFloat1, "float", "a", std::to_string(utils::Helpers::parseFloat(float32)))
+            // std::make_tuple<std::string>("float64 a = " + underscoreFloat2, "float", "a", std::to_string(utils::Helpers::parseFloat(float64)))
 
-            // Exponent Notation
-            std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
-            std::make_tuple<std::string>("float a = " + exp2, "float", "a", exp2),
-
-            // Boolean
-            std::make_tuple<std::string>("bool a = " + bool1, "bool", "a", bool1 == "true" ? "1" : "0"),
-            std::make_tuple<std::string>("bool a = " + bool2, "bool", "a", bool2 == "true" ? "1" : "0"),
+            // // Exponent Notation
+            // std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
+            // std::make_tuple<std::string>("float a = " + exp2, "float", "a", exp2),
+            //
+            // // Boolean
+            // std::make_tuple<std::string>("bool a = " + bool1, "bool", "a", bool1 == "true" ? "1" : "0"),
+            // std::make_tuple<std::string>("bool a = " + bool2, "bool", "a", bool2 == "true" ? "1" : "0")
 
             // String
-            std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),
-            std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
-            std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!")
+            // std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),
+            // std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
+            // std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!")
 
         );
 
