@@ -157,7 +157,20 @@ namespace yogi::visitor {
                         node.value += contentNode.value;
                     } else if (result.type() == typeid(nodes::IdentifierLiteral)) {
                         auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
-                        node.value += contentNode.value;
+                        std::cout << "IdentifierLiteral: " << contentNode.value << std::endl;
+                        const auto variable = scope->lookupVariable(contentNode.value);
+                        if (!variable.has_value()) {
+                            throwScopeError("Variable not found", contentNode.value, node, source);
+                        }
+
+                        const auto& varNode = variable.value();
+                        if (varNode->kind != nodes::Kind::VARIABLE_DECLARATION) {
+                            throwTypeError("Variable is not a variable declaration", contentNode.value, node, source);
+                        }
+
+                        const auto [type, value, _] = Helpers::resolveItem(varNode->value);
+                        node.value += value;
+
                     } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
                         if (const auto contentNode = std::any_cast<nodes::BinaryExpressionNode>(result); contentNode.resultType == "int") {
                             node.value += contentNode.value;

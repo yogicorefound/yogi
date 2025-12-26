@@ -14,7 +14,6 @@ literal
 numberLiterals
     : integerLiteral
     | floatLiteral
-    | identifierLiteral
     ;
 
 stringLiterals
