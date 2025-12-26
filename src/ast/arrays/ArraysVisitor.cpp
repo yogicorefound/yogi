@@ -17,10 +17,9 @@ namespace yogi::visitor {
 
         // Get array type information
         const auto type = visit(ctx->arrayType());
-        const auto [first, second] = std::any_cast<std::pair<std::string, std::string>>(type); // {elementType, size}
-        const std::string arrayType = first;
-        const std::string arraySize = second;
+        const auto [arrayType, arraySize] = std::any_cast<std::pair<std::string, std::string>>(type); // {elementType, size}
 
+        std::cout << "arrayType: " << arrayType << " arraySize: " << arraySize << std::endl;
         // Get identifier
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
@@ -54,7 +53,12 @@ namespace yogi::visitor {
         // Check if declared size matches actual elements
         if (arraySize != "auto") {
             if (elements.size() > std::stoull(arraySize)) {
-                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arraySize + ".", start, source);
+                throwError(
+                    "ArraySizeViolation",
+                    "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " +
+                        arraySize + ".",
+                    start,
+                    source);
             }
         }
 
@@ -110,7 +114,12 @@ namespace yogi::visitor {
         // Check if declared size matches actual elements
         if (arrayNode.size != "auto") {
             if (elements.size() > std::stoull(arrayNode.size)) {
-                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arrayNode.size + ".", start, source);
+                throwError(
+                    "ArraySizeViolation",
+                    "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " +
+                        arrayNode.size + ".",
+                    start,
+                    source);
             }
         }
 

@@ -4,7 +4,6 @@
 
 #include <utils/helpers/Helpers.h>
 #include <bitset>
-#include <iostream>
 #include <random>
 #include <sstream>
 #include <string>
