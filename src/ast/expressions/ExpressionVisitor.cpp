@@ -16,7 +16,6 @@ namespace yogi::visitor {
     }
 
     std::any ExpressionVisitor::visitBinaryExpression(Grammar::BinaryExpressionContext* ctx) {
-
         // -------------------------------------------------------
         // (1) Literal → return literal node
         // -------------------------------------------------------
@@ -94,11 +93,14 @@ namespace yogi::visitor {
                         throw std::runtime_error("Variable '" + node.value + "' is not declared");
 
                     const auto& varNode = variable.value();
-                    if (varNode->kind != nodes::Kind::VARIABLE_DECLARATION)
-                        throw std::runtime_error("Identifier '" + node.value + "' must be a variable");
+                    if (varNode->varType.starts_with("int") || varNode->varType.starts_with("uint")) {
+                        if (varNode->kind != nodes::Kind::VARIABLE_DECLARATION)
+                            throw std::runtime_error("Identifier '" + node.value + "' must be a variable");
 
-                    // Recursive call to resolve identifiers fully
-                    return extractedValue(varNode->value);
+                        return extractedValue(varNode->value);
+                    }
+
+                    throwError("Error", "identifier '" + varNode->identifier + "' must be an number", result, source);
                 }
 
                 throw std::runtime_error("Unsupported node type in expression");

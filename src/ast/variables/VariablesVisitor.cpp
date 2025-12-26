@@ -84,16 +84,18 @@ namespace yogi::visitor {
 
         if (value.type() == typeid(nodes::BinaryExpressionNode)) {
             auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
-
-            std::any floatLiteralNode;
+            // std::cout << "<BinaryExpressionNode>: " << typeid(node.value).name() << std::endl;
 
             if (dataType.starts_with("float")) {
-                floatLiteralNode = nodes::FloatLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
+                auto floatLiteralNode = nodes::FloatLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
+                const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
+                analyzeVariableDeclaration(varNode, source);
+                scope->declareVariable(identifier, varNode);
 
-            } else {
-                floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
+                return varNode;
             }
 
+            auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
             const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
             analyzeVariableDeclaration(varNode, source);
             scope->declareVariable(identifier, varNode);
