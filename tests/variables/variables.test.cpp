@@ -150,9 +150,8 @@ namespace yogi::visitor::nodes {
     std::string oct2 = toOctal(randomInt(0, INT16_MAX));
 
     // Random exponent value
-
-    std::string exp1 = toExponent(std::stoll(float32));
-    std::string exp2 = toExponent(std::stoll(float32));
+    std::string exp1 = toExponent(std::stold(float32));
+    std::string exp2 = toExponent(std::stold(float32));
 
     // Random underscore value
     std::string underscore1 = toUnderscore(std::to_string(randomInt(INT8_MIN, INT8_MAX)));
@@ -197,8 +196,8 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("float64 a = 16.469402", "float", "a", "16.469402"), // Work but needs attention
 
             // Exponent Notation
-            std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
-            std::make_tuple<std::string>("float a = " + exp2, "float", "a", exp2),
+            std::make_tuple<std::string>("float b = " + exp1, "float", "a", exp1),
+            std::make_tuple<std::string>("float c = " + exp2, "float", "a", exp2),
 
             // Boolean
             std::make_tuple<std::string>("bool a = " + bool1, "bool", "a", bool1 == "true" ? "1" : "0"),
@@ -209,7 +208,6 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
             std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!"),
             std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!")
-
         );
 
         auto [text, type, name, expectedValue] = cases;
@@ -217,7 +215,6 @@ namespace yogi::visitor::nodes {
         const auto& node = std::any_cast<VariableDeclarationNode>(ast.body[0].children.at(0));
         const auto [resolvedType, resolvedValue, resolvedNode] = utils::Helpers::resolveItem(node.value);
 
-        std::cout << node.varType << ": " << resolvedValue << " " << expectedValue << std::endl;
         REQUIRE(node.kind == Kind::VARIABLE_DECLARATION);
         REQUIRE(resolvedValue == expectedValue);
         REQUIRE(resolvedType == type);
