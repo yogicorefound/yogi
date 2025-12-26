@@ -1,1 +1,1 @@
-int d = 0xff + 1.5
+uint d = 10

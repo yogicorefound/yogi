@@ -45,8 +45,6 @@ namespace yogi::visitor {
 
             processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, itemResult, scope, source);
 
-            // analyzeArrayItems(identifier, itemType, rValue, boolValue, arrayType, resolveItem(itemResult, scope, source), source);
-
             // Add element to array
             auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
             elements.push_back(std::move(elementNode));

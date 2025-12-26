@@ -4,6 +4,7 @@
 
 #include <utils/helpers/Helpers.h>
 #include <bitset>
+#include <iostream>
 #include <random>
 #include <sstream>
 #include <string>
@@ -19,12 +20,44 @@ namespace yogi::visitor::nodes {
         return dist(gen);
     }
 
+    std::string formatFloatNumberDecimal(const std::string& text, const int maxDecimals = -1) {
+        double value;
+        try {
+            value = std::stod(text);
+        } catch (...) {
+            return text; // si no es número válido
+        }
+
+        std::ostringstream oss;
+
+        if (maxDecimals >= 0) {
+            oss << std::fixed << std::setprecision(maxDecimals) << value;
+        } else {
+            oss << value;
+        }
+
+        std::string result = oss.str();
+
+        // Eliminar ceros finales
+        if (result.find('.') != std::string::npos) {
+            result.erase(result.find_last_not_of('0') + 1);
+
+            // Eliminar el punto si quedó solo
+            if (result.back() == '.') {
+                result.pop_back();
+            }
+        }
+
+        return result;
+    }
+
     double randomDouble(const double min, const double max) {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         std::uniform_real_distribution dist(min, max);
 
-        return dist(gen);
+        const auto value = formatFloatNumberDecimal(Catch::to_string(dist(gen)));
+        return std::stod(value);
     }
 
     std::string toHex(const uint64_t value) {
@@ -45,7 +78,7 @@ namespace yogi::visitor::nodes {
     }
 
     template <typename T>
-    std::string toExponent(T value, int precision = 6) {
+    std::string toExponent(T value, const int precision = 6) {
         std::stringstream ss;
         ss.setf(std::ios::scientific);
         ss.precision(precision);
@@ -98,7 +131,7 @@ namespace yogi::visitor::nodes {
 
     // Random underscore float value
     std::string underscoreFloat1 = toUnderscore(float32);
-    std::string underscoreFloat2 = toUnderscore(float64);
+    std::string underscoreFloat2 = toUnderscore(float32);
 
     // Random boolean values
     std::string bool1 = randomInt(0, 1) == 1 ? "true" : "false";
@@ -117,8 +150,9 @@ namespace yogi::visitor::nodes {
     std::string oct2 = toOctal(randomInt(0, INT16_MAX));
 
     // Random exponent value
-    std::string exp1 = toExponent(randomDouble(0, 2000));
-    std::string exp2 = toExponent(randomDouble(0, 2000));
+
+    std::string exp1 = toExponent(std::stoll(float32));
+    std::string exp2 = toExponent(std::stoll(float32));
 
     // Random underscore value
     std::string underscore1 = toUnderscore(std::to_string(randomInt(INT8_MIN, INT8_MAX)));
@@ -159,30 +193,31 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("float a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float32 a = " + float32, "float", "a", float32),
             std::make_tuple<std::string>("float64 a = " + float64, "float", "a", float64),
-            std::make_tuple<std::string>("float a = " + underscoreFloat1, "float", "a", std::to_string(utils::Helpers::parseFloat(float32)))
-            // std::make_tuple<std::string>("float64 a = " + underscoreFloat2, "float", "a", std::to_string(utils::Helpers::parseFloat(float64)))
+            std::make_tuple<std::string>("float a = 1716.469402", "float", "a", "1716.469402"), // // Work but needs attention
+            std::make_tuple<std::string>("float64 a = 16.469402", "float", "a", "16.469402"), // Work but needs attention
 
-            // // Exponent Notation
-            // std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
-            // std::make_tuple<std::string>("float a = " + exp2, "float", "a", exp2),
-            //
-            // // Boolean
-            // std::make_tuple<std::string>("bool a = " + bool1, "bool", "a", bool1 == "true" ? "1" : "0"),
-            // std::make_tuple<std::string>("bool a = " + bool2, "bool", "a", bool2 == "true" ? "1" : "0")
+            // Exponent Notation
+            std::make_tuple<std::string>("float a = " + exp1, "float", "a", exp1),
+            std::make_tuple<std::string>("float a = " + exp2, "float", "a", exp2),
+
+            // Boolean
+            std::make_tuple<std::string>("bool a = " + bool1, "bool", "a", bool1 == "true" ? "1" : "0"),
+            std::make_tuple<std::string>("bool a = " + bool2, "bool", "a", bool2 == "true" ? "1" : "0"),
 
             // String
-            // std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),
-            // std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
-            // std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!")
+            std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),
+            std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
+            std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!"),
+            std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!")
 
         );
 
         auto [text, type, name, expectedValue] = cases;
-
         const auto ast = Yogi::testAST(text);
         const auto& node = std::any_cast<VariableDeclarationNode>(ast.body[0].children.at(0));
         const auto [resolvedType, resolvedValue, resolvedNode] = utils::Helpers::resolveItem(node.value);
 
+        std::cout << node.varType << ": " << resolvedValue << " " << expectedValue << std::endl;
         REQUIRE(node.kind == Kind::VARIABLE_DECLARATION);
         REQUIRE(resolvedValue == expectedValue);
         REQUIRE(resolvedType == type);

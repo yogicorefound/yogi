@@ -82,7 +82,7 @@ namespace yogi::visitor {
 
         if (ctx->getText().contains("_")) {
             // ctx->getText()
-            auto node = nodes::IntegerLiteralNode(std::to_string(parseFloat(ctx->getText())), start, end);
+            auto node = nodes::IntegerLiteralNode(formatFloatNumberDecimal(ctx->getText(), -1), start, end);
             return node;
         }
 

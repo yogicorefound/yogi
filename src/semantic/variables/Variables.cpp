@@ -207,15 +207,15 @@ namespace yogi::semantic {
 
     bool Variables::checkDataType(const std::string& dataType, const std::string& returnType) {
         if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {
-            return returnType == "int" || returnType == "float";
+            return returnType == "int";
         }
 
         if (dataType == "uint" || dataType == "uint8" || dataType == "uint16" || dataType == "uint32" || dataType == "uint64") {
-            return returnType == "int" || returnType == "float";
+            return returnType == "int";
         }
 
         if (dataType == "float" || dataType == "float32" || dataType == "float64") {
-            return returnType == "float" || returnType == "int";
+            return returnType == "float";
         }
 
         if (dataType == "bool") {

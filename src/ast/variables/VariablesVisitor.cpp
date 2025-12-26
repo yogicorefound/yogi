@@ -70,19 +70,15 @@ namespace yogi::visitor {
 
         // Visit the expression instead of variableValue
         std::any value = visit(ctx->expression());
-
         parser->inVarMode = false;
 
         const bool isConstant = toUpper(identifier) == identifier;
-
-        std::cout << "<BinaryExpressionNode>: " << value.type().name() << std::endl;
-
-        // If it's an identifier, check it exists in scope (optional)
         if (value.type() == typeid(nodes::IdentifierLiteral)) {
             if (auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(value); !scope->lookupVariable(identifierNode.value).has_value()) {
                 throwScopeError("variable '" + identifierNode.value + "' is not declared", identifierNode.value, value, source);
             }
         }
+
 
         if (value.type() == typeid(nodes::BinaryExpressionNode)) {
             auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
@@ -98,27 +94,7 @@ namespace yogi::visitor {
 
             auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
             const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
-            analyzeVariableDeclaration(varNode, source);
-            scope->declareVariable(identifier, varNode);
 
-            return varNode;
-        }
-
-
-        if (value.type() == typeid(nodes::IntegerLiteralNode)) {
-            auto integerNode = std::any_cast<nodes::IntegerLiteralNode>(value);
-
-            if (dataType.starts_with("float")) {
-                auto floatLiteralNode = nodes::FloatLiteralNode(formatFloatNumberDecimal(integerNode.value, -1), integerNode.start, integerNode.end);
-                const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
-                analyzeVariableDeclaration(varNode, source);
-                scope->declareVariable(identifier, varNode);
-
-                return varNode;
-            }
-
-            auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(integerNode.value)), integerNode.start, integerNode.end);
-            const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
             analyzeVariableDeclaration(varNode, source);
             scope->declareVariable(identifier, varNode);
 
