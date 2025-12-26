@@ -1,3 +1,4 @@
-str a = f"Hello, {"hola " + "adios"} {1.5 - 5}"
-str b = f"{a + " adios"} adios"
 
+int c = 1 // ok
+float d = 10.5 + c // ok
+float a = d + c // ok

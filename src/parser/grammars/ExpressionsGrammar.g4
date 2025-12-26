@@ -10,8 +10,8 @@ expression
           : booleanLiteral
           | numberLiterals
           | identifierLiteral
-          | concatenationExpression
           | binaryExpression
+          | concatenationExpression
           | memberExpression
           ;
 

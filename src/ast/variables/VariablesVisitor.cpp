@@ -55,7 +55,7 @@ namespace yogi::visitor {
     std::any VariablesVisitor::visitVariableDeclaration(Grammar::VariableDeclarationContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        // Get identifier
+
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
         parser->inVarMode = true;
@@ -64,87 +64,47 @@ namespace yogi::visitor {
         const auto visitDataType = visit(ctx->variableDataType());
         const auto dataType = std::any_cast<std::string>(visitDataType);
 
-        // // Check if variable already exists in current scope
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
         }
 
-        std::any value = visit(ctx->variableValue());
+        // Visit the expression instead of variableValue
+        std::any value = visit(ctx->expression());
 
         parser->inVarMode = false;
-        // Determine if it's a constant (const keyword)
+
         const bool isConstant = toUpper(identifier) == identifier;
 
-        if (value.type() == typeid(nodes::ConcatenationExpressionNode)) {
-            const auto conNode = std::any_cast<nodes::ConcatenationExpressionNode>(value);
-            value = conNode.value;
-
-        } else if (value.type() == typeid(nodes::BinaryExpressionNode)) {
-            const auto binNode = std::any_cast<nodes::BinaryExpressionNode>(value);
-            if (dataType.contains("int") || dataType.contains("uint")) {
-                nodes::IntegerLiteralNode intNode(binNode.value, binNode.start, binNode.end);
-                value = intNode;
-            } else {
-                nodes::FloatLiteralNode floatNode(binNode.value, binNode.start, binNode.end);
-                value = floatNode;
-            }
-
-        } else if (value.type() == typeid(nodes::IntegerLiteralNode)) {
-            const auto binNode = std::any_cast<nodes::IntegerLiteralNode>(value);
-
-            if (dataType.contains("int") || dataType.contains("uint")) {
-                nodes::IntegerLiteralNode intNode(binNode.value, binNode.start, binNode.end);
-                value = intNode;
-            } else {
-                nodes::FloatLiteralNode floatNode(binNode.value, binNode.start, binNode.end);
-                value = floatNode;
-            }
-
-        } else if (value.type() == typeid(nodes::FloatLiteralNode)) {
-            const auto binNode = std::any_cast<nodes::FloatLiteralNode>(value);
-
-            if (dataType.contains("int") || dataType.contains("uint")) {
-                nodes::IntegerLiteralNode intNode(binNode.value, binNode.start, binNode.end);
-                value = intNode;
-            } else {
-                nodes::FloatLiteralNode floatNode(binNode.value, binNode.start, binNode.end);
-                value = floatNode;
-            }
-        } else if (value.type() == typeid(nodes::IdentifierLiteral)) {
-            const auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(value);
-            const auto variable = scope->lookupVariable(identifierNode.value);
-            if (!variable.has_value()) {
+        // If it's an identifier, check it exists in scope (optional)
+        if (value.type() == typeid(nodes::IdentifierLiteral)) {
+            if (auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(value); !scope->lookupVariable(identifierNode.value).has_value()) {
                 throwScopeError("variable '" + identifierNode.value + "' is not declared", identifierNode.value, value, source);
             }
-
-            const auto varNode = variable.value();
-            value = varNode->value;
         }
 
-        const auto v = value;
-        const auto [varType, reVlue, varName] = Helpers::resolveItem(v);
-        const auto node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
+        if (value.type() == typeid(nodes::BinaryExpressionNode)) {
+            auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
 
-        analyzeVariableDeclaration(node, source);
-        scope->declareVariable(identifier, node);
+            std::any floatLiteralNode;
 
-        return node;
-    }
+            if (dataType.starts_with("float")) {
+                floatLiteralNode = nodes::FloatLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
 
-    std::any VariablesVisitor::visitVariableValue(Grammar::VariableValueContext* ctx) {
-        auto node = visitChildren(ctx);
-
-        if (node.type() == typeid(nodes::IdentifierLiteral)) {
-            const auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(node);
-            const auto variable = scope->lookupVariable(identifierNode.value);
-            std::cout << "visitVariableValues: " << identifierNode.value << std::endl;
-            if (!variable.has_value()) {
-                throwScopeError("variable '" + identifierNode.value + "' is not declared", identifierNode.value, node, source);
+            } else {
+                floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
             }
 
-            const auto varNode = variable.value();
-            return varNode->value;
+            const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
+            analyzeVariableDeclaration(varNode, source);
+            scope->declareVariable(identifier, varNode);
+
+            return varNode;
         }
+
+        // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
+        const auto& node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
+        analyzeVariableDeclaration(node, source);
+        scope->declareVariable(identifier, node);
 
         return node;
     }
@@ -156,7 +116,7 @@ namespace yogi::visitor {
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
         parser->inVarMode = true;
-        const std::any newValue = visit(ctx->variableValue());
+        const std::any newValue = visit(ctx->expression());
         std::cout << newValue.type().name() << std::endl;
         parser->inVarMode = false;
 
