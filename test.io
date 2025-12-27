@@ -1,2 +1,2 @@
-regex a = "[0_9]" // any regex behave as regex
-str a = "Hello" // string
+str a = "Hola"
+a.replace("a", a)

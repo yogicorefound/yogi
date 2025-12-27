@@ -55,19 +55,7 @@ namespace yogi::visitor {
     }
 
     std::vector<std::string> MembersByType::strAvailableMembers() {
-        const std::vector<std::string> members = {
-            "size",
-            "lower",
-            "upper",
-            "title",
-            "includes",
-            "startWith",
-            "endsWith",
-            "find",
-            "trim",
-            "trimStart",
-            "trimEnd"
-        };
+        const std::vector<std::string> members = {"size", "lower", "upper", "title", "includes", "startWith", "endsWith", "find", "trim", "trimStart", "trimEnd", "replace"};
 
         return members;
     }
@@ -328,6 +316,49 @@ namespace yogi::visitor {
 
             nodes::StringLiteralNode node(utils::Helpers::trimEnd(stringLiteralNode.value), variable.start, variable.end);
             return node;
+        }
+
+        if (member == "replace" && isMethod) {
+            if (arguments.size() != 2) {
+                throw std::runtime_error("Error: 'replace' requires exactly 2 arguments, but received " + std::to_string(arguments.size()));
+            }
+
+            // Helper lambda to extract string argument
+            auto extractStringArg = [&](const std::any& arg, const std::string& param) -> std::string {
+                if (arg.type() == typeid(nodes::IdentifierLiteral)) {
+                    const auto identifier = std::any_cast<nodes::IdentifierLiteral>(&arg);
+                    const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                    if (!variableScoped.has_value()) {
+                        utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                    }
+
+                    const auto varNode = variableScoped.value();
+                    if (varNode->varType != "str") {
+                        utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
+                    }
+
+                    const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                    return value;
+                }
+
+                const auto [type, value, node] = utils::Helpers::resolveItem(arg);
+                if (type != "str") {
+                    utils::Errors::throwError("Error", param + " must be a string", node, source);
+                }
+
+                return value;
+            };
+
+            // Extract both arguments
+            const std::string search = extractStringArg(arguments[0], "search");
+            const std::string replacement = extractStringArg(arguments[1], "replacement");
+
+            // Perform replacement on the target variable
+            const auto varNode = utils::Helpers::resolveItem(variable.value);
+            const auto resultValue = utils::Helpers::replace(varNode.value, search, replacement);
+
+            return nodes::StringLiteralNode(resultValue, variable.start, variable.end);
         }
 
         utils::Errors::throwScopeError("Error: member '" + member + "' not available for string type", member, variable, source);

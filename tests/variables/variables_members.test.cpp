@@ -23,7 +23,8 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string, std::string>("str a = \"" + testString + "\" a.includes(\"world\")", testString.contains("world") ? "1" : "0", "bool"),
             std::make_tuple<std::string, std::string>("str a = \"" + testString + "\" a.startWith(\"world\")", testString.starts_with("world") ? "1" : "0", "bool"),
             std::make_tuple<std::string, std::string>("str a = \"" + testString + "\" a.endsWith(\"world\")", testString.ends_with("world") ? "1" : "0", "bool"),
-            std::make_tuple<std::string, std::string>("str a = \"" + testString + "\" a.find(\"world\")", std::move(findIndex), "int")
+            std::make_tuple<std::string, std::string>("str a = \"" + testString + "\" a.find(\"world\")", std::move(findIndex), "int"),
+            std::make_tuple<std::string, std::string>("str a = \"" + testString + "\" a.replace(\"world\", \"mundo\")", utils::Helpers::replace(testString, "world", "mundo"), "str")
 
         );
 
