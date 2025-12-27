@@ -11,11 +11,14 @@ arrays
     | arrayReAssignment
     ;
 
-arrayDeclaration: {inSkipMode = true;} arrayType {inSkipMode = false;} IDENTIFIER EQ LBRACKET (arrayItems (COMMA arrayItems)*)? RBRACKET;
+arrayDeclaration: {inSkipMode = true;} arrayType {inSkipMode = false;} IDENTIFIER EQ arrayValues;
+
+arrayValues: arrayItemsWithBrackets | expression* | memberExpression;
+
+arrayItemsWithBrackets: LBRACKET (expression (COMMA expression)*)? RBRACKET;
 
 arrayItems
     : stringLiteral
-    | formattedString
     | formattedString
     | identifierLiteral
     | integerLiteral

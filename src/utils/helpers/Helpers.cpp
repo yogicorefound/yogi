@@ -11,9 +11,48 @@
 #include <sstream>
 #include <string>
 #include <variant>
+#include <vector>
 #include "antlr4-runtime.h"
 
 namespace yogi::utils {
+
+    std::vector<std::string> Helpers::split(const std::string& text, const std::variant<std::string, std::regex>& pattern) {
+        std::vector<std::string> result;
+
+        if (std::holds_alternative<std::string>(pattern)) {
+            const std::string& sep = std::get<std::string>(pattern);
+
+            if (sep.empty()) {
+                // Optional: split into characters
+                for (char c : text) {
+                    result.emplace_back(1, c);
+                }
+                return result;
+            }
+
+            size_t start = 0;
+            size_t pos;
+
+            while ((pos = text.find(sep, start)) != std::string::npos) {
+                result.push_back(text.substr(start, pos - start));
+                start = pos + sep.length();
+            }
+
+            result.push_back(text.substr(start));
+            return result;
+        }
+
+        const std::regex& rx = std::get<std::regex>(pattern);
+
+        std::sregex_token_iterator it(text.begin(), text.end(), rx, -1);
+        std::sregex_token_iterator end;
+
+        for (; it != end; ++it) {
+            result.push_back(it->str());
+        }
+
+        return result;
+    }
 
     std::string Helpers::replace(const std::string& input, const std::variant<std::string, std::regex>& search, const std::string& replacement) {
         std::string result;
@@ -394,14 +433,21 @@ namespace yogi::utils {
         // Array element (IMPORTANT FIX)
         // -------------------------------------------------
 
+        if (node.type() == typeid(std::vector<ArrayElementNode>)) {
+            const auto& n = std::any_cast<const std::vector<ArrayElementNode>&>(node);
+
+            json elements = json::array();
+            for (const auto& el : n) {
+                elements.push_back(nodeToJson(el));
+            }
+
+            return {{"kind", "ArrayElements"}, {"elements", elements}};
+        }
+
         if (node.type() == typeid(ArrayElementNode)) {
             const auto& n = std::any_cast<const ArrayElementNode&>(node);
             return nodeToJson(n.value); // unwrap
         }
-
-        // -------------------------------------------------
-        // Members
-        // -------------------------------------------------
 
         // -------------------------------------------------
         // Expressions
@@ -439,7 +485,6 @@ namespace yogi::utils {
         // -------------------------------------------------
         // Declarations
         // -------------------------------------------------
-
         if (node.type() == typeid(VariableDeclarationNode)) {
             const auto& n = std::any_cast<const VariableDeclarationNode&>(node);
             return {{"kind", "VariableDeclaration"}, {"identifier", n.identifier}, {"type", n.varType}, {"isConstant", n.isConstant}, {"value", nodeToJson(n.value)}};
@@ -518,6 +563,34 @@ namespace yogi::utils {
         }
 
         return {}; // unreachable
+    }
+
+    visitor::nodes::Kind Helpers::resolveKind(const std::any& itemResult) {
+        if (itemResult.type() == typeid(visitor::nodes::IntegerLiteralNode)) {
+            return visitor::nodes::Kind::INTEGER_LITERAL;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::FloatLiteralNode)) {
+            return visitor::nodes::Kind::FLOAT_LITERAL;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::StringLiteralNode)) {
+            return visitor::nodes::Kind::STRING_LITERAL;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::RegexLiteralNode)) {
+            return visitor::nodes::Kind::REGEX_LITERAL;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::BooleanLiteralNode)) {
+            return visitor::nodes::Kind::BOOLEAN_LITERAL;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::BinaryExpressionNode)) {
+            return visitor::nodes::Kind::BINARY_EXPRESSION;
+        }
+
+        return visitor::nodes::Kind::NONE_LITERAL;
     }
 
 } // namespace yogi::utils

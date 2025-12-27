@@ -18,6 +18,7 @@ namespace yogi::visitor {
         std::any visitArrayDeclarationTypeSize(Grammar::ArrayDeclarationTypeSizeContext* ctx) override;
         std::any visitArrayType(Grammar::ArrayTypeContext* ctx) override;
         std::any visitArrayDataType(Grammar::ArrayDataTypeContext* ctx) override;
+        std::any visitArrayItemsWithBrackets(Grammar::ArrayItemsWithBracketsContext* ctx) override;
+        std::any visitArrayValues(Grammar::ArrayValuesContext* ctx) override;
     };
 } // namespace yogi::visitor
-

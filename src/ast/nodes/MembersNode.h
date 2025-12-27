@@ -9,12 +9,10 @@
 namespace yogi::visitor::nodes {
 
     struct MemberExpressionNode : BaseNode {
-        std::any object; // expresión base
-        std::string member; // property o method
-        std::vector<std::any> arguments; // vacío si es property
-        bool isCall; // true = method call
+        std::any value; // expresión base
+        Kind kind; // property o method
 
-        MemberExpressionNode(std::any object, std::string member, std::vector<std::any> arguments, bool isCall, Position start, Position end) : BaseNode(isCall ? Kind::MEMBER_METHOD : Kind::MEMBER_ACCESS, start, end), object(std::move(object)), member(std::move(member)), arguments(std::move(arguments)), isCall(isCall) {}
+        MemberExpressionNode(const std::any& value, const Kind kind, Position const start, const Position end) : BaseNode(kind, start, end), value(value), kind(kind) {}
     };
 
 } // namespace yogi::visitor::nodes

@@ -9,6 +9,8 @@
 #include "libs/json.hpp"
 #include "math/math.h"
 
+#include <ast/nodes/BaseNode.h>
+
 using json = nlohmann::ordered_json;
 
 namespace yogi::utils {
@@ -27,6 +29,7 @@ namespace yogi::utils {
         static std::string trim(std::string s);
         static std::string trimStart(std::string s);
         static std::string trimEnd(std::string s);
+        static std::vector<std::string> split(const std::string& text, const std::variant<std::string, std::regex>& pattern);
         static std::string replace(const std::string& input, const std::variant<std::string, std::regex>& search, const std::string& replacement);
 
         static json createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop);
@@ -37,5 +40,6 @@ namespace yogi::utils {
         static json nodeToJson(const std::any& node);
 
         static ResolvedItem resolveItem(const std::any& itemResult);
+        static visitor::nodes::Kind resolveKind(const std::any& itemResult);
     };
 } // namespace yogi::utils

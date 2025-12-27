@@ -26,60 +26,115 @@ namespace yogi::visitor {
             throwScopeError(message, identifier, type, source);
         }
 
-        // Create array declaration node
-        std::vector<nodes::ArrayElementNode> elements;
+        // Value by passing array of elements
+        if (auto arrayValues = visit(ctx->arrayValues()); arrayValues.has_value()) {
+            std::vector<nodes::ArrayElementNode> elements;
 
-        parser->inVarMode = true;
-        for (auto exprCtx : ctx->arrayItems()) {
-            const auto item = visit(exprCtx);
+            if (arrayValues.type() == typeid(std::vector<nodes::StringLiteralNode>)) {
+                for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(arrayValues); const auto& item : stringLiterals) {
+                    const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                    const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
 
-            // Extract value and type from the item
-            std::string itemType;
-            std::any itemValue;
+                    elements.push_back(std::move(elementNode));
+                }
+            }
 
-            if (item.type() == typeid(nodes::IdentifierLiteral)) {
-                auto node = std::any_cast<nodes::IdentifierLiteral>(item);
-                const auto variable = scope->lookupVariable(node.value);
-                if (!variable.has_value()) {
-                    throwScopeError("Error: '" + node.value + "' is not declared", node.value, node, source);
+            // Register ArrayDeclarationNode in scope
+            nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
+            scope->declareArray(identifier, node);
+
+            return node;
+        }
+
+        // Value by passing literal with brackets
+        if (const auto& arrayItemsWithBrackets = ctx->arrayValues()->arrayItemsWithBrackets()->expression(); !arrayItemsWithBrackets.empty()) {
+            std::vector<nodes::ArrayElementNode> elements;
+            // Create array declaration node
+
+            parser->inVarMode = true;
+            for (auto itemCtx : arrayItemsWithBrackets) {
+                const auto item = visit(itemCtx);
+                std::cout << "arrayItemsWithBrackets: " << typeid(itemCtx).name() << std::endl;
+
+                // Extract value and type from the item
+                std::string itemType;
+                std::any itemValue;
+
+                if (item.type() == typeid(nodes::IdentifierLiteral)) {
+                    auto node = std::any_cast<nodes::IdentifierLiteral>(item);
+                    const auto variable = scope->lookupVariable(node.value);
+                    if (!variable.has_value()) {
+                        throwScopeError("Error: '" + node.value + "' is not declared", node.value, node, source);
+                    }
+
+                    const auto varNode = variable.value();
+                    itemValue = varNode->value;
+                    itemType = varNode->varType;
+
+                } else {
+                    std::string boolValue;
+                    std::string rValue;
+                    processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, item, scope, source);
                 }
 
-                const auto varNode = variable.value();
-                itemValue = varNode->value;
-                itemType = varNode->varType;
+                std::cout << "processArrayItems: " << itemValue.type().name() << std::endl;
 
-            } else {
-                std::string boolValue;
-                std::string rValue;
-                processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, item, scope, source);
+                // Add element to array
+                auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
+                elements.push_back(std::move(elementNode));
+            }
+            parser->inVarMode = false;
+
+            // Check if declared size matches actual elements
+
+            if (arraySize != "auto") {
+                if (elements.size() > std::stoull(arraySize)) {
+                    throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arraySize + ".", start, source);
+                }
             }
 
-            // Add element to array
-            auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
-            elements.push_back(std::move(elementNode));
-        }
-        parser->inVarMode = false;
+            nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
+            scope->declareArray(identifier, node);
 
-        // Check if declared size matches actual elements
-        if (arraySize != "auto") {
-            if (elements.size() > std::stoull(arraySize)) {
-                throwError(
-                    "ArraySizeViolation",
-                    "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " +
-                        arraySize + ".",
-                    start,
-                    source);
-            }
+            return node;
         }
+
+        throwTypeError(identifier, arrayType, type, source);
+        return "";
 
         // Register ArrayDeclarationNode in scope
-        nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
-        scope->declareArray(identifier, node);
-
-        return node;
     }
 
     std::any ArraysVisitor::visitArrayItems(Grammar::ArrayItemsContext* ctx) {
+        return visitChildren(ctx);
+    }
+
+    std::any ArraysVisitor::visitArrayItemsWithBrackets(Grammar::ArrayItemsWithBracketsContext* ctx) {
+        return visitChildren(ctx);
+    }
+
+    std::any ArraysVisitor::visitArrayValues(Grammar::ArrayValuesContext* ctx) {
+
+        std::cout << "visitArrayValues: " << typeid(ctx->expression().data()).name() << std::endl;
+        // Value by passing array of elements
+        // if (auto arrayValues = visit(ctx->expression()); arrayValues.has_value()) {
+        //     std::vector<nodes::ArrayElementNode> elements;
+        //
+        //     if (arrayValues.type() == typeid(std::vector<nodes::StringLiteralNode>)) {
+        //         for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(arrayValues); const auto& item : stringLiterals) {
+        //             const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+        //             const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
+        //
+        //             elements.push_back(std::move(elementNode));
+        //         }
+        //     }
+        //
+        //     // Register ArrayDeclarationNode in scope
+        //     nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
+        //     scope->declareArray(identifier, node);
+        //
+        //     return node;
+        // }
         return visitChildren(ctx);
     }
 
@@ -124,12 +179,7 @@ namespace yogi::visitor {
         // Check if declared size matches actual elements
         if (arrayNode.size != "auto") {
             if (elements.size() > std::stoull(arrayNode.size)) {
-                throwError(
-                    "ArraySizeViolation",
-                    "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " +
-                        arrayNode.size + ".",
-                    start,
-                    source);
+                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arrayNode.size + ".", start, source);
             }
         }
 

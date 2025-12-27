@@ -55,14 +55,12 @@ namespace yogi::visitor {
     std::any VariablesVisitor::visitVariableDeclaration(Grammar::VariableDeclarationContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
         parser->inVarMode = true;
-
-        // Get data type
         const auto visitDataType = visit(ctx->variableDataType());
-        const auto dataType = std::any_cast<std::string>(visitDataType);
+        const auto arrayTypeKind = resolveKind(visitDataType);
+        const auto [dataType, typeValue, typeNode] = Helpers::resolveItem(visitDataType);
 
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
@@ -71,6 +69,18 @@ namespace yogi::visitor {
         // Visit the expression instead of variableValue
         std::any value = visit(ctx->expression());
         parser->inVarMode = false;
+
+        if (value.type() == typeid(nodes::MemberExpressionNode)) {
+            const auto memberExpression = std::any_cast<nodes::MemberExpressionNode>(value);
+
+            std::cout << "memberExpression: " << memberExpression.value.type().name() << " arrayTypeKind: " << typeid(arrayTypeKind).name() << std::endl;
+            if (arrayTypeKind != memberExpression.kind) {
+                throwTypeError(identifier, typeValue, memberExpression.value, source);
+            }
+
+            const auto [memberType, memberValue, memberNode] = Helpers::resolveItem(memberExpression.value);
+            return memberNode;
+        }
 
         const bool isConstant = toUpper(identifier) == identifier;
         if (value.type() == typeid(nodes::IdentifierLiteral)) {
@@ -163,8 +173,29 @@ namespace yogi::visitor {
     }
 
     std::any VariablesVisitor::visitVariableDataType(Grammar::VariableDataTypeContext* ctx) {
-        // Return the type as a string
-        return ctx->getText();
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        const auto dataType = ctx->getText();
+        std::cout << "visitVariableDataType: " << dataType<< std::endl;
+
+        if (dataType == "str") {
+            return nodes::StringLiteralNode(dataType, start, end);
+        }
+
+        if (dataType.starts_with("int") || dataType.starts_with("uint")) {
+            return nodes::IntegerLiteralNode(dataType, start, end);
+        }
+
+        if (dataType.starts_with("float")) {
+            return nodes::FloatLiteralNode(dataType, start, end);
+        }
+
+        if (dataType == "bool") {
+            return nodes::BooleanLiteralNode(dataType, start, end);
+        }
+
+        return nodes::NoneLiteralNode("", start, end);
     }
 
 } // namespace yogi::visitor

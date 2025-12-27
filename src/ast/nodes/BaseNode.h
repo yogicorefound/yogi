@@ -13,6 +13,9 @@ namespace yogi::visitor::nodes {
         STATEMENT,
         DATA_TYPE,
 
+        // Regex
+        REGEX_LITERAL,
+
         // Literal
         INTEGER_LITERAL,
         FLOAT_LITERAL,
@@ -39,6 +42,7 @@ namespace yogi::visitor::nodes {
 
         ARRAY_DECLARATION,
         ARRAY_ELEMENT,
+        ARRAY_ELEMENTS,
 
         DICTIONARY_DECLARATION,
         DICTIONARY_PAIR,
