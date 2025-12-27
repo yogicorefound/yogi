@@ -15,6 +15,7 @@ namespace yogi::visitor {
         static std::any processMembers(
             nodes::VariableDeclarationNode& variable,
             const std::string& member,
+            const bool& isMethod,
             const std::vector<std::any>& arguments,
             const std::string& source);
 
@@ -30,6 +31,7 @@ namespace yogi::visitor {
         static std::any processStringMembers(
             nodes::VariableDeclarationNode& variable,
             const std::string& member,
+            const bool& isMethod,
             std::vector<std::any> arguments,
             const std::string& source);
     };

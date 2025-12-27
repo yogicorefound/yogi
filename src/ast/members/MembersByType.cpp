@@ -78,6 +78,7 @@ namespace yogi::visitor {
     std::any MembersByType::processStringMembers(
         nodes::VariableDeclarationNode& variable,
         const std::string& member,
+        const bool& isMethod,
         std::vector<std::any> arguments,
         const std::string& source) {
         // Check if member is available for strings
@@ -98,7 +99,7 @@ namespace yogi::visitor {
         std::cout << "Processing string member '" << member << "' on value: " << stringLiteralNode.value << std::endl;
 
         // Properties (no arguments needed)
-        if (member == "size") {
+        if (member == "size" && isMethod) {
             nodes::IntegerLiteralNode node(std::to_string(stringLiteralNode.value.size()), variable.start, variable.end);
             return node;
         }
@@ -184,6 +185,7 @@ namespace yogi::visitor {
     std::any MembersByType::processMembers(
         nodes::VariableDeclarationNode& variable,
         const std::string& member,
+        const bool& isMethod,
         const std::vector<std::any>& arguments,
         const std::string& source) {
         std::any result;
@@ -193,7 +195,7 @@ namespace yogi::visitor {
         }
 
         if (variable.varType == "str") {
-            return processStringMembers(variable, member, arguments, source);
+            return processStringMembers(variable, member, isMethod, arguments, source);
         }
 
         utils::Errors::throwScopeError("Error: member '" + member + "' not available for type '" + variable.varType + "'", member, variable, source);

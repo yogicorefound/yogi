@@ -21,7 +21,6 @@ namespace yogi::visitor {
 
         const auto& variable = lookupVariable.value();
 
-
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
         variable->start = start;
@@ -39,73 +38,42 @@ namespace yogi::visitor {
 
         for (size_t i = 0; i < postfixes.size(); i++) {
             auto* postfix = postfixes[i];
+            if (!postfix)
+                throw std::runtime_error("Null postfix at index " + std::to_string(i));
 
-            if (!postfix) {
-                throw std::runtime_error("Error: null postfix in chain at index " + std::to_string(i));
-            }
+            std::string memberName;
+            std::vector<std::any> arguments;
+            bool isMethod = false;
 
-            // Check if this is a DOT access (.member)
             if (postfix->DOT()) {
                 auto* identLiteral = postfix->identifierLiteral();
-                if (!identLiteral) {
-                    throw std::runtime_error("Error: DOT postfix has no identifier");
-                }
+                memberName = identLiteral->getText();
 
-                const std::string memberName = identLiteral->getText();
-
-                // Check if the NEXT postfix is a function call on this member
-                std::vector<std::any> arguments;
-
-                if (i + 1 < postfixes.size()) {
-                    auto* nextPostfix = postfixes[i + 1];
-                    // If next postfix is LPAREN with no DOT, it's calling the current member
-                    if (nextPostfix && nextPostfix->LPAREN() && !nextPostfix->DOT() && !nextPostfix->identifierLiteral()) {
-                        // Get arguments from the next postfix
-                        if (nextPostfix->argumentList()) {
-                            for (auto* expr : nextPostfix->argumentList()->expression()) {
-                                if (expr) {
-                                    arguments.push_back(visit(expr));
-                                }
-                            }
-                        }
-
-                        i++; // Skip the next postfix since we already processed it
-                    }
-                }
-
-                // Process as property or method
-
-                current = processMembers(*variable, memberName, arguments, source);
-            }
-            // Standalone method call (should have identifier)
-            else if (postfix->LPAREN()) {
-                auto* identLiteral = postfix->identifierLiteral();
-                if (!identLiteral) {
-                    throw std::runtime_error("Error: method call postfix has no identifier (this shouldn't happen - check grammar)");
-                }
-
-                const std::string memberName = identLiteral->getText();
-                std::vector<std::any> arguments;
-
-                if (postfix->argumentList()) {
-                    for (auto* expr : postfix->argumentList()->expression()) {
-                        if (expr) {
+                // Lookahead: is next postfix a LPAREN for method call?
+                if (i + 1 < postfixes.size() && postfixes[i + 1]->LPAREN()) {
+                    isMethod = true;
+                    auto* callPostfix = postfixes[i + 1];
+                    if (callPostfix->argumentList()) {
+                        for (auto* expr : callPostfix->argumentList()->expression()) {
                             arguments.push_back(visit(expr));
                         }
                     }
+                    i++; // Skip the LPAREN postfix, already processed
+                }
+            } else if (postfix->LPAREN()) {
+                isMethod = true;
+                if (postfix->argumentList()) {
+                    for (auto* expr : postfix->argumentList()->expression()) {
+                        arguments.push_back(visit(expr));
+                    }
                 }
 
-                std::cout << "Method call: " << memberName << "() with " << arguments.size() << " arguments" << std::endl;
-                current = processMembers(*variable, memberName, arguments, source);
-            } else {
-                // Unknown postfix type
-                throw std::runtime_error("Error: Unknown postfix type at index " + std::to_string(i) + " (text: " + postfix->getText() + ")");
+                memberName = ""; // empty means "call current object"
             }
 
-            // ✅ Validate result after each operation
-            if (!current.has_value()) {
-                throw std::runtime_error("Error: processMembers returned empty value");
-            }
+            current = processMembers(*variable, memberName, isMethod, arguments, source);
+            if (!current.has_value())
+                throw std::runtime_error("processMembers returned empty value");
         }
 
         return current;

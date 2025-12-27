@@ -12,7 +12,7 @@ namespace yogi::visitor::nodes {
         // List of test expressions: { input_text, expected_value, expected_result_type, top_operator }
         auto cases = GENERATE(
             // string members
-            std::make_tuple<std::string, std::string>("str a = \"yx\" a.size()", "2", "int")
+            std::make_tuple<std::string, std::string>("str a = \"yx\" a.size", "2", "int")
 
         );
 
@@ -20,9 +20,6 @@ namespace yogi::visitor::nodes {
         const auto ast = Yogi::testAST(text);
         const auto [type, value, node] = utils::Helpers::resolveItem(ast.body[1].children.at(0));
 
-        std::cout << type << std::endl;
-
-        //
         REQUIRE(value == expectedValue);
         REQUIRE(type == expectedType);
     }
