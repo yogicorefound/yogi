@@ -34,7 +34,8 @@ namespace yogi::visitor {
 
         parser->inVarMode = true;
         for (auto exprCtx : ctx->arrayItems()) {
-            const auto itemResult = visit(exprCtx);
+            const auto item = visit(exprCtx);
+            std::cout << "itemResult: " << item.type().name() << std::endl;
 
             // Extract value and type from the item
             std::string itemType;
@@ -42,12 +43,26 @@ namespace yogi::visitor {
             std::string boolValue;
             std::string rValue;
 
-            processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, itemResult, scope, source);
+            if (item.type() == typeid(nodes::IdentifierLiteral)) {
+                auto node = std::any_cast<nodes::IdentifierLiteral>(item);
+                const auto variable = scope->lookupVariable(node.value);
+                if (!variable.has_value()) {
+                    throwScopeError("Error: '" + node.value + "' is not declared", node.value, node, source);
+                }
+
+                const auto varNode = variable.value();
+                itemValue = varNode->value;
+                itemType = varNode->varType;
+
+            } else {
+                processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, item, scope, source);
+            }
 
             // Add element to array
             auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
             elements.push_back(std::move(elementNode));
         }
+
         parser->inVarMode = false;
 
         // Check if declared size matches actual elements

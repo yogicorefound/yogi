@@ -1,1 +1,2 @@
-int8[] a = [1]
+str a = "x"
+str[1] b = [a]
