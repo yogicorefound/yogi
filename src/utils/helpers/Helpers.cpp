@@ -502,6 +502,11 @@ namespace yogi::utils {
             return {"str", n.value, itemResult};
         }
 
+        if (itemResult.type() == typeid(visitor::nodes::RegexLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::RegexLiteralNode>(itemResult);
+            return {"regex", n.value, itemResult};
+        }
+
         if (itemResult.type() == typeid(visitor::nodes::BooleanLiteralNode)) {
             auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(itemResult);
             return {"bool", n.value, itemResult};

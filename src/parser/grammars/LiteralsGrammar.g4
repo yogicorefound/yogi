@@ -19,7 +19,6 @@ numberLiterals
 stringLiterals
     : stringLiteral
     | formattedString
-//    | regexLiteral
     | identifierLiteral
     ;
 
@@ -28,7 +27,8 @@ formattedString
     ;
 
 formattedStringContent
-    : FORMATTED_STRING_TEXT
+    : REGEX_LITERAL
+    | FORMATTED_STRING_TEXT
     | LBRACE_IN_FSTRING expression RBRACE_IN_FSTRING
     ;
 

@@ -204,7 +204,7 @@ namespace yogi::visitor {
         }
 
         // CASE 2: TEXT inside formatted string
-        if (ctx->FORMATTED_STRING_TEXT()) {
+        if (ctx->FORMATTED_STRING_TEXT() || ctx->REGEX_LITERAL()) {
             const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
             const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 

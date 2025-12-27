@@ -102,11 +102,15 @@ namespace yogi::visitor {
 
         const auto [type, resolveValue, _] = Helpers::resolveItem(value);
         if (dataType == "regex") {
-            const auto regexNode = nodes::RegexLiteralNode(resolveValue, start, end);
+            std::string rValue = resolveValue;
+            if (rValue.size() >= 2) {
+                rValue.erase(0, 1); // remove first character
+                rValue.erase(rValue.size() - 1, 1); // remove last character
+            }
+            const auto regexNode = nodes::RegexLiteralNode(rValue, start, end);
             const auto& node = nodes::VariableDeclarationNode(identifier, dataType, regexNode, isConstant, start, end);
 
             analyzeVariableDeclaration(node, source);
-            std::cout << "VariableDeclaration: " << "value.type().name()" << std::endl;
             scope->declareVariable(identifier, node);
 
             return node;

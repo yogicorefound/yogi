@@ -324,7 +324,7 @@ namespace yogi::visitor {
             }
 
             // Helper lambda to extract string argument
-            auto extractStringArg = [&](const std::any& arg, const std::string& param) -> std::string {
+            auto extractStringArg = [&](const std::any& arg, const std::string& param) -> std::pair<std::string, std::string> {
                 if (arg.type() == typeid(nodes::IdentifierLiteral)) {
                     const auto identifier = std::any_cast<nodes::IdentifierLiteral>(&arg);
                     const auto variableScoped = scope->lookupVariable(identifier->value);
@@ -334,30 +334,39 @@ namespace yogi::visitor {
                     }
 
                     const auto varNode = variableScoped.value();
-                    if (varNode->varType != "str") {
-                        utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
+                    if (varNode->varType == "str" || varNode->varType == "regex") {
+                        const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                        return {value, varNode->varType};
                     }
 
-                    const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
-                    return value;
+                    utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
+                    return {"", ""};
                 }
 
                 const auto [type, value, node] = utils::Helpers::resolveItem(arg);
-                if (type != "str") {
-                    utils::Errors::throwError("Error", param + " must be a string", node, source);
+                if (type == "str" || type == "regex") {
+                    return {value, type};
                 }
 
-                return value;
+                utils::Errors::throwError("Error", param + " must be a string", node, source);
+                return {"", ""};
             };
 
             // Extract both arguments
-            const std::string search = extractStringArg(arguments[0], "search");
-            const std::string replacement = extractStringArg(arguments[1], "replacement");
+            const auto [search, searchType] = extractStringArg(arguments[0], "search");
+            const auto [replacement, replacementType] = extractStringArg(arguments[1], "replacement");
 
             // Perform replacement on the target variable
             const auto varNode = utils::Helpers::resolveItem(variable.value);
-            const auto resultValue = utils::Helpers::replace(varNode.value, search, replacement);
 
+            if (searchType == "regex") {
+                const std::regex value(search);
+                const auto resultValue = utils::Helpers::replace(varNode.value, value, replacement);
+
+                return nodes::StringLiteralNode(resultValue, variable.start, variable.end);
+            }
+
+            const auto resultValue = utils::Helpers::replace(varNode.value, search, replacement);
             return nodes::StringLiteralNode(resultValue, variable.start, variable.end);
         }
 

@@ -1,2 +1,4 @@
-regex a = r"{Hola}"
-// a.replace("a", a)
+str a = "Contact me at test@gmail.com"
+regex emailPattern = r"/me/"
+
+a.replace("a", "[hidden]")

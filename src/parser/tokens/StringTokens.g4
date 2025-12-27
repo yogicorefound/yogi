@@ -27,6 +27,11 @@ FORMATTED_STRING_TEXT
     : ( ESC_SEQ | ~["\\{}] )+
     ;
 
+REGEX_LITERAL
+    : '/' ( '\\/' | . )*? '/'
+    ;
+
+
 // enter expression mode
 LBRACE_IN_FSTRING
     : '{' -> pushMode(EXPR_MODE)

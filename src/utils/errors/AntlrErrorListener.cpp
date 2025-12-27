@@ -21,11 +21,11 @@ namespace yogi::utils::errors {
             lines.push_back(line);
     }
 
-    void AntlrErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line, size_t charPos, const std::string& msg, std::exception_ptr) {
-        std::cerr << "\n\033[1;31mSyntaxError: at line " << line << ", column " << charPos << "\n\033[0m";
+    void AntlrErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, const size_t line, const size_t charPos, const std::string& msg, std::exception_ptr) {
+        std::cerr << "\n\033[1;31mSyntaxError: at line " << line << ", columns " << charPos  << "\n\033[0m";
 
         if (line > 0 && line <= lines.size()) {
-            std::string l = lines[line - 1];
+            const std::string l = lines[line - 1];
             std::cerr << "\033[37m" << l << "\033[0m\n";
 
             std::string arrow(charPos, ' ');
