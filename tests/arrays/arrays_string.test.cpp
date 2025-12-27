@@ -40,15 +40,15 @@ namespace yogi::visitor::nodes {
         REQUIRE(node.identifier == name);
         REQUIRE(node.size == size);
 
-        // for (int i = 0; i < node.elements.size(); i++) {
-        //     const auto item = node.elements[i];
-        //     const auto expectedValue = expectedItems[i];
-        //     const auto [resolvedItemType, resolvedItemValue, resolvedItemNode] = utils::Helpers::resolveItem(item.value);
-        //
-        //     REQUIRE(resolvedItemValue == expectedValue);
-        //     REQUIRE(item.type == resolvedItemType);
-        //     REQUIRE(resolvedItemNode.type() == item.value.type());
-        // }
+        for (int i = 0; i < node.elements.size(); i++) {
+            const auto item = node.elements[i];
+            const auto expectedValue = expectedItems[i];
+            const auto [resolvedItemType, resolvedItemValue, resolvedItemNode] = utils::Helpers::resolveItem(item.value);
+
+            REQUIRE(resolvedItemValue == expectedValue);
+            REQUIRE(item.type == resolvedItemType);
+            REQUIRE(resolvedItemNode.type() == item.value.type());
+        }
     }
 
 } // namespace yogi::visitor::nodes
