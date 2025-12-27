@@ -199,7 +199,8 @@ namespace yogi::visitor {
                 value += stringLiteralNode.value;
                 literals.push_back(stringLiteralNode);
 
-            } else {
+            }
+            else {
                 auto literal = visit(expression);
                 auto literalNode = std::any_cast<nodes::StringLiteralNode>(literal);
                 value += literalNode.value;

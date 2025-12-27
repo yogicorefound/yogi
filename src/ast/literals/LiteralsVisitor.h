@@ -17,6 +17,7 @@ namespace yogi::visitor {
         std::any visitNoneLiteral(Grammar::NoneLiteralContext* ctx) override;
         std::any visitFormattedString(Grammar::FormattedStringContext* ctx) override;
         std::any visitFormattedStringContent(Grammar::FormattedStringContentContext* ctx) override;
+        std::any visitRegexLiteral(Grammar::RegexLiteralContext* ctx) override;
 
         std::any visitNumberLiterals(Grammar::NumberLiteralsContext* ctx) override;
         std::any visitStringLiterals(Grammar::StringLiteralsContext* ctx) override;
@@ -24,4 +25,3 @@ namespace yogi::visitor {
         std::any visitIdentifierLiteral(Grammar::IdentifierLiteralContext* ctx) override;
     };
 } // namespace yogi::visitor
-

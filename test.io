@@ -1,2 +1,1 @@
-str a = "Hola"
-a.trim()
+str a = r"[a-zA-Z]"

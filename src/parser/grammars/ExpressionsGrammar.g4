@@ -9,16 +9,15 @@ import LiteralsGrammar, MembersGrammar;
 expression
           : booleanLiteral
           | numberLiterals
-          | identifierLiteral
           | binaryExpression
           | concatenationExpression
+          | identifierLiteral
           | memberExpression
           ;
 
 
 concatenationExpression
     :  ((stringLiterals | identifierLiteral) (PLUS (stringLiterals | identifierLiteral))*)+
-
     ;
 
 

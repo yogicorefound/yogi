@@ -56,6 +56,10 @@ namespace yogi::visitor {
             return visit(ctx->identifierLiteral());
         }
 
+        if (ctx->regexLiteral()) {
+            return visit(ctx->regexLiteral());
+        }
+
         // Return a NoneLiteralNode as default
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -66,8 +70,7 @@ namespace yogi::visitor {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        if (ctx->getText().starts_with("0b") || ctx->getText().starts_with("0x") || ctx->getText().starts_with("0o") ||
-            ctx->getText().contains("_")) {
+        if (ctx->getText().starts_with("0b") || ctx->getText().starts_with("0x") || ctx->getText().starts_with("0o") || ctx->getText().contains("_")) {
             auto node = nodes::IntegerLiteralNode(std::to_string(parseInteger(ctx->getText())), start, end);
             return node;
         }
@@ -93,7 +96,6 @@ namespace yogi::visitor {
 
         return node;
     }
-
 
     std::any LiteralsVisitor::visitStringLiteral(Grammar::StringLiteralContext* ctx) {
         const std::string value = parseString(ctx->getText());
@@ -188,6 +190,14 @@ namespace yogi::visitor {
                 }
             }
         }
+        return node;
+    }
+
+    std::any LiteralsVisitor::visitRegexLiteral(Grammar::RegexLiteralContext* ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        auto node = nodes::StringLiteralNode(ctx->REGEX_CONTENT()->getText(), start, end);
         return node;
     }
 
