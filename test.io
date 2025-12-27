@@ -1,1 +1,1 @@
-str a = r"[a-zA-Z]"
+regex a = r"[a-zA-Z]"

@@ -13,3 +13,4 @@ libs/antlr4
 /antlr4/
 /ast.json
 /src/modules/runtime.bc
+/src/parser/generated/

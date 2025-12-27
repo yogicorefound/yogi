@@ -95,11 +95,15 @@ namespace yogi::visitor {
             auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
             const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
 
+
             analyzeVariableDeclaration(varNode, source);
             scope->declareVariable(identifier, varNode);
 
             return varNode;
         }
+
+
+
 
 
         // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)

@@ -70,7 +70,8 @@ namespace yogi::semantic {
 
             } else if (node.value.type() == typeid(StringLiteralNode)) {
                 auto val = std::any_cast<StringLiteralNode>(node.value);
-                returnType = "str";
+                std::cout << "StringLiteralNode: " << dataType << std::endl;
+                returnType = dataType == "regex" ? dataType : "str";
                 rValue = val.value;
                 stringValue = val.value;
 
@@ -224,6 +225,10 @@ namespace yogi::semantic {
 
         if (dataType == "str") {
             return returnType == "str";
+        }
+
+        if (dataType == "regex") {
+            return returnType == "regex";
         }
 
         return false;
