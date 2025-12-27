@@ -11,27 +11,11 @@ STRING
     | '\'' (ESC_SEQ | ~["\\\r\n])* '\''
     ;
 
-//// F-STRING START
-//REGEX_START
-//    : 'r"' -> pushMode(REGEX_MODE)
-//    ;
-//
-//// FSTRING_MODE
-//mode REGEX_MODE;
-//
-//REGEX_CONTENT
-//    : ~["\\\r\n]+ ;  // any chars except " or \ or newline
-//
-//// end of f-string
-//REGEX_END
-//    : '"' -> popMode
-//    ;
-
 // =======================================================================================================================================================
 // F-STRING START
 // =======================================================================================================================================================
 FORMATTED_STRING_START
-    : 'f"' -> pushMode(FSTRING_MODE)
+    : ('f"' | 'r"') -> pushMode(FSTRING_MODE)
     ;
 
 // FSTRING_MODE

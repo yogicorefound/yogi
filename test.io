@@ -1,2 +1,2 @@
-str a = "Hola"
-a.replace("a", a)
+regex a = r"{Hola}"
+// a.replace("a", a)

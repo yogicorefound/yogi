@@ -70,8 +70,13 @@ namespace yogi::semantic {
 
             } else if (node.value.type() == typeid(StringLiteralNode)) {
                 auto val = std::any_cast<StringLiteralNode>(node.value);
-                std::cout << "StringLiteralNode: " << dataType << std::endl;
-                returnType = dataType == "regex" ? dataType : "str";
+                returnType = "str";
+                rValue = val.value;
+                stringValue = val.value;
+
+            } else if (node.value.type() == typeid(RegexLiteralNode)) {
+                auto val = std::any_cast<RegexLiteralNode>(node.value);
+                returnType = "regex";
                 rValue = val.value;
                 stringValue = val.value;
 
@@ -157,19 +162,28 @@ namespace yogi::semantic {
                 auto val = std::any_cast<FloatLiteralNode>(node.value);
                 returnType = "float";
                 rValue = val.value;
+
             } else if (node.value.type() == typeid(BooleanLiteralNode)) {
                 auto val = std::any_cast<BooleanLiteralNode>(node.value);
                 returnType = "bool";
                 rValue = val.value;
                 boolValue = (val.value == "1") ? "true" : "false";
+
             } else if (node.value.type() == typeid(StringLiteralNode)) {
                 auto val = std::any_cast<StringLiteralNode>(node.value);
                 returnType = "str";
                 rValue = val.value;
+
+            } else if (node.value.type() == typeid(RegexLiteralNode)) {
+                auto val = std::any_cast<RegexLiteralNode>(node.value);
+                returnType = "regex";
+                rValue = val.value;
+
             } else if (node.value.type() == typeid(BinaryExpressionNode)) {
                 auto val = std::any_cast<BinaryExpressionNode>(node.value);
                 returnType = val.resultType;
                 rValue = val.value;
+
             } else if (node.value.type() == typeid(NoneLiteralNode)) {
                 auto val = std::any_cast<NoneLiteralNode>(node.value);
                 returnType = "none";
@@ -183,7 +197,10 @@ namespace yogi::semantic {
             throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
 
+        std::cout << "checkDataType";
+
         // Type checking - ensure new value matches variable's declared type
+        std::cout << "checkDataType";
         if (!checkDataType(node.varType, returnType)) {
             utils::Errors::throwTypeError(identifier, node.varType, node, source);
         }

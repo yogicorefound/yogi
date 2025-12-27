@@ -134,10 +134,17 @@ namespace yogi::visitor {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        // Create the formatted string node
-        auto node = nodes::StringLiteralNode("", start, end);
+        if (const auto fStringPrefix = ctx->FORMATTED_STRING_START()->getText(); fStringPrefix == "r\"") {
+            std::string value = "";
+            for (const auto child : ctx->formattedStringContent()) {
+                value += child->getText();
+            }
 
-        // Process all formatted string content parts
+            auto node = nodes::StringLiteralNode(value, start, end);
+            return node;
+        }
+
+        auto node = nodes::StringLiteralNode("", start, end);
         for (const auto child : ctx->formattedStringContent()) {
             if (auto result = visit(child); result.has_value()) {
                 try {
@@ -186,6 +193,7 @@ namespace yogi::visitor {
                 }
             }
         }
+
         return node;
     }
 

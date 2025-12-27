@@ -79,7 +79,6 @@ namespace yogi::visitor {
             }
         }
 
-
         if (value.type() == typeid(nodes::BinaryExpressionNode)) {
             auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
 
@@ -95,16 +94,23 @@ namespace yogi::visitor {
             auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
             const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
 
-
             analyzeVariableDeclaration(varNode, source);
             scope->declareVariable(identifier, varNode);
 
             return varNode;
         }
 
+        const auto [type, resolveValue, _] = Helpers::resolveItem(value);
+        if (dataType == "regex") {
+            const auto regexNode = nodes::RegexLiteralNode(resolveValue, start, end);
+            const auto& node = nodes::VariableDeclarationNode(identifier, dataType, regexNode, isConstant, start, end);
 
+            analyzeVariableDeclaration(node, source);
+            std::cout << "VariableDeclaration: " << "value.type().name()" << std::endl;
+            scope->declareVariable(identifier, node);
 
-
+            return node;
+        }
 
         // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
         const auto& node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);

@@ -370,6 +370,11 @@ namespace yogi::utils {
             return {{"kind", "StringLiteral"}, {"value", n.value}};
         }
 
+        if (node.type() == typeid(RegexLiteralNode)) {
+            const auto& n = std::any_cast<const RegexLiteralNode&>(node);
+            return {{"kind", "RegexLiteral"}, {"value", n.value}};
+        }
+
         if (node.type() == typeid(BooleanLiteralNode)) {
             const auto& n = std::any_cast<const BooleanLiteralNode&>(node);
             return {{"kind", "BooleanLiteral"}, {"value", n.value == "1"}};
