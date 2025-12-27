@@ -18,9 +18,6 @@ namespace yogi::visitor {
         // Get array type information
         const auto type = visit(ctx->arrayType());
         const auto [arrayType, arraySize] = std::any_cast<std::pair<std::string, std::string>>(type); // {elementType, size}
-
-        std::cout << "arrayType: " << arrayType << " arraySize: " << arraySize << std::endl;
-        // Get identifier
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
         // Check if array already declared
@@ -35,13 +32,10 @@ namespace yogi::visitor {
         parser->inVarMode = true;
         for (auto exprCtx : ctx->arrayItems()) {
             const auto item = visit(exprCtx);
-            std::cout << "itemResult: " << item.type().name() << std::endl;
 
             // Extract value and type from the item
             std::string itemType;
             std::any itemValue;
-            std::string boolValue;
-            std::string rValue;
 
             if (item.type() == typeid(nodes::IdentifierLiteral)) {
                 auto node = std::any_cast<nodes::IdentifierLiteral>(item);
@@ -55,6 +49,8 @@ namespace yogi::visitor {
                 itemType = varNode->varType;
 
             } else {
+                std::string boolValue;
+                std::string rValue;
                 processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, item, scope, source);
             }
 
@@ -62,7 +58,6 @@ namespace yogi::visitor {
             auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
             elements.push_back(std::move(elementNode));
         }
-
         parser->inVarMode = false;
 
         // Check if declared size matches actual elements

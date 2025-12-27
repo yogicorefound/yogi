@@ -1,2 +1,4 @@
 str a = "x"
-str[1] b = [a]
+str[2] b = [a]
+
+a.size()
