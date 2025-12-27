@@ -56,36 +56,25 @@ namespace yogi::visitor {
 
     std::vector<std::string> MembersByType::strAvailableMembers() {
         const std::vector<std::string> members = {
-            // Properties
             "size",
-
-            // Methods
             "lower",
             "upper",
             "title",
             "includes",
-
             "startWith",
             "endsWith",
-            "index",
+            "find",
             "trim",
-            "normalize",
+            "trimStart",
+            "trimEnd"
         };
 
         return members;
     }
 
-    std::any MembersByType::processStringMembers(
-        nodes::VariableDeclarationNode& variable,
-        const std::string& member,
-        const bool& isMethod,
-        std::vector<std::any> arguments,
-        const std::string& source) {
+    std::any MembersByType::processStringMembers(nodes::VariableDeclarationNode& variable, const std::string& member, const bool& isMethod, std::vector<std::any> arguments, const std::string& source, semantic::Scope* scope) {
         // Check if member is available for strings
         if (const auto availableMembers = strAvailableMembers(); std::ranges::find(availableMembers, member) == availableMembers.end()) {
-            std::cout << "start:ine: " << variable.start.line << " startColum: " << variable.end.line << std::endl;
-            std::cout << "end:ine: " << variable.end.line << " endColum: " << variable.end.line << std::endl;
-
             utils::Errors::throwScopeError("'" + variable.identifier + "' has no member named '" + member, member, variable, source);
         }
 
@@ -96,7 +85,6 @@ namespace yogi::visitor {
         }
 
         auto stringLiteralNode = std::any_cast<nodes::StringLiteralNode>(variable.value);
-        std::cout << "Processing string member '" << member << "' on value: " << stringLiteralNode.value << std::endl;
 
         // Properties (no arguments needed)
         if (member == "size" && isMethod) {
@@ -104,42 +92,75 @@ namespace yogi::visitor {
             return node;
         }
 
-        if (member == "lower") {
+        if (member == "lower" && isMethod) {
             nodes::StringLiteralNode node(utils::Helpers::toLower(stringLiteralNode.value), variable.start, variable.end);
-            std::cout << "Lower: " << stringLiteralNode.value << std::endl;
             return node;
         }
 
-        if (member == "upper") {
+        if (member == "upper" && isMethod) {
             nodes::StringLiteralNode node(utils::Helpers::toUpper(stringLiteralNode.value), variable.start, variable.end);
             return node;
         }
 
-        if (member == "title") {
+        if (member == "title" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), variable, source);
+            }
+
             nodes::StringLiteralNode node(utils::Helpers::toTitle(stringLiteralNode.value), variable.start, variable.end);
             return node;
         }
 
-        // Methods (require arguments)
-        if (member == "includes") {
+        if (member == "includes" && isMethod) {
             if (arguments.size() != 1) {
-                throw std::runtime_error("Error: 'includes' requires exactly 1 argument, got " + std::to_string(arguments.size()));
+                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), variable, source);
             }
 
-            if (auto exprPtr = std::any_cast<nodes::BinaryExpressionNode>(&arguments[0])) {
+            const auto argument = arguments[0];
+            if (argument.type() == typeid(nodes::BinaryExpressionNode)) {
+                const auto& exprPtr = std::any_cast<nodes::BinaryExpressionNode>(&arguments[0]);
                 auto& expression = *exprPtr;
                 if (expression.resultType != "str") {
                     utils::Errors::throwError("Error", "Argument must be a string", expression, source);
                 }
 
                 bool isIncluded = stringLiteralNode.value.contains(expression.value);
-                nodes::BooleanLiteralNode node(isIncluded ? "true" : "false", variable.start, variable.end);
+                nodes::BooleanLiteralNode node(isIncluded ? "1" : "0", variable.start, variable.end);
                 return node;
             }
-            throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'includes'");
+
+            if (argument.type() == typeid(nodes::IdentifierLiteral)) {
+                const auto identifier = std::any_cast<nodes::IdentifierLiteral>(&arguments[0]);
+                const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                if (!variableScoped.has_value()) {
+                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                }
+
+                const auto varNode = variableScoped.value();
+                const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                if (varNode->varType != "str") {
+                    utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
+                }
+                std::string isIncluded = stringLiteralNode.value.contains(value) ? "1" : "0";
+                nodes::BooleanLiteralNode node(isIncluded, varNode->start, varNode->end);
+                return node;
+            }
+
+            const auto& [type, value, arrNode] = utils::Helpers::resolveItem(arguments[0]);
+            if (type != "str") {
+                utils::Errors::throwError("Error", "Argument must be a string", arrNode, source);
+            }
+
+            bool isIncluded = stringLiteralNode.value.contains(value);
+
+            nodes::BooleanLiteralNode node(isIncluded ? "1" : "0", variable.start, variable.end);
+            return node;
         }
 
-        if (member == "startWith") {
+        if (member == "startWith" && isMethod) {
+            const auto argument = arguments[0];
             if (arguments.size() != 1) {
                 throw std::runtime_error("Error: 'startWith' requires exactly 1 argument, got " + std::to_string(arguments.size()));
             }
@@ -150,17 +171,45 @@ namespace yogi::visitor {
                     utils::Errors::throwError("Error", "Argument must be a string", expression, source);
                 }
 
-                bool starts = stringLiteralNode.value.starts_with(expression.value);
-                nodes::BooleanLiteralNode node(starts ? "true" : "false", variable.start, variable.end);
+                bool isIncluded = stringLiteralNode.value.starts_with(expression.value);
+                nodes::BooleanLiteralNode node(isIncluded ? "1" : "0", variable.start, variable.end);
                 return node;
             }
 
-            throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'startWith'");
+            if (argument.type() == typeid(nodes::IdentifierLiteral)) {
+                const auto identifier = std::any_cast<nodes::IdentifierLiteral>(&arguments[0]);
+                const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                if (!variableScoped.has_value()) {
+                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                }
+
+                const auto varNode = variableScoped.value();
+                const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                if (varNode->varType != "str") {
+                    utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
+                }
+                std::string isIncluded = stringLiteralNode.value.starts_with(value) ? "1" : "0";
+                nodes::BooleanLiteralNode node(isIncluded, varNode->start, varNode->end);
+                return node;
+            }
+
+            const auto& [type, value, arrNode] = utils::Helpers::resolveItem(arguments[0]);
+            if (type != "str") {
+                utils::Errors::throwError("Error", "Argument must be a string", arrNode, source);
+            }
+
+            bool isIncluded = stringLiteralNode.value.starts_with(value);
+
+            nodes::BooleanLiteralNode node(isIncluded ? "1" : "0", variable.start, variable.end);
+            return node;
         }
 
-        if (member == "endsWith") {
+        if (member == "endsWith" && isMethod) {
+            const auto argument = arguments[0];
             if (arguments.size() != 1) {
-                throw std::runtime_error("Error: 'endsWith' requires exactly 1 argument, got " + std::to_string(arguments.size()));
+                throw std::runtime_error("Error: 'startWith' requires exactly 1 argument, got " + std::to_string(arguments.size()));
             }
 
             if (auto exprPtr = std::any_cast<nodes::BinaryExpressionNode>(&arguments[0])) {
@@ -169,12 +218,116 @@ namespace yogi::visitor {
                     utils::Errors::throwError("Error", "Argument must be a string", expression, source);
                 }
 
-                bool ends = stringLiteralNode.value.ends_with(expression.value);
-                nodes::BooleanLiteralNode node(ends ? "true" : "false", variable.start, variable.end);
+                bool isIncluded = stringLiteralNode.value.ends_with(expression.value);
+                nodes::BooleanLiteralNode node(isIncluded ? "1" : "0", variable.start, variable.end);
                 return node;
             }
 
-            throw std::runtime_error("Error: argument[0] is not BinaryExpressionNode for 'endsWith'");
+            if (argument.type() == typeid(nodes::IdentifierLiteral)) {
+                const auto identifier = std::any_cast<nodes::IdentifierLiteral>(&arguments[0]);
+                const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                if (!variableScoped.has_value()) {
+                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                }
+
+                const auto varNode = variableScoped.value();
+                const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                if (varNode->varType != "str") {
+                    utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
+                }
+                std::string isIncluded = stringLiteralNode.value.ends_with(value) ? "1" : "0";
+                nodes::BooleanLiteralNode node(isIncluded, varNode->start, varNode->end);
+                return node;
+            }
+
+            const auto& [type, value, arrNode] = utils::Helpers::resolveItem(arguments[0]);
+            if (type != "str") {
+                utils::Errors::throwError("Error", "Argument must be a string", arrNode, source);
+            }
+
+            bool isIncluded = stringLiteralNode.value.ends_with(value);
+
+            nodes::BooleanLiteralNode node(isIncluded ? "1" : "0", variable.start, variable.end);
+            return node;
+        }
+
+        if (member == "find" && isMethod) {
+            const auto argument = arguments[0];
+            if (arguments.size() != 1) {
+                throw std::runtime_error("Error: 'startWith' requires exactly 1 argument, got " + std::to_string(arguments.size()));
+            }
+
+            if (auto exprPtr = std::any_cast<nodes::BinaryExpressionNode>(&arguments[0])) {
+                auto& expression = *exprPtr;
+                if (expression.resultType != "str") {
+                    utils::Errors::throwError("Error", "Argument must be a string", expression, source);
+                }
+
+                size_t index = stringLiteralNode.value.find(expression.value);
+                std::string indexOf = index != std::string::npos ? std::to_string(index) : std::to_string(-1);
+                nodes::IntegerLiteralNode node(indexOf, variable.start, variable.end);
+                return node;
+            }
+
+            if (argument.type() == typeid(nodes::IdentifierLiteral)) {
+                const auto identifier = std::any_cast<nodes::IdentifierLiteral>(&arguments[0]);
+                const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                if (!variableScoped.has_value()) {
+                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                }
+
+                const auto varNode = variableScoped.value();
+                const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                if (varNode->varType != "str") {
+                    utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
+                }
+
+                size_t index = stringLiteralNode.value.find(value);
+                std::string indexOf = index != std::string::npos ? std::to_string(index) : std::to_string(-1);
+                nodes::IntegerLiteralNode node(indexOf, variable.start, variable.end);
+                return node;
+            }
+
+            const auto& [type, value, arrNode] = utils::Helpers::resolveItem(arguments[0]);
+            if (type != "str") {
+                utils::Errors::throwError("Error", "Argument must be a string", arrNode, source);
+            }
+
+            size_t index = stringLiteralNode.value.find(value);
+            std::string indexOf = index != std::string::npos ? std::to_string(index) : std::to_string(-1);
+            nodes::IntegerLiteralNode node(indexOf, variable.start, variable.end);
+            return node;
+        }
+
+        if (member == "trim" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), variable, source);
+            }
+
+            nodes::StringLiteralNode node(utils::Helpers::trim(stringLiteralNode.value), variable.start, variable.end);
+            return node;
+        }
+
+        if (member == "trimStart" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), variable, source);
+            }
+
+            nodes::StringLiteralNode node(utils::Helpers::trimStart(stringLiteralNode.value), variable.start, variable.end);
+            return node;
+        }
+
+        if (member == "trimEnd" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), variable, source);
+            }
+
+            nodes::StringLiteralNode node(utils::Helpers::trimEnd(stringLiteralNode.value), variable.start, variable.end);
+            return node;
         }
 
         utils::Errors::throwScopeError("Error: member '" + member + "' not available for string type", member, variable, source);
@@ -182,12 +335,7 @@ namespace yogi::visitor {
     }
 
     // COMPREHENSIVE FIX for processMembers
-    std::any MembersByType::processMembers(
-        nodes::VariableDeclarationNode& variable,
-        const std::string& member,
-        const bool& isMethod,
-        const std::vector<std::any>& arguments,
-        const std::string& source) {
+    std::any MembersByType::processMembers(nodes::VariableDeclarationNode& variable, const std::string& member, const bool& isMethod, const std::vector<std::any>& arguments, const std::string& source, semantic::Scope* scope) {
         std::any result;
 
         if (member.empty()) {
@@ -195,7 +343,7 @@ namespace yogi::visitor {
         }
 
         if (variable.varType == "str") {
-            return processStringMembers(variable, member, isMethod, arguments, source);
+            return processStringMembers(variable, member, isMethod, arguments, source, scope);
         }
 
         utils::Errors::throwScopeError("Error: member '" + member + "' not available for type '" + variable.varType + "'", member, variable, source);

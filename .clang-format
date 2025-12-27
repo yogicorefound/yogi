@@ -37,7 +37,7 @@ BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: false
 
 # 🔴 Critical change — enables wrapping
-ColumnLimit: 150
+ColumnLimit: 250
 
 CommentPragmas: '^ IWYU pragma:'
 CompactNamespaces: false

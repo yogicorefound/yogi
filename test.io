@@ -1,2 +1,2 @@
-str a = "x"
-a.size()
+str a = "Hola"
+a.trim()

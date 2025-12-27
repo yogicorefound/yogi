@@ -94,6 +94,7 @@ namespace yogi::visitor {
         return node;
     }
 
+
     std::any LiteralsVisitor::visitStringLiteral(Grammar::StringLiteralContext* ctx) {
         const std::string value = parseString(ctx->getText());
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};

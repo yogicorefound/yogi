@@ -6,6 +6,7 @@
 
 #include <vector>
 #include "BaseNode.h"
+#include <regex>
 
 namespace yogi::visitor::nodes {
 
@@ -47,6 +48,12 @@ namespace yogi::visitor::nodes {
         std::string value;
 
         explicit StringLiteralNode(const std::string& v, const Position start, const Position end) : BaseNode(Kind::STRING_LITERAL, start, end), value(v) {}
+    };
+
+    // String Literal
+    struct RegexLiteralNode : BaseNode {
+        std::string value;
+        explicit RegexLiteralNode(const std::string& v, const Position start, const Position end) : BaseNode(Kind::STRING_LITERAL, start, end), value(v) {}
     };
 
     // Formatted String Literal

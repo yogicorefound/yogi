@@ -50,6 +50,28 @@ namespace yogi::utils {
         return s;
     }
 
+    std::string Helpers::trimStart(std::string s) {
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+        return s;
+    }
+
+    std::string Helpers::trimEnd(std::string s) {
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
+        return s;
+    }
+
+    std::string Helpers::trim(std::string s) {
+        auto notSpace = [](unsigned char ch) { return !std::isspace(ch); };
+
+        // left trim
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), notSpace));
+
+        // right trim
+        s.erase(std::find_if(s.rbegin(), s.rend(), notSpace).base(), s.end());
+
+        return s;
+    }
+
     std::string Helpers::toLower(std::string s) {
         std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::tolower(c); });
         return s;
@@ -134,12 +156,8 @@ namespace yogi::utils {
         std::string raw = rawInput;
 
         // Helper lambdas for starts_with and ends_with (C++11 compatible)
-        auto starts_with = [](const std::string& str, const std::string& prefix) {
-            return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
-        };
-        auto ends_with = [](const std::string& str, const std::string& suffix) {
-            return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-        };
+        auto starts_with = [](const std::string& str, const std::string& prefix) { return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0; };
+        auto ends_with = [](const std::string& str, const std::string& suffix) { return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0; };
 
         // 1️⃣ Detect triple-quoted string ("""...""" or '''...''')
         bool triple = false;
@@ -358,13 +376,7 @@ namespace yogi::utils {
 
         if (node.type() == typeid(BinaryExpressionNode)) {
             const auto& n = std::any_cast<const BinaryExpressionNode&>(node);
-            return {
-                {"kind", "BinaryExpression"},
-                {"operator", n.op},
-                {"resultType", n.resultType},
-                {"value", n.value},
-                {"left", nodeToJson(n.left)},
-                {"right", nodeToJson(n.right)}};
+            return {{"kind", "BinaryExpression"}, {"operator", n.op}, {"resultType", n.resultType}, {"value", n.value}, {"left", nodeToJson(n.left)}, {"right", nodeToJson(n.right)}};
         }
 
         // -------------------------------------------------
@@ -397,12 +409,7 @@ namespace yogi::utils {
 
         if (node.type() == typeid(VariableDeclarationNode)) {
             const auto& n = std::any_cast<const VariableDeclarationNode&>(node);
-            return {
-                {"kind", "VariableDeclaration"},
-                {"identifier", n.identifier},
-                {"type", n.varType},
-                {"isConstant", n.isConstant},
-                {"value", nodeToJson(n.value)}};
+            return {{"kind", "VariableDeclaration"}, {"identifier", n.identifier}, {"type", n.varType}, {"isConstant", n.isConstant}, {"value", nodeToJson(n.value)}};
         }
 
         if (node.type() == typeid(ArrayDeclarationNode)) {
@@ -417,12 +424,7 @@ namespace yogi::utils {
 
         if (node.type() == typeid(DictionaryDeclarationNode)) {
             const auto& n = std::any_cast<const DictionaryDeclarationNode&>(node);
-            return {
-                {"kind", "DictionaryDeclaration"},
-                {"identifier", n.identifier},
-                {"keyType", n.keyType},
-                {"valueType", n.valueType},
-                {"size", n.size}};
+            return {{"kind", "DictionaryDeclaration"}, {"identifier", n.identifier}, {"keyType", n.keyType}, {"valueType", n.valueType}, {"size", n.size}};
         }
 
         // -------------------------------------------------

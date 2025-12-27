@@ -71,7 +71,7 @@ namespace yogi::visitor {
                 memberName = ""; // empty means "call current object"
             }
 
-            current = processMembers(*variable, memberName, isMethod, arguments, source);
+            current = processMembers(*variable, memberName, isMethod, arguments, source, scope);
             if (!current.has_value())
                 throw std::runtime_error("processMembers returned empty value");
         }
