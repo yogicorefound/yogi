@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <regex>
 #include "antlr4-runtime.h"
 #include "libs/json.hpp"
 #include "math/math.h"
@@ -26,6 +27,7 @@ namespace yogi::utils {
         static std::string trim(std::string s);
         static std::string trimStart(std::string s);
         static std::string trimEnd(std::string s);
+        static std::string replace(const std::string& input, const std::variant<std::string, std::regex>& search, const std::string& replacement);
 
         static json createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop);
         static std::string parseString(const std::string& rawInput);

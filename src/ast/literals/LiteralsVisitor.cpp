@@ -56,10 +56,6 @@ namespace yogi::visitor {
             return visit(ctx->identifierLiteral());
         }
 
-        if (ctx->regexLiteral()) {
-            return visit(ctx->regexLiteral());
-        }
-
         // Return a NoneLiteralNode as default
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -190,14 +186,6 @@ namespace yogi::visitor {
                 }
             }
         }
-        return node;
-    }
-
-    std::any LiteralsVisitor::visitRegexLiteral(Grammar::RegexLiteralContext* ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-
-        auto node = nodes::StringLiteralNode(ctx->REGEX_CONTENT()->getText(), start, end);
         return node;
     }
 

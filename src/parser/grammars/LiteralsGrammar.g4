@@ -19,7 +19,7 @@ numberLiterals
 stringLiterals
     : stringLiteral
     | formattedString
-    | regexLiteral
+//    | regexLiteral
     | identifierLiteral
     ;
 
@@ -36,7 +36,7 @@ stringLiteral
     : STRING
     ;
 
-regexLiteral: REGEX_START REGEX_CONTENT REGEX_END;
+//regexLiteral: REGEX_START REGEX_CONTENT REGEX_END;
 
 integerLiteral: INTEGER;
 floatLiteral: FLOAT;

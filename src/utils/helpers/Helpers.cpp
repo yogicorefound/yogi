@@ -5,14 +5,42 @@
 #include "Helpers.h"
 #include <ast/nodes/nodes.h>
 #include <utils/errors/Errors.h>
-
 #include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <variant>
 #include "antlr4-runtime.h"
 
-#include <iomanip>
-#include <sstream>
 namespace yogi::utils {
+
+    std::string Helpers::replace(const std::string& input, const std::variant<std::string, std::regex>& search, const std::string& replacement) {
+        std::string result;
+
+        if (std::holds_alternative<std::string>(search)) {
+            // Reemplazo literal
+            const std::string& literal = std::get<std::string>(search);
+            if (literal.empty()) {
+                throw std::runtime_error("replace(): search string cannot be empty");
+            }
+
+            size_t pos = 0;
+            size_t found;
+            while ((found = input.find(literal, pos)) != std::string::npos) {
+                result.append(input, pos, found - pos);
+                result.append(replacement);
+                pos = found + literal.size();
+            }
+            result.append(input, pos, input.size() - pos);
+        } else if (std::holds_alternative<std::regex>(search)) {
+            // Reemplazo usando regex
+            const std::regex& re = std::get<std::regex>(search);
+            result = std::regex_replace(input, re, replacement);
+        }
+
+        return result;
+    }
 
     std::string Helpers::formatFloatNumberDecimal(const std::string& text, const int maxDecimals = -1) {
         double value;
