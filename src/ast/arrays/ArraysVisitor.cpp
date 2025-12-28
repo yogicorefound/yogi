@@ -43,6 +43,10 @@ namespace yogi::visitor {
                 const auto& memberNode = std::any_cast<nodes::MemberExpressionNode>(arrayValues);
 
                 if (memberNode.kind == nodes::Kind::ARRAY_STRING_ELEMENTS) {
+                    if (arrayType != "str") {
+                        throwTypeError(identifier, arrayType, memberNode, source);
+                    }
+
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
@@ -51,6 +55,20 @@ namespace yogi::visitor {
                 }
 
                 if (memberNode.kind == nodes::Kind::ARRAY_INTEGER_ELEMENTS) {
+                    if (arrayType != "str") {
+                        throwTypeError(identifier, arrayType, memberNode, source);
+                    }
+                    for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
+                        const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                        const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
+                        elements.push_back(std::move(elementNode));
+                    }
+                }
+
+                if (memberNode.kind == nodes::Kind::ARRAY_BOOLEAN_ELEMENTS) {
+                    if (arrayType != "str") {
+                        throwTypeError(identifier, arrayType, memberNode, source);
+                    }
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);

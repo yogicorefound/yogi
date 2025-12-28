@@ -45,6 +45,7 @@ namespace yogi::visitor::nodes {
         ARRAY_ELEMENTS,
         ARRAY_STRING_ELEMENTS,
         ARRAY_INTEGER_ELEMENTS,
+        ARRAY_BOOLEAN_ELEMENTS,
 
         DICTIONARY_DECLARATION,
         DICTIONARY_PAIR,
