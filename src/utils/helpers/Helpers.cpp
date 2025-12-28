@@ -593,4 +593,39 @@ namespace yogi::utils {
         return visitor::nodes::Kind::NONE_LITERAL;
     }
 
+    std::string Helpers::resolveDataType(const std::any& itemResult) {
+        if (itemResult.type() == typeid(visitor::nodes::IntegerLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(itemResult);
+            return n.value;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::FloatLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::FloatLiteralNode>(itemResult);
+            return n.value;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::StringLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::StringLiteralNode>(itemResult);
+            return n.value;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::RegexLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::RegexLiteralNode>(itemResult);
+            return n.value;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::BooleanLiteralNode)) {
+            auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(itemResult);
+            return n.value;
+        }
+
+        if (itemResult.type() == typeid(visitor::nodes::BinaryExpressionNode)) {
+            auto n = std::any_cast<visitor::nodes::BinaryExpressionNode>(itemResult);
+            return n.value;
+        }
+
+        auto n = std::any_cast<visitor::nodes::NoneLiteralNode>(itemResult);
+        return n.value;
+    }
+
 } // namespace yogi::utils

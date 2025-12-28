@@ -1,2 +1,3 @@
-str a = "Contact me at test@gmail.com"
-int64 b = a.size()
+str a = "Found FFI"
+
+int8 b = a.lower()

@@ -60,7 +60,7 @@ namespace yogi::visitor {
         parser->inVarMode = true;
         const auto visitDataType = visit(ctx->variableDataType());
         const auto arrayTypeKind = resolveKind(visitDataType);
-        const auto [dataType, typeValue, typeNode] = Helpers::resolveItem(visitDataType);
+        const auto dataType = resolveDataType(visitDataType);
 
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
@@ -73,13 +73,21 @@ namespace yogi::visitor {
         if (value.type() == typeid(nodes::MemberExpressionNode)) {
             const auto memberExpression = std::any_cast<nodes::MemberExpressionNode>(value);
 
-            std::cout << "memberExpression: " << memberExpression.value.type().name() << " arrayTypeKind: " << typeid(arrayTypeKind).name() << std::endl;
             if (arrayTypeKind != memberExpression.kind) {
-                throwTypeError(identifier, typeValue, memberExpression.value, source);
+                throwTypeError(identifier, dataType, memberExpression.value, source);
             }
 
+            // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
+            const bool isConstant = toUpper(identifier) == identifier;
             const auto [memberType, memberValue, memberNode] = Helpers::resolveItem(memberExpression.value);
-            return memberNode;
+            const auto& node = nodes::VariableDeclarationNode(identifier, dataType, memberNode, isConstant, start, end);
+
+            std::cout << "returnType: " << node.varType << " dataType: " << dataType << std::endl;
+
+            analyzeVariableDeclaration(node, source);
+            scope->declareVariable(identifier, node);
+
+            return node;
         }
 
         const bool isConstant = toUpper(identifier) == identifier;
@@ -177,7 +185,7 @@ namespace yogi::visitor {
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         const auto dataType = ctx->getText();
-        std::cout << "visitVariableDataType: " << dataType<< std::endl;
+        std::cout << "visitVariableDataType: " << dataType << std::endl;
 
         if (dataType == "str") {
             return nodes::StringLiteralNode(dataType, start, end);

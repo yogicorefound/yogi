@@ -41,5 +41,6 @@ namespace yogi::utils {
 
         static ResolvedItem resolveItem(const std::any& itemResult);
         static visitor::nodes::Kind resolveKind(const std::any& itemResult);
+        static std::string resolveDataType(const std::any& itemResult);
     };
 } // namespace yogi::utils

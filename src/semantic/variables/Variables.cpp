@@ -107,6 +107,8 @@ namespace yogi::semantic {
             throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
 
+        std::cout << "returnType: " << returnType << " dataType: " << dataType << std::endl;
+
         // Type checking
         if (!checkDataType(dataType, returnType)) {
             utils::Errors::throwTypeError(identifier, dataType, node.value, source);
