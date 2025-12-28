@@ -39,6 +39,26 @@ namespace yogi::visitor {
                 }
             }
 
+            if (arrayValues.type() == typeid(nodes::MemberExpressionNode)) {
+                const auto& memberNode = std::any_cast<nodes::MemberExpressionNode>(arrayValues);
+
+                if (memberNode.kind == nodes::Kind::ARRAY_STRING_ELEMENTS) {
+                    for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
+                        const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                        const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
+                        elements.push_back(std::move(elementNode));
+                    }
+                }
+
+                if (memberNode.kind == nodes::Kind::ARRAY_INTEGER_ELEMENTS) {
+                    for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
+                        const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                        const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
+                        elements.push_back(std::move(elementNode));
+                    }
+                }
+            }
+
             // Register ArrayDeclarationNode in scope
             nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
             scope->declareArray(identifier, node);
@@ -114,27 +134,6 @@ namespace yogi::visitor {
     }
 
     std::any ArraysVisitor::visitArrayValues(Grammar::ArrayValuesContext* ctx) {
-
-        std::cout << "visitArrayValues: " << typeid(ctx->expression().data()).name() << std::endl;
-        // Value by passing array of elements
-        // if (auto arrayValues = visit(ctx->expression()); arrayValues.has_value()) {
-        //     std::vector<nodes::ArrayElementNode> elements;
-        //
-        //     if (arrayValues.type() == typeid(std::vector<nodes::StringLiteralNode>)) {
-        //         for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(arrayValues); const auto& item : stringLiterals) {
-        //             const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
-        //             const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-        //
-        //             elements.push_back(std::move(elementNode));
-        //         }
-        //     }
-        //
-        //     // Register ArrayDeclarationNode in scope
-        //     nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
-        //     scope->declareArray(identifier, node);
-        //
-        //     return node;
-        // }
         return visitChildren(ctx);
     }
 

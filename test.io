@@ -1,4 +1,3 @@
-str a = "  Found FFI  "
+str a = "Fou nd FFI"
 
-regex b = r"/F/"
-str c = a.trim().replace(b, "-")
+str[] c = a.split(" ")

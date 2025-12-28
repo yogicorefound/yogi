@@ -441,7 +441,7 @@ namespace yogi::visitor {
                 }
             }
 
-            auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_ELEMENTS, mNode.start, mNode.end);
+            auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_STRING_ELEMENTS, mNode.start, mNode.end);
             return memberNode;
         }
 
