@@ -150,7 +150,7 @@ namespace yogi::utils {
     void Errors::throwTypeError(const std::string& identifier, const std::string& dataType, const std::any& node, const std::string& source) {
         const std::string typeMsg = getTypeMessage(dataType);
         const auto type = Helpers::resolveItem(node);
-        const std::string message = "'" + identifier + "' expects " + typeMsg + " but received " + type.type;
+        const std::string message = "'" + identifier + "' expects " + typeMsg;
         throwError("Error", message, node, source);
     }
 
@@ -207,7 +207,7 @@ namespace yogi::utils {
 
         // STRING
         if (dataType == "str")
-            return "string type value";
+            return "string value type";
 
         // ARRAY
         if (dataType == "int[]")

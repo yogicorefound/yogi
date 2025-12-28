@@ -1,2 +1,2 @@
-str a = "Found FFI"
-str b = a.lower().size()
+str a = "  Found FFI  "
+str c = a.replace("FFI", "NNI")
