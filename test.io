@@ -1,2 +1,4 @@
 str a = "  Found FFI  "
-str c = a.replace("FFI", "NNI")
+
+regex b = r"/F/"
+str c = a.trim().replace(b, "-")

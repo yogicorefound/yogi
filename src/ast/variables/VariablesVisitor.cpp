@@ -61,7 +61,6 @@ namespace yogi::visitor {
         const auto visitDataType = visit(ctx->variableDataType());
         const auto arrayTypeKind = resolveKind(visitDataType);
         const auto [dataType, _, dataTypeNode] = Helpers::resolveItem(visitDataType);
-
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
         }
@@ -69,7 +68,6 @@ namespace yogi::visitor {
         // Visit the expression instead of variableValue
         std::any value = visit(ctx->expression());
         parser->inVarMode = false;
-
         if (value.type() == typeid(nodes::MemberExpressionNode)) {
             const auto memberExpression = std::any_cast<nodes::MemberExpressionNode>(value);
 
@@ -118,14 +116,15 @@ namespace yogi::visitor {
         }
 
         const auto [type, resolveValue, __] = Helpers::resolveItem(value);
-        if (dataType == "regex") {
+        if (value.type() == typeid(nodes::RegexLiteralNode)) {
             std::string rValue = resolveValue;
             if (rValue.size() >= 2) {
                 rValue.erase(0, 1); // remove first character
                 rValue.erase(rValue.size() - 1, 1); // remove last character
             }
+
             const auto regexNode = nodes::RegexLiteralNode(rValue, start, end);
-            const auto& node = nodes::VariableDeclarationNode(identifier, dataType, regexNode, isConstant, start, end);
+            const auto& node = nodes::VariableDeclarationNode(identifier, type, regexNode, isConstant, start, end);
 
             analyzeVariableDeclaration(node, source);
             scope->declareVariable(identifier, node);

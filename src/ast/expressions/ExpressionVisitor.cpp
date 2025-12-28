@@ -180,6 +180,7 @@ namespace yogi::visitor {
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         std::string value;
+        std::string type = "str";
         std::vector<nodes::StringLiteralNode> literals;
         for (const auto expression : ctx->stringLiterals()) {
             if (expression->identifierLiteral()) {
@@ -201,12 +202,25 @@ namespace yogi::visitor {
                 literals.push_back(stringLiteralNode);
 
             } else {
-                auto literal = visit(expression);
+                if (auto literal = visit(expression); literal.type() == typeid(nodes::RegexLiteralNode)) {
+                    auto literalNode = std::any_cast<nodes::RegexLiteralNode>(literal);
+                    auto stringNode = nodes::StringLiteralNode(literalNode.value, literalNode.start, literalNode.end);
 
-                auto literalNode = std::any_cast<nodes::StringLiteralNode>(literal);
-                value += literalNode.value;
-                literals.push_back(literalNode);
+                    type = "regex";
+                    value += literalNode.value;
+                    literals.push_back(stringNode);
+                } else {
+                    auto literalNode = std::any_cast<nodes::StringLiteralNode>(literal);
+
+                    value += literalNode.value;
+                    literals.push_back(literalNode);
+                }
             }
+        }
+
+        if (type == "regex") {
+            const nodes::RegexLiteralNode node(value, start, end);
+            return node;
         }
 
         const nodes::StringLiteralNode node(value, start, end);

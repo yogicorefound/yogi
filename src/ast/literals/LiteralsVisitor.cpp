@@ -140,7 +140,7 @@ namespace yogi::visitor {
                 value += child->getText();
             }
 
-            auto node = nodes::StringLiteralNode(value, start, end);
+            auto node = nodes::RegexLiteralNode(value, start, end);
             return node;
         }
 
