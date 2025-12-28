@@ -4,6 +4,8 @@
 
 #include "Errors.h"
 #include <ast/nodes/nodes.h>
+#include <utils/helpers/Helpers.h>
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -147,7 +149,8 @@ namespace yogi::utils {
 
     void Errors::throwTypeError(const std::string& identifier, const std::string& dataType, const std::any& node, const std::string& source) {
         const std::string typeMsg = getTypeMessage(dataType);
-        const std::string message = "'" + identifier + "' expects " + typeMsg;
+        const auto type = Helpers::resolveItem(node);
+        const std::string message = "'" + identifier + "' expects " + typeMsg + " but received " + type.type;
         throwError("Error", message, node, source);
     }
 
@@ -204,7 +207,7 @@ namespace yogi::utils {
 
         // STRING
         if (dataType == "str")
-            return "string";
+            return "string type value";
 
         // ARRAY
         if (dataType == "int[]")

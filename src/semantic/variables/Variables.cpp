@@ -66,7 +66,7 @@ namespace yogi::semantic {
                 auto val = std::any_cast<BooleanLiteralNode>(node.value);
                 returnType = "bool";
                 rValue = val.value;
-                stringValue = (val.value == "1") ? "true" : "false";
+                stringValue = val.value == "1" ? "true" : "false";
 
             } else if (node.value.type() == typeid(StringLiteralNode)) {
                 auto val = std::any_cast<StringLiteralNode>(node.value);
@@ -107,8 +107,6 @@ namespace yogi::semantic {
             throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
 
-        std::cout << "returnType: " << returnType << " dataType: " << dataType << std::endl;
-
         // Type checking
         if (!checkDataType(dataType, returnType)) {
             utils::Errors::throwTypeError(identifier, dataType, node.value, source);
@@ -145,6 +143,7 @@ namespace yogi::semantic {
         if (dataType.find("float") != std::string::npos) {
             result.value = std::any(FloatLiteralNode(rValue, node.start, node.end));
         }
+
     }
 
     void Variables::analyzeVariableReassignment(const VariableDeclarationNode& node, const std::string& source) {
@@ -169,7 +168,7 @@ namespace yogi::semantic {
                 auto val = std::any_cast<BooleanLiteralNode>(node.value);
                 returnType = "bool";
                 rValue = val.value;
-                boolValue = (val.value == "1") ? "true" : "false";
+                boolValue = val.value == "1" ? "true" : "false";
 
             } else if (node.value.type() == typeid(StringLiteralNode)) {
                 auto val = std::any_cast<StringLiteralNode>(node.value);

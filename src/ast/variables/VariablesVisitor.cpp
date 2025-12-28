@@ -60,7 +60,7 @@ namespace yogi::visitor {
         parser->inVarMode = true;
         const auto visitDataType = visit(ctx->variableDataType());
         const auto arrayTypeKind = resolveKind(visitDataType);
-        const auto dataType = resolveDataType(visitDataType);
+        const auto [dataType, _, dataTypeNode] = Helpers::resolveItem(visitDataType);
 
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
@@ -82,9 +82,8 @@ namespace yogi::visitor {
             const auto [memberType, memberValue, memberNode] = Helpers::resolveItem(memberExpression.value);
             const auto& node = nodes::VariableDeclarationNode(identifier, dataType, memberNode, isConstant, start, end);
 
-            std::cout << "returnType: " << node.varType << " dataType: " << dataType << std::endl;
-
             analyzeVariableDeclaration(node, source);
+
             scope->declareVariable(identifier, node);
 
             return node;
@@ -118,7 +117,7 @@ namespace yogi::visitor {
             return varNode;
         }
 
-        const auto [type, resolveValue, _] = Helpers::resolveItem(value);
+        const auto [type, resolveValue, __] = Helpers::resolveItem(value);
         if (dataType == "regex") {
             std::string rValue = resolveValue;
             if (rValue.size() >= 2) {
@@ -150,7 +149,6 @@ namespace yogi::visitor {
 
         parser->inVarMode = true;
         const std::any newValue = visit(ctx->expression());
-        std::cout << newValue.type().name() << std::endl;
         parser->inVarMode = false;
 
         // Get identifier
@@ -185,7 +183,6 @@ namespace yogi::visitor {
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         const auto dataType = ctx->getText();
-        std::cout << "visitVariableDataType: " << dataType << std::endl;
 
         if (dataType == "str") {
             return nodes::StringLiteralNode(dataType, start, end);

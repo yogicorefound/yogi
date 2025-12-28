@@ -27,13 +27,13 @@ namespace yogi::visitor {
         variable->end = end;
 
         // ✅ Initialize current with the variable itself as fallback
-        std::any current = variable->value;
+        auto lastValue = nodes::MemberExpressionNode(variable->value, variable->kind, start, end);
 
         // 2️⃣ Apply postfix chain
         auto postfixes = ctx->valuePostfix();
         if (postfixes.empty()) {
             // No postfix operations, return the variable's value
-            return current;
+            return lastValue;
         }
 
         for (size_t i = 0; i < postfixes.size(); i++) {
@@ -71,12 +71,14 @@ namespace yogi::visitor {
                 memberName = ""; // empty means "call current object"
             }
 
-            current = processMembers(*variable, memberName, isMethod, arguments, source, scope);
-            if (!current.has_value())
+            auto member = nodes::StringLiteralNode(memberName, lastValue.start, lastValue.end);
+            lastValue = processMembers(lastValue, member, isMethod, arguments, source, scope);
+
+            if (!lastValue.value.has_value())
                 throw std::runtime_error("processMembers returned empty value");
         }
 
-        return current;
+        return lastValue;
     }
 
     std::any MembersVisitor::visitValueAtom(Grammar::ValueAtomContext* ctx) {
