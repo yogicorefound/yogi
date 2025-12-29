@@ -101,7 +101,7 @@ namespace yogi::utils {
 
         const int totalLines = static_cast<int>(lines.size());
 
-        int from = std::max(1, startLine - context);
+        int from = std::max(0, startLine - context);
         int to = std::min(totalLines, endLine + context);
 
         for (int i = from; i <= to; i++) {
@@ -110,11 +110,11 @@ namespace yogi::utils {
 
             if (i == startLine) {
                 std::cout << "    ";
-                int underlineStart = startCol;
+                int underlineStart = startCol + 1;
                 int underlineSize = startLine == endLine ? std::max(1, endCol - startCol + 1) : static_cast<int>(lines[i - 1].size()) - startCol;
 
                 std::cout << std::string(underlineStart, ' ');
-                std::cout << "\033[1;31m" << std::string(underlineSize, '^') << "\033[0m";
+                std::cout << "\033[1;31m" << std::string(underlineSize + 2, '^') << "\033[0m";
 
                 if (!hint.empty()) {
                     std::cout << " \033[33m" << hint << "\033[0m";
@@ -122,7 +122,7 @@ namespace yogi::utils {
                 std::cout << "\n";
             }
 
-            if (i > startLine && i <= endLine) {
+            if (i > startLine && i <= endLine + 1) {
                 std::cout << "    ";
                 std::cout << "\033[1;31m" << std::string(lines[i - 1].size(), '^') << "\033[0m\n";
             }
@@ -130,7 +130,6 @@ namespace yogi::utils {
 
         std::cout << "\n";
     }
-
 
     void Errors::throwError(const std::string& errorType, const std::string& message, const std::any& node, const std::string& source) {
         std::cerr << "\n\033[1;31m" << errorType << ": " << message << "\033[0m\n";

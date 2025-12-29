@@ -1,2 +1,2 @@
-int a = 4     // ❌ ERROR literal float a int
-int b = -2     // ❌ ERROR literal float a int
+int n = 7   // ❌ ERROR literal decimal a int
+int m = -0  // ❌ ERROR literal decimal a int
