@@ -71,6 +71,8 @@ namespace yogi::visitor {
             return node;
         }
 
+        // exceedsInt64();
+
         auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
         return node;
     }
@@ -134,7 +136,7 @@ namespace yogi::visitor {
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         if (const auto fStringPrefix = ctx->FORMATTED_STRING_START()->getText(); fStringPrefix == "r\"") {
-            std::string value = "";
+            std::string value;
             for (const auto child : ctx->formattedStringContent()) {
                 value += child->getText();
             }

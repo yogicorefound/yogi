@@ -113,7 +113,7 @@ namespace yogi::semantic {
         }
 
         // Range checking for integers
-        // analyze64BitInteger(rValue, dataType, identifier, source, node.value);
+        analyze64BitInteger(rValue, dataType, identifier, source, node.value);
 
         if (dataType.find("uint") != std::string::npos) {
             analyzeUnsignedInteger(rValue, dataType, identifier, source, node.value);
@@ -143,7 +143,6 @@ namespace yogi::semantic {
         if (dataType.find("float") != std::string::npos) {
             result.value = std::any(FloatLiteralNode(rValue, node.start, node.end));
         }
-
     }
 
     void Variables::analyzeVariableReassignment(const VariableDeclarationNode& node, const std::string& source) {

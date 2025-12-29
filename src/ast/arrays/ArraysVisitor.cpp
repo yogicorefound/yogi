@@ -27,10 +27,8 @@ namespace yogi::visitor {
         }
 
         // Value by passing array of elements
-        auto arrayValues = visit(ctx->arrayValues());
-        std::cout << "array: " << arrayValues.has_value() << std::endl;
 
-        if (arrayValues.has_value()) {
+        if (const auto arrayValues = visit(ctx->arrayValues()); arrayValues.has_value()) {
             std::vector<nodes::ArrayElementNode> elements;
 
             if (arrayValues.type() == typeid(std::vector<nodes::StringLiteralNode>)) {
@@ -86,10 +84,8 @@ namespace yogi::visitor {
 
             return node;
         }
+
         // Value by passing literal with brackets
-
-        std::cout << "arrayValues: " << std::endl;
-
         if (const auto& arrayItemsWithBrackets = ctx->arrayValues()->arrayItemsWithBrackets()->expression(); !arrayItemsWithBrackets.empty()) {
             std::vector<nodes::ArrayElementNode> elements;
             // Create array declaration node
@@ -138,11 +134,6 @@ namespace yogi::visitor {
 
             return node;
         }
-
-        std::cout << "arrayItemsWithBrackets: " << std::endl;
-
-        // const auto& arrayValues = visit(ctx->arrayValues());
-        // std::cout << "arrayValues: " << arrayValues.type().name() << std::endl;
 
         throwTypeError(identifier, arrayType, type, source);
         return "";

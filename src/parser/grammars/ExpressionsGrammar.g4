@@ -24,8 +24,6 @@ concatenationExpression
 binaryExpression
     : literals
     | LPAREN binaryExpression RPAREN
-    | binaryExpression expressionOperator binaryExpression
+    | binaryExpression (MUL | DIV | MOD) binaryExpression
+    | binaryExpression (PLUS | MINUS) binaryExpression
     ;
-
-
-expressionOperator: (MUL | DIV | MOD | PLUS | MINUS);

@@ -30,10 +30,6 @@ namespace yogi::visitor {
         return visitChildren(ctx);
     }
 
-    std::any ExpressionVisitor::visitExpressionOperator(Grammar::ExpressionOperatorContext* ctx) {
-        return visitChildren(ctx);
-    }
-
     std::any ExpressionVisitor::visitBinaryExpression(Grammar::BinaryExpressionContext* ctx) {
         // -------------------------------------------------------
         // (1) literals
@@ -51,7 +47,19 @@ namespace yogi::visitor {
         // (3) binaryExpression op binaryExpression
         // -------------------------------------------------------
         if (ctx->binaryExpression().size() == 2) {
-            const std::string op = ctx->expressionOperator()->getText();
+            std::string op;
+            if (ctx->MUL()) {
+                op = "*";
+            } else if (ctx->DIV()) {
+                op = "/";
+            } else if (ctx->MOD()) {
+                op = "%";
+            } else if (ctx->PLUS()) {
+                op = "+";
+            }
+            else if (ctx->MINUS()) {
+                op = "-";
+            }
 
             std::any leftAny = visit(ctx->binaryExpression(0));
             std::any rightAny = visit(ctx->binaryExpression(1));

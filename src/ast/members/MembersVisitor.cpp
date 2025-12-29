@@ -74,6 +74,7 @@ namespace yogi::visitor {
             auto member = nodes::StringLiteralNode(memberName, lastValue.start, lastValue.end);
             lastValue = processMembers(lastValue, member, isMethod, arguments, source, scope);
 
+
             if (!lastValue.value.has_value())
                 throw std::runtime_error("processMembers returned empty value");
         }

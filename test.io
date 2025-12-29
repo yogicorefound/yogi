@@ -1,3 +1,3 @@
-str a = "x"
-str[1] b = [a + " " + a, a]
+str a = "hello, world!"
+a.size()
 

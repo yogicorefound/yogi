@@ -100,6 +100,7 @@ namespace yogi::visitor {
         }
 
         if (member == "lower" && isMethod) {
+
             StringLiteralNode node(utils::Helpers::toLower(pValue), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
 

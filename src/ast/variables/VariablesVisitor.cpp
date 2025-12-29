@@ -60,7 +60,7 @@ namespace yogi::visitor {
         parser->inVarMode = true;
         const auto visitDataType = visit(ctx->variableDataType());
         const auto arrayTypeKind = resolveKind(visitDataType);
-        const auto [dataType, _, dataTypeNode] = Helpers::resolveItem(visitDataType);
+        const auto [_, typeValue, dataTypeNode] = Helpers::resolveItem(visitDataType);
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
         }
@@ -72,16 +72,15 @@ namespace yogi::visitor {
             const auto memberExpression = std::any_cast<nodes::MemberExpressionNode>(value);
 
             if (arrayTypeKind != memberExpression.kind) {
-                throwTypeError(identifier, dataType, memberExpression.value, source);
+                throwTypeError(identifier, typeValue, memberExpression.value, source);
             }
 
             // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
             const bool isConstant = toUpper(identifier) == identifier;
             const auto [memberType, memberValue, memberNode] = Helpers::resolveItem(memberExpression.value);
-            const auto& node = nodes::VariableDeclarationNode(identifier, dataType, memberNode, isConstant, start, end);
+            const auto& node = nodes::VariableDeclarationNode(identifier, typeValue, memberNode, isConstant, start, end);
 
             analyzeVariableDeclaration(node, source);
-
             scope->declareVariable(identifier, node);
 
             return node;
@@ -97,9 +96,9 @@ namespace yogi::visitor {
         if (value.type() == typeid(nodes::BinaryExpressionNode)) {
             auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
 
-            if (dataType.starts_with("float")) {
+            if (typeValue.starts_with("float")) {
                 auto floatLiteralNode = nodes::FloatLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
-                const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
+                const auto& varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
                 analyzeVariableDeclaration(varNode, source);
                 scope->declareVariable(identifier, varNode);
 
@@ -107,7 +106,7 @@ namespace yogi::visitor {
             }
 
             auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
-            const auto& varNode = nodes::VariableDeclarationNode(identifier, dataType, floatLiteralNode, isConstant, start, end);
+            const auto& varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
 
             analyzeVariableDeclaration(varNode, source);
             scope->declareVariable(identifier, varNode);
@@ -133,7 +132,7 @@ namespace yogi::visitor {
         }
 
         // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
-        const auto& node = nodes::VariableDeclarationNode(identifier, dataType, value, isConstant, start, end);
+        const auto& node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);
         analyzeVariableDeclaration(node, source);
         scope->declareVariable(identifier, node);
 
@@ -143,7 +142,6 @@ namespace yogi::visitor {
     std::any VariablesVisitor::visitVariableReAssignment(Grammar::VariableReAssignmentContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
         parser->inVarMode = true;

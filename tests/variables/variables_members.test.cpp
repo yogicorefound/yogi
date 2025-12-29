@@ -32,7 +32,8 @@ namespace yogi::visitor::nodes {
 
         auto [text, expectedValue, expectedType] = cases;
         const auto ast = Yogi::testAST(text);
-        const auto [type, value, node] = utils::Helpers::resolveItem(ast.body[1].children.at(0));
+        const auto memberNode = std::any_cast<nodes::MemberExpressionNode>(ast.body[1].children[0]);
+        const auto [type, value, node] = utils::Helpers::resolveItem(memberNode.value);
 
         REQUIRE(value == expectedValue);
         REQUIRE(type == expectedType);

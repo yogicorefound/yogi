@@ -412,7 +412,8 @@ namespace yogi::utils {
         if (node.type() == typeid(std::vector<StringLiteralNode>)) {
             const auto& strLiteral = std::any_cast<const std::vector<StringLiteralNode>&>(node);
 
-            json elements = json::array();;
+            json elements = json::array();
+            ;
             for (auto s : strLiteral) {
                 elements.push_back(nodeToJson(s));
             }
@@ -456,8 +457,7 @@ namespace yogi::utils {
 
         if (node.type() == typeid(MemberExpressionNode)) {
             const auto& n = std::any_cast<MemberExpressionNode>(node);
-            std::cout << "MemberExpressionNode: " << n.value.type().name();
-            const auto items = std::any_cast<std::vector<std::any>>(n.value);
+            // const auto items = std::any_cast<std::vector<std::any>>(n.value);
 
             return {{"kind", "Members"}, {"values", nodeToJson(n.value)}};
         }
