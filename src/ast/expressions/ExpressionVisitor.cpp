@@ -23,7 +23,7 @@ namespace yogi::visitor {
             }
 
             if (node.resultType == "float") {
-                return nodes::FloatLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
+                return nodes::FloatLiteralNode(node.value, node.start, node.end);
             }
         }
 
@@ -56,8 +56,7 @@ namespace yogi::visitor {
                 op = "%";
             } else if (ctx->PLUS()) {
                 op = "+";
-            }
-            else if (ctx->MINUS()) {
+            } else if (ctx->MINUS()) {
                 op = "-";
             }
 

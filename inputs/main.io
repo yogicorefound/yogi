@@ -1,23 +1,22 @@
-// string
-str fName = "Brayhan"
-str lName = "De Aza"
-str fullName = fName + " " + lName
+// input
+int y1 = 1994
+int y2 = 2000
+int y3 = 1987
 
-// integer
-int yBorn = 1994
-int yNow = 2025
-int edad = yNow - yBorn
+int sum = y1 + y2 + y3
+float64 avg = sum / 3.0
 
-// float
-float pi = 3.14159
-float radius = 5.0
-float area = pi * radius * radius
+// Overflow int8
+// int8 a = 120
+// int8 b = 10
+// int8 c = a + b // Error
 
-// boolean
-bool isAdult = true
+// int[] values = [300, 20, -5, 127]
+// int[] small = values
 
-// array
-int[] numbers = [1, 2, 3, 4, -8]
-int8[] fromIdentifier = numbers // no working
+float32 pi32 = 3.14159
+float64 pi64 = 3.141592653589793
+float32 r = 1000.0
 
-
+float32 area32 = pi32 * r * r
+float64 area64 = pi64 * r * r

@@ -19,43 +19,12 @@ namespace yogi::visitor::nodes {
         return dist(gen);
     }
 
-    std::string formatFloatNumberDecimal(const std::string& text, const int maxDecimals = -1) {
-        double value;
-        try {
-            value = std::stod(text);
-        } catch (...) {
-            return text; // si no es número válido
-        }
-
-        std::ostringstream oss;
-
-        if (maxDecimals >= 0) {
-            oss << std::fixed << std::setprecision(maxDecimals) << value;
-        } else {
-            oss << value;
-        }
-
-        std::string result = oss.str();
-
-        // Eliminar ceros finales
-        if (result.find('.') != std::string::npos) {
-            result.erase(result.find_last_not_of('0') + 1);
-
-            // Eliminar el punto si quedó solo
-            if (result.back() == '.') {
-                result.pop_back();
-            }
-        }
-
-        return result;
-    }
-
     double randomDouble(const double min, const double max) {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         std::uniform_real_distribution dist(min, max);
 
-        const auto value = formatFloatNumberDecimal(Catch::to_string(dist(gen)));
+        const auto value = Catch::to_string(dist(gen));
         return std::stod(value);
     }
 

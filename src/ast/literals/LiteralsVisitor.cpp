@@ -83,7 +83,7 @@ namespace yogi::visitor {
 
         if (ctx->getText().contains("_")) {
             // ctx->getText()
-            auto node = nodes::IntegerLiteralNode(formatFloatNumberDecimal(ctx->getText(), -1), start, end);
+            auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
             return node;
         }
 
@@ -183,7 +183,7 @@ namespace yogi::visitor {
                             node.value += contentNode.value;
 
                         } else {
-                            node.value += formatFloatNumberDecimal(contentNode.value, -1);
+                            node.value += contentNode.value;
                         }
                     }
 

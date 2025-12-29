@@ -45,7 +45,6 @@ namespace yogi::semantic {
 
     void Arrays::checkNumberRange(const std::string& dataType, const std::string& rValue, const std::any& node, const std::string& source) {
         const auto value = utils::Helpers::parseFloat(rValue);
-        std::cout << "value > 0: " << (value > 0) << std::endl;
 
         // Signed Integer
         // =======================================================================================================================================

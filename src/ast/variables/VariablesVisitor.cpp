@@ -97,7 +97,7 @@ namespace yogi::visitor {
             auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
 
             if (typeValue.starts_with("float")) {
-                auto floatLiteralNode = nodes::FloatLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
+                auto floatLiteralNode = nodes::FloatLiteralNode(node.value, node.start, node.end);
                 const auto& varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
                 analyzeVariableDeclaration(varNode, source);
                 scope->declareVariable(identifier, varNode);
