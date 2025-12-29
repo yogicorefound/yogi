@@ -11,168 +11,168 @@
 namespace yogi::visitor {
 
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
-        const auto expression = visitChildren(ctx);
+        if (const auto expression = visitChildren(ctx); expression.type() == typeid(nodes::BinaryExpressionNode)) {
+            const auto node = std::any_cast<nodes::BinaryExpressionNode>(expression);
 
+            if (node.resultType == "str") {
+                return nodes::StringLiteralNode(node.value, node.start, node.end);
+            }
+
+            if (node.resultType == "int") {
+                return nodes::IntegerLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
+            }
+
+            if (node.resultType == "float") {
+                return nodes::FloatLiteralNode(formatFloatNumberDecimal(node.value, -1), node.start, node.end);
+            }
+        }
+
+        return visitChildren(ctx);
+    }
+
+    std::any ExpressionVisitor::visitExpressionOperator(Grammar::ExpressionOperatorContext* ctx) {
         return visitChildren(ctx);
     }
 
     std::any ExpressionVisitor::visitBinaryExpression(Grammar::BinaryExpressionContext* ctx) {
         // -------------------------------------------------------
-        // (1) Literal → return literal node
+        // (1) literals
         // -------------------------------------------------------
-        if (ctx->numberLiterals()) {
-            return visit(ctx->numberLiterals());
-        }
-
-        if (ctx->identifierLiteral()) {
-            return visit(ctx->identifierLiteral());
-        }
+        if (ctx->literals())
+            return visit(ctx->literals());
 
         // -------------------------------------------------------
-        // (2) Parenthesized expression: LPAREN binaryExpression RPAREN
+        // (2) Parenthesized expression
         // -------------------------------------------------------
-        if (ctx->LPAREN() && ctx->RPAREN() && ctx->binaryExpression().size() == 1) {
+        if (ctx->LPAREN() && ctx->binaryExpression().size() == 1)
             return visit(ctx->binaryExpression(0));
-        }
 
         // -------------------------------------------------------
-        // (3) Binary expression with operator
+        // (3) binaryExpression op binaryExpression
         // -------------------------------------------------------
         if (ctx->binaryExpression().size() == 2) {
-            std::string op;
-            if (ctx->PLUS())
-                op = "+";
-            else if (ctx->MINUS())
-                op = "-";
-            else if (ctx->MUL())
-                op = "*";
-            else if (ctx->DIV())
-                op = "/";
-            else if (ctx->MOD())
-                op = "%";
+            const std::string op = ctx->expressionOperator()->getText();
 
-            if (op.empty())
-                throw std::runtime_error("Binary expression with 2 operands but no operator found");
-
-            std::any leftResult = visit(ctx->binaryExpression(0));
-            std::any rightResult = visit(ctx->binaryExpression(1));
+            std::any leftAny = visit(ctx->binaryExpression(0));
+            std::any rightAny = visit(ctx->binaryExpression(1));
 
             const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
             const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-            // -------------------------------------------------------
-            // Recursive value extraction
-            // -------------------------------------------------------
-            std::function<std::pair<double, std::string>(const std::any&)> extractedValue;
-            extractedValue = [this, &extractedValue](const std::any& result) -> std::pair<double, std::string> {
-                if (result.type() == typeid(nodes::IntegerLiteralNode)) {
-                    auto node = std::any_cast<nodes::IntegerLiteralNode>(result);
-                    return {std::stod(node.value), "int"};
+            // ---------------------------------------------------
+            // Recursive extractor (RESOLVES IDENTIFIERS)
+            // ---------------------------------------------------
+            std::function<std::pair<std::string, std::string>(const std::any&)> extract;
+
+            extract = [&](const std::any& value) -> std::pair<std::string, std::string> {
+                if (value.type() == typeid(nodes::IntegerLiteralNode)) {
+                    auto n = std::any_cast<nodes::IntegerLiteralNode>(value);
+                    return {n.value, "int"};
                 }
-                if (result.type() == typeid(nodes::FloatLiteralNode)) {
-                    auto node = std::any_cast<nodes::FloatLiteralNode>(result);
-                    return {std::stod(node.value), "float"};
+
+                if (value.type() == typeid(nodes::FloatLiteralNode)) {
+                    auto n = std::any_cast<nodes::FloatLiteralNode>(value);
+                    return {n.value, "float"};
                 }
-                if (result.type() == typeid(nodes::BooleanLiteralNode)) {
-                    auto node = std::any_cast<nodes::BooleanLiteralNode>(result);
-                    return {std::stod(node.value), "bool"};
+
+                if (value.type() == typeid(nodes::StringLiteralNode)) {
+                    auto s = std::any_cast<nodes::StringLiteralNode>(value);
+                    return {s.value, "str"};
                 }
-                if (result.type() == typeid(nodes::NoneLiteralNode)) {
-                    return {0.0, "none"};
+
+                if (value.type() == typeid(nodes::BooleanLiteralNode)) {
+                    auto b = std::any_cast<nodes::BooleanLiteralNode>(value);
+                    return {b.value, "bool"};
                 }
-                if (result.type() == typeid(nodes::BinaryExpressionNode)) {
-                    auto node = std::any_cast<nodes::BinaryExpressionNode>(result);
-                    return {std::stod(node.value), node.resultType};
-                }
-                if (result.type() == typeid(nodes::IdentifierLiteral)) {
-                    auto node = std::any_cast<nodes::IdentifierLiteral>(result);
+
+                if (value.type() == typeid(nodes::IdentifierLiteral)) {
+                    auto id = std::any_cast<nodes::IdentifierLiteral>(value);
+
                     if (!scope)
-                        throw std::runtime_error("No scope available for identifier lookup: " + node.value);
+                        throw std::runtime_error("No scope for identifier");
 
-                    auto variable = scope->lookupVariable(node.value);
-                    if (!variable.has_value())
-                        throw std::runtime_error("Variable '" + node.value + "' is not declared");
+                    auto var = scope->lookupVariable(id.value);
+                    if (!var.has_value())
+                        throw std::runtime_error("Variable '" + id.value + "' not declared");
 
-                    const auto& varNode = variable.value();
-                    if (varNode->varType.starts_with("int") || varNode->varType.starts_with("uint")) {
-                        if (varNode->kind != nodes::Kind::VARIABLE_DECLARATION)
-                            throw std::runtime_error("Identifier '" + node.value + "' must be a variable");
-
-                        return extractedValue(varNode->value);
-                    }
-
-                    throwError("Error", "identifier '" + varNode->identifier + "' must be an number", result, source);
+                    return extract(var.value()->value);
                 }
 
-                throw std::runtime_error("Unsupported node type in expression");
+                if (value.type() == typeid(nodes::BinaryExpressionNode)) {
+                    auto n = std::any_cast<nodes::BinaryExpressionNode>(value);
+                    return {n.value, n.resultType};
+                }
+
+                throw std::runtime_error("Unsupported operand");
             };
 
-            double leftValue, rightValue;
-            std::string leftType, rightType;
+            std::string lv, lt, rv, rt;
             try {
-                auto [lv, lt] = extractedValue(leftResult);
-                auto [rv, rt] = extractedValue(rightResult);
-                leftValue = lv;
-                leftType = lt;
-                rightValue = rv;
-                rightType = rt;
+                std::tie(lv, lt) = extract(leftAny);
+                std::tie(rv, rt) = extract(rightAny);
             } catch (...) {
-                return nodes::BinaryExpressionNode(leftResult, rightResult, op, "0.0", "error", start, end);
+                return nodes::BinaryExpressionNode(leftAny, rightAny, op, "0", "error", start, end);
             }
 
-            // -------------------------------------------------------
-            // Perform arithmetic
-            // -------------------------------------------------------
-            double result = 0.0;
-            if (op == "+")
-                result = leftValue + rightValue;
-            else if (op == "-")
-                result = leftValue - rightValue;
-            else if (op == "*")
-                result = leftValue * rightValue;
-            else if (op == "/") {
-                if (rightValue == 0.0)
-                    return nodes::BinaryExpressionNode(leftResult, rightResult, op, "0.0", "error", start, end);
-                result = leftValue / rightValue;
-            } else if (op == "%") {
-                if (rightValue == 0.0)
-                    return nodes::BinaryExpressionNode(leftResult, rightResult, op, "0.0", "error", start, end);
-                if (leftValue == static_cast<int>(leftValue) && rightValue == static_cast<int>(rightValue))
-                    result = static_cast<int>(leftValue) % static_cast<int>(rightValue);
-                else
-                    result = std::fmod(leftValue, rightValue);
+            // ---------------------------------------------------
+            // STRING CONCATENATION
+            // ---------------------------------------------------
+            if (op == "+" && lt == "str" && rt == "str") {
+                return nodes::BinaryExpressionNode(leftAny, rightAny, op, lv + rv, "str", start, end);
             }
 
-            // -------------------------------------------------------
-            // Determine final data type
-            // -------------------------------------------------------
-            auto determineType = [](const std::string& mOp, const std::string& mLeftType, const std::string& mRightType) -> std::string {
-                if (mLeftType == "float" || mRightType == "float")
-                    return "float";
-                if (mLeftType == "bool" || mRightType == "bool")
-                    return "int";
-                if (mLeftType == "none" || mRightType == "none")
-                    return "int";
-                if (mOp == "%")
-                    return "int";
-                if (mOp == "/")
-                    return "float";
-                return "int";
+            // ---------------------------------------------------
+            // NUMERIC OPERATIONS ONLY
+            // ---------------------------------------------------
+            const bool leftNumeric = (lt == "int" || lt == "float");
+            const bool rightNumeric = (rt == "int" || rt == "float");
+
+            if (!leftNumeric || !rightNumeric) {
+                throwError("TypeError", "Invalid operands for operator '" + op + "'", ctx, source);
+            }
+
+            // Safe numeric validation
+            auto isNumeric = [](const std::string& s) {
+                if (s.empty())
+                    return false;
+                char* end = nullptr;
+                std::strtod(s.c_str(), &end);
+                return end != s.c_str() && *end == '\0';
             };
-            std::string finalType = determineType(op, leftType, rightType);
 
-            return nodes::BinaryExpressionNode(leftResult, rightResult, op, std::to_string(result), finalType, start, end);
+            if (!isNumeric(lv) || !isNumeric(rv)) {
+                throwError("TypeError", "Non-numeric value used with operator '" + op + "'", ctx, source);
+            }
+
+            double lhs = std::stod(lv);
+            double rhs = std::stod(rv);
+            double result = 0.0;
+
+            if (op == "+")
+                result = lhs + rhs;
+            else if (op == "-")
+                result = lhs - rhs;
+            else if (op == "*")
+                result = lhs * rhs;
+            else if (op == "/") {
+                if (rhs == 0.0)
+                    throwError("MathError", "Division by zero", ctx, source);
+                result = lhs / rhs;
+            } else if (op == "%") {
+                if (rhs == 0.0)
+                    throwError("MathError", "Modulo by zero", ctx, source);
+                result = std::fmod(lhs, rhs);
+            }
+
+            std::string finalType = (lt == "float" || rt == "float" || op == "/") ? "float" : "int";
+
+            return nodes::BinaryExpressionNode(leftAny, rightAny, op, std::to_string(result), finalType, start, end);
         }
 
         // -------------------------------------------------------
-        // Fallbacks
+        // Fallback
         // -------------------------------------------------------
-        if (!ctx->binaryExpression().empty())
-            return visit(ctx->binaryExpression(0));
-
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        return nodes::NoneLiteralNode("None", start, end);
+        return visit(ctx->binaryExpression(0));
     }
 
     std::any ExpressionVisitor::visitConcatenationExpression(Grammar::ConcatenationExpressionContext* ctx) {

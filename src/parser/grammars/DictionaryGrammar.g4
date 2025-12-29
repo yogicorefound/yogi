@@ -9,7 +9,7 @@ import ExpressionsGrammar;
 dictionaryDeclaration: DICT_KEYWORD LESSTHAN dictionaryDeclarationType GREATERTHAN IDENTIFIER EQ LBRACE (dictionaryAssignmentBody (COMMA dictionaryAssignmentBody COMMA? )*)? RBRACE;
 
 dictionaryAssignmentBody
-    : literal COLON expression
+    : literals COLON expression
     ;
 
 dictionaryDeclarationType

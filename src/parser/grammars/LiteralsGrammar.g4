@@ -4,7 +4,7 @@ options {
     tokenVocab = Tokens;
 }
 
-literal
+literals
     : numberLiterals
     | stringLiterals
     | booleanLiteral

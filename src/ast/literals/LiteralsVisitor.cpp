@@ -8,7 +8,7 @@
 #include <catch2/catch_amalgamated.hpp>
 
 namespace yogi::visitor {
-    std::any LiteralsVisitor::visitLiteral(Grammar::LiteralContext* ctx) {
+    std::any LiteralsVisitor::visitLiterals(Grammar::LiteralsContext* ctx) {
         if (ctx->numberLiterals()) {
             return visit(ctx->numberLiterals());
         }
@@ -27,7 +27,7 @@ namespace yogi::visitor {
         // Return a NoneLiteralNode as default
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        return nodes::NoneLiteralNode("None", start, end);
+        return nodes::NoneLiteralNode("Unknown", start, end);
     }
 
     std::any LiteralsVisitor::visitNumberLiterals(Grammar::NumberLiteralsContext* ctx) {
@@ -126,8 +126,7 @@ namespace yogi::visitor {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        auto node = nodes::IdentifierLiteral(identifier, start, end);
-        return node;
+        return nodes::IdentifierLiteral(identifier, start, end);
     }
 
     std::any LiteralsVisitor::visitFormattedString(Grammar::FormattedStringContext* ctx) {

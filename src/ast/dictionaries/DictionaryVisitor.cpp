@@ -38,10 +38,10 @@ namespace yogi::visitor {
     }
 
     std::any DictionaryVisitor::visitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext* ctx) {
-        const auto keyAny = visit(ctx->literal());
+        const auto keyAny = visit(ctx->literals());
         const auto valAny = visit(ctx->expression());
-        const auto keyNode = keyAny;
-        const auto valueNode = valAny;
+        const auto& keyNode = keyAny;
+        const auto& valueNode = valAny;
 
         auto* pair = new DictionaryPairNode(keyNode, valueNode, makeStart(ctx), makeEnd(ctx));
         return std::shared_ptr<DictionaryPairNode>(pair);

@@ -9,7 +9,7 @@
 namespace yogi::visitor {
     class LiteralsVisitor : public virtual BaseVisitor {
        public:
-        std::any visitLiteral(Grammar::LiteralContext* ctx) override;
+        std::any visitLiterals(Grammar::LiteralsContext* ctx) override;
         std::any visitIntegerLiteral(Grammar::IntegerLiteralContext* ctx) override;
         std::any visitFloatLiteral(Grammar::FloatLiteralContext* ctx) override;
         std::any visitStringLiteral(Grammar::StringLiteralContext* ctx) override;

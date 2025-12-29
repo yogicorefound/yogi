@@ -21,12 +21,11 @@ concatenationExpression
     ;
 
 
-
-
 binaryExpression
-    : numberLiterals
-    | identifierLiteral
+    : literals
     | LPAREN binaryExpression RPAREN
-    | binaryExpression (MUL | DIV | MOD) binaryExpression
-    | binaryExpression (PLUS | MINUS) binaryExpression
+    | binaryExpression expressionOperator binaryExpression
     ;
+
+
+expressionOperator: (MUL | DIV | MOD | PLUS | MINUS);
