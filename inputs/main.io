@@ -1,1 +1,2 @@
-int[] a = [1, 2, 3, 4]  // ❌ ERROR: 4.0 no puede ser int (decisión estricta)
+int a = 4     // ❌ ERROR literal float a int
+int b = -2     // ❌ ERROR literal float a int

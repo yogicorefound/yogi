@@ -36,7 +36,7 @@ namespace yogi::semantic {
         }
     }
 
-    void Variables::analyzeVariableDeclaration(const VariableDeclarationNode& node, const std::string& source) {
+    void Variables::analyzeVariableDeclaration(const VariableDeclarationNode& node, const std::string& source, bool fromExplicit) {
         const std::string& identifier = node.identifier;
         const std::string& dataType = node.varType;
 
@@ -55,7 +55,7 @@ namespace yogi::semantic {
                 rValue = val.value;
                 stringValue = val.value;
 
-                if (node.varType.starts_with("float") && !utils::Helpers::isInteger(std::stold(val.value))) {
+                if (node.varType.starts_with("float") && !utils::Helpers::isInteger(std::stold(val.value)) && !fromExplicit) {
                     returnType = "float";
                 } else {
                     returnType = "int";
@@ -66,7 +66,7 @@ namespace yogi::semantic {
                 rValue = val.value;
                 stringValue = val.value;
 
-                if (node.varType.starts_with("int") && utils::Helpers::isInteger(std::stold(val.value))) {
+                if (node.varType.starts_with("int") && utils::Helpers::isInteger(std::stold(val.value)) && !fromExplicit) {
                     returnType = "int";
                 } else {
                     returnType = "float";

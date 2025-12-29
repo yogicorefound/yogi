@@ -80,7 +80,7 @@ namespace yogi::visitor {
             const auto [memberType, memberValue, memberNode] = Helpers::resolveItem(memberExpression.value);
             const auto& node = nodes::VariableDeclarationNode(identifier, typeValue, memberNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(node, source);
+            analyzeVariableDeclaration(node, source, false);
             scope->declareVariable(identifier, node);
 
             return node;
@@ -99,7 +99,7 @@ namespace yogi::visitor {
             if (typeValue.starts_with("float")) {
                 auto floatLiteralNode = nodes::FloatLiteralNode(node.value, node.start, node.end);
                 const auto& varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
-                analyzeVariableDeclaration(varNode, source);
+                analyzeVariableDeclaration(varNode, source, false);
                 scope->declareVariable(identifier, varNode);
 
                 return varNode;
@@ -108,7 +108,7 @@ namespace yogi::visitor {
             auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
             const auto& varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(varNode, source);
+            analyzeVariableDeclaration(varNode, source, false);
             scope->declareVariable(identifier, varNode);
 
             return varNode;
@@ -125,7 +125,7 @@ namespace yogi::visitor {
             const auto regexNode = nodes::RegexLiteralNode(rValue, start, end);
             const auto& node = nodes::VariableDeclarationNode(identifier, type, regexNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(node, source);
+            analyzeVariableDeclaration(node, source, false);
             scope->declareVariable(identifier, node);
 
             return node;
@@ -133,7 +133,7 @@ namespace yogi::visitor {
 
         // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
         const auto& node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);
-        analyzeVariableDeclaration(node, source);
+        analyzeVariableDeclaration(node, source, true);
         scope->declareVariable(identifier, node);
 
         return node;
