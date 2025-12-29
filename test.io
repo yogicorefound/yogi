@@ -1,3 +1,3 @@
-str a = "Fou nd FFI"
 
-str[] c = a.split(" ")
+str a = "x"
+str[] b = [a + a]

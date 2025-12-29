@@ -27,7 +27,10 @@ namespace yogi::visitor {
         }
 
         // Value by passing array of elements
-        if (auto arrayValues = visit(ctx->arrayValues()); arrayValues.has_value()) {
+        auto arrayValues = visit(ctx->arrayValues());
+        std::cout << "array: " << arrayValues.has_value() << std::endl;
+
+        if (arrayValues.has_value()) {
             std::vector<nodes::ArrayElementNode> elements;
 
             if (arrayValues.type() == typeid(std::vector<nodes::StringLiteralNode>)) {
@@ -35,7 +38,7 @@ namespace yogi::visitor {
                     const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
                     const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
 
-                    elements.push_back(std::move(elementNode));
+                    elements.push_back(elementNode);
                 }
             }
 
@@ -50,7 +53,7 @@ namespace yogi::visitor {
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                        elements.push_back(std::move(elementNode));
+                        elements.push_back(elementNode);
                     }
                 }
 
@@ -61,7 +64,7 @@ namespace yogi::visitor {
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                        elements.push_back(std::move(elementNode));
+                        elements.push_back(elementNode);
                     }
                 }
 
@@ -72,7 +75,7 @@ namespace yogi::visitor {
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                        elements.push_back(std::move(elementNode));
+                        elements.push_back(elementNode);
                     }
                 }
             }
@@ -83,8 +86,10 @@ namespace yogi::visitor {
 
             return node;
         }
-
         // Value by passing literal with brackets
+
+        std::cout << "arrayValues: " << std::endl;
+
         if (const auto& arrayItemsWithBrackets = ctx->arrayValues()->arrayItemsWithBrackets()->expression(); !arrayItemsWithBrackets.empty()) {
             std::vector<nodes::ArrayElementNode> elements;
             // Create array declaration node
@@ -92,7 +97,6 @@ namespace yogi::visitor {
             parser->inVarMode = true;
             for (auto itemCtx : arrayItemsWithBrackets) {
                 const auto item = visit(itemCtx);
-                std::cout << "arrayItemsWithBrackets: " << typeid(itemCtx).name() << std::endl;
 
                 // Extract value and type from the item
                 std::string itemType;
@@ -105,7 +109,7 @@ namespace yogi::visitor {
                         throwScopeError("Error: '" + node.value + "' is not declared", node.value, node, source);
                     }
 
-                    const auto varNode = variable.value();
+                    const auto& varNode = variable.value();
                     itemValue = varNode->value;
                     itemType = varNode->varType;
 
@@ -114,8 +118,6 @@ namespace yogi::visitor {
                     std::string rValue;
                     processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, item, scope, source);
                 }
-
-                std::cout << "processArrayItems: " << itemValue.type().name() << std::endl;
 
                 // Add element to array
                 auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
@@ -136,6 +138,11 @@ namespace yogi::visitor {
 
             return node;
         }
+
+        std::cout << "arrayItemsWithBrackets: " << std::endl;
+
+        // const auto& arrayValues = visit(ctx->arrayValues());
+        // std::cout << "arrayValues: " << arrayValues.type().name() << std::endl;
 
         throwTypeError(identifier, arrayType, type, source);
         return "";
