@@ -5,8 +5,8 @@
 #pragma once
 
 #include <any>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace yogi::utils::helpers {
     class Math {
@@ -19,6 +19,8 @@ namespace yogi::utils::helpers {
         static bool isGreaterSigned(const std::string& num, const std::string& maxPos, const std::string& maxNeg);
         static bool isValidNumber(const std::string& str);
         static bool isInteger(double number);
+        static bool couldBeInteger(double value);
+        static bool couldBeFloat(double value);
 
         struct DecimalInteger {
             std::string mantissa; // sin ceros a la izquierda

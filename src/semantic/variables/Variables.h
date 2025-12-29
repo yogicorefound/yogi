@@ -19,7 +19,7 @@ namespace yogi::semantic {
 
         static void analyzeVariableReassignment(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
         // Check if data type matches return type
-        static bool checkDataType(const std::string& dataType, const std::string& returnType);
+        static bool checkDataType(const std::string& dataType, const std::string& returnType, std::string& rValue);
     };
 
 } // namespace yogi::semantic

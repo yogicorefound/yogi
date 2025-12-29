@@ -335,7 +335,6 @@ namespace yogi::utils {
     }
 
 
-
     json Helpers::createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop) {
         json node;
         node["kind"] = kind;

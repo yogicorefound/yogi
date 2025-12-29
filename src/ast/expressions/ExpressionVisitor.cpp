@@ -132,9 +132,11 @@ namespace yogi::visitor {
             // NUMERIC OPERATIONS ONLY
             // ---------------------------------------------------
             const bool leftNumeric = (lt == "int" || lt == "float");
-            const bool rightNumeric = (rt == "int" || rt == "float");
+            if (const bool rightNumeric = (rt == "int" || rt == "float"); !leftNumeric || !rightNumeric) {
+                if (lt == "str") {
+                    throwError("TypeError", "cannot concatenate '" + lt + "' " + op + " '" + rt + "'", ctx, source);
+                }
 
-            if (!leftNumeric || !rightNumeric) {
                 throwError("TypeError", "Invalid operands for operator '" + op + "'", ctx, source);
             }
 

@@ -220,6 +220,18 @@ namespace yogi::utils::helpers {
         return std::modf(number, &intPart) == 0.0;
     }
 
+    bool Math::couldBeFloat(double value) {
+        return !couldBeInteger(value);
+    }
+
+
+    bool Math::couldBeInteger(const double value) {
+        constexpr  double epsilon = 1e-12;
+        const double intPart = static_cast<long long>(value);
+        return (value - intPart) < epsilon && (value - intPart) > -epsilon;
+    }
+
+
     bool Math::isValidNumber(const std::string& str) {
         if (str.empty())
             return false;

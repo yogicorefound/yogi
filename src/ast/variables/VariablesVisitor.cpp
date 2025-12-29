@@ -114,7 +114,7 @@ namespace yogi::visitor {
             return varNode;
         }
 
-        const auto [type, resolveValue, __] = Helpers::resolveItem(value);
+        const auto [type, resolveValue, __] = resolveItem(value);
         if (value.type() == typeid(nodes::RegexLiteralNode)) {
             std::string rValue = resolveValue;
             if (rValue.size() >= 2) {

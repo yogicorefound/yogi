@@ -52,15 +52,25 @@ namespace yogi::semantic {
         try {
             if (node.value.type() == typeid(IntegerLiteralNode)) {
                 auto val = std::any_cast<IntegerLiteralNode>(node.value);
-                returnType = "int";
                 rValue = val.value;
                 stringValue = val.value;
 
+                if (node.varType.starts_with("float") && !utils::Helpers::isInteger(std::stold(val.value))) {
+                    returnType = "float";
+                } else {
+                    returnType = "int";
+                }
+
             } else if (node.value.type() == typeid(FloatLiteralNode)) {
                 auto val = std::any_cast<FloatLiteralNode>(node.value);
-                returnType = "float";
                 rValue = val.value;
                 stringValue = val.value;
+
+                if (node.varType.starts_with("int") && utils::Helpers::isInteger(std::stold(val.value))) {
+                    returnType = "int";
+                } else {
+                    returnType = "float";
+                }
 
             } else if (node.value.type() == typeid(BooleanLiteralNode)) {
                 auto val = std::any_cast<BooleanLiteralNode>(node.value);
@@ -108,7 +118,7 @@ namespace yogi::semantic {
         }
 
         // Type checking
-        if (!checkDataType(dataType, returnType)) {
+        if (!checkDataType(dataType, returnType, rValue)) {
             utils::Errors::throwTypeError(identifier, dataType, node.value, source);
         }
 
@@ -198,21 +208,25 @@ namespace yogi::semantic {
         }
 
         // Type checking - ensure new value matches variable's declared type
-        if (!checkDataType(node.varType, returnType)) {
+        if (!checkDataType(node.varType, returnType, rValue)) {
             utils::Errors::throwTypeError(identifier, node.varType, node, source);
         }
 
         // Range checking for integers
         analyze64BitInteger(rValue, node.varType, identifier, source, node.value);
 
-        if (node.varType.find("uint") != std::string::npos) {
+        if (node.varType.starts_with("uint")) {
             analyzeUnsignedInteger(rValue, node.varType, identifier, source, node.value);
-        } else if (node.varType.find("int") != std::string::npos) {
+
+        } else if (node.varType.starts_with("int")) {
             analyzeSignedInteger(rValue, node.varType, identifier, source, node.value);
-        } else if (node.varType.find("float") != std::string::npos) {
+
+        } else if (node.varType.starts_with("float")) {
             analyzeFloat(rValue, node.varType, source, node.value);
+
         } else if (node.varType == "str" && returnType != "str") {
             utils::Errors::throwTypeError(identifier, node.varType, node.value, source);
+
         } else if (node.varType == "bool") {
             if (boolValue != "true" && boolValue != "false") {
                 utils::Errors::throwTypeError(identifier, node.varType, node.value, source);
@@ -220,7 +234,7 @@ namespace yogi::semantic {
         }
     }
 
-    bool Variables::checkDataType(const std::string& dataType, const std::string& returnType) {
+    bool Variables::checkDataType(const std::string& dataType, const std::string& returnType, std::string& rValue) {
         if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {
             return returnType == "int";
         }
