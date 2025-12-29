@@ -24,7 +24,11 @@ namespace yogi::semantic {
             return false;
 
         // Store a shared_ptr copy of the node
-        symbols[name] = ScopeNode{visitor::nodes::Kind::ARRAY_DECLARATION, std::make_shared<std::any>(info)};
+        auto node_ptr = std::make_shared<visitor::nodes::ArrayDeclarationNode>(info);
+        symbols[name] = ScopeNode{
+            visitor::nodes::Kind::ARRAY_DECLARATION,
+            std::make_shared<std::any>(node_ptr) //
+        };
         return true;
     }
 
@@ -74,12 +78,11 @@ namespace yogi::semantic {
         // Check current scope
         if (symbols.contains(name)) {
             const auto [kind, value] = symbols.at(name);
-
             if (kind != visitor::nodes::Kind::VARIABLE_DECLARATION) {
                 return nullptr;
             }
 
-            const auto node = std::any_cast<std::shared_ptr<visitor::nodes::VariableDeclarationNode>>(*value);
+            auto node = std::any_cast<std::shared_ptr<visitor::nodes::VariableDeclarationNode>>(*value);
             return node;
         }
 
@@ -99,7 +102,8 @@ namespace yogi::semantic {
                 return std::nullopt;
             }
 
-            return std::any_cast<std::shared_ptr<visitor::nodes::ArrayDeclarationNode>>(value);
+            auto node = std::any_cast<std::shared_ptr<visitor::nodes::ArrayDeclarationNode>>(*value);
+            return node;
         }
 
         // Check parent scopes recursively

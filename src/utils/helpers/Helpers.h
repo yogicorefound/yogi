@@ -23,6 +23,8 @@ namespace yogi::utils {
         static long long parseNumberString(const std::string& raw);
         static std::string formatFloatNumberDecimal(const std::string& text, int maxDecimals);
 
+        static bool checkDataType(const std::string& dataType, const std::string& returnType);
+
         static std::string toUpper(std::string s);
         static std::string toLower(std::string s);
         static std::string toTitle(std::string s);

@@ -108,10 +108,7 @@ if (NOT ENABLE_TESTING)
     # ============================================================
     #                       RUN TARGET
     # ============================================================
-    set(DEFAULT_FILE "${CMAKE_SOURCE_DIR}/test.io")
-
     add_custom_target(run
-            COMMAND yogi ${DEFAULT_FILE}
             DEPENDS yogi
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )

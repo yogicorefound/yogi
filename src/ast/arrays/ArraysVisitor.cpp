@@ -27,15 +27,33 @@ namespace yogi::visitor {
         }
 
         // Value by passing array of elements
-
         if (const auto arrayValues = visit(ctx->arrayValues()); arrayValues.has_value()) {
             std::vector<nodes::ArrayElementNode> elements;
+
+            if (arrayValues.type() == typeid(nodes::IdentifierLiteral)) {
+                const auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(arrayValues);
+
+                const auto& scopedArray = scope->lookupArray(identifierNode.value);
+                if (!scopedArray.has_value()) {
+                    throwScopeError("Array not found in current scope", identifierNode.value, identifierNode, source);
+                }
+
+                for (const auto itemsNode = scopedArray.value(); const auto item : itemsNode->elements) {
+                    const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item.value);
+
+                    const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
+                    elements.push_back(elementNode);
+                }
+            }
 
             if (arrayValues.type() == typeid(std::vector<nodes::StringLiteralNode>)) {
                 for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(arrayValues); const auto& item : stringLiterals) {
                     const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
-                    const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
+                    if (itemType != arrayType) {
+                        throwTypeError(identifier, arrayType, itemNode, source);
+                    }
 
+                    const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
                     elements.push_back(elementNode);
                 }
             }
@@ -50,28 +68,41 @@ namespace yogi::visitor {
 
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                        if (itemType != arrayType) {
+                            throwTypeError(identifier, arrayType, itemNode, source);
+                        }
+
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
                         elements.push_back(elementNode);
                     }
                 }
 
                 if (memberNode.kind == nodes::Kind::ARRAY_INTEGER_ELEMENTS) {
-                    if (arrayType != "str") {
+                    if (arrayType != "int") {
                         throwTypeError(identifier, arrayType, memberNode, source);
                     }
+
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                        if (itemType != arrayType) {
+                            throwTypeError(identifier, arrayType, itemNode, source);
+                        }
+
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
                         elements.push_back(elementNode);
                     }
                 }
 
                 if (memberNode.kind == nodes::Kind::ARRAY_BOOLEAN_ELEMENTS) {
-                    if (arrayType != "str") {
+                    if (arrayType != "bool") {
                         throwTypeError(identifier, arrayType, memberNode, source);
                     }
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
                         const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                        if (itemType != arrayType) {
+                            throwTypeError(identifier, arrayType, itemNode, source);
+                        }
+
                         const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
                         elements.push_back(elementNode);
                     }
@@ -80,6 +111,7 @@ namespace yogi::visitor {
 
             // Register ArrayDeclarationNode in scope
             nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
+            analyzeArrayDeclaration(node, source);
             scope->declareArray(identifier, node);
 
             return node;
@@ -112,7 +144,7 @@ namespace yogi::visitor {
                 } else {
                     std::string boolValue;
                     std::string rValue;
-                    processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, item, scope, source);
+                    processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, item, source);
                 }
 
                 // Add element to array
@@ -122,7 +154,6 @@ namespace yogi::visitor {
             parser->inVarMode = false;
 
             // Check if declared size matches actual elements
-
             if (arraySize != "auto") {
                 if (elements.size() > std::stoull(arraySize)) {
                     throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arraySize + ".", start, source);
@@ -137,8 +168,6 @@ namespace yogi::visitor {
 
         throwTypeError(identifier, arrayType, type, source);
         return "";
-
-        // Register ArrayDeclarationNode in scope
     }
 
     std::any ArraysVisitor::visitArrayItems(Grammar::ArrayItemsContext* ctx) {
@@ -183,7 +212,7 @@ namespace yogi::visitor {
             std::string boolValue;
             std::string rValue;
 
-            processArrayItems(arrayType, itemType, itemValue, boolValue, rValue, itemResult, scope, source);
+            processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, itemResult, source);
 
             // Add element to array
             auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);

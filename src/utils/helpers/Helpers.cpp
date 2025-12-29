@@ -16,6 +16,34 @@
 
 namespace yogi::utils {
 
+    bool Helpers::checkDataType(const std::string& dataType, const std::string& returnType) {
+        if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {
+            return returnType == "int";
+        }
+
+        if (dataType == "uint" || dataType == "uint8" || dataType == "uint16" || dataType == "uint32" || dataType == "uint64") {
+            return returnType == "int";
+        }
+
+        if (dataType == "float" || dataType == "float32" || dataType == "float64") {
+            return returnType == "float";
+        }
+
+        if (dataType == "bool") {
+            return returnType == "bool";
+        }
+
+        if (dataType == "str") {
+            return returnType == "str";
+        }
+
+        if (dataType == "regex") {
+            return returnType == "regex";
+        }
+
+        return false;
+    }
+
     std::vector<std::string> Helpers::split(const std::string& text, const std::variant<std::string, std::regex>& pattern) {
         std::vector<std::string> result;
 
@@ -305,6 +333,8 @@ namespace yogi::utils {
         pos["column"] = token->getCharPositionInLine();
         return pos;
     }
+
+
 
     json Helpers::createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop) {
         json node;

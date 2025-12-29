@@ -40,12 +40,7 @@ namespace yogi::semantic {
         return false;
     }
 
-    void BaseSemantic::analyzeSignedInteger(
-        const std::string& rValue,
-        const std::string& dataType,
-        const std::string& identifier,
-        const std::string& source,
-        const std::any& node) {
+    void BaseSemantic::analyzeSignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
         const auto value = utils::Helpers::parseInteger(rValue);
         const bool isValidNumber = utils::Helpers::isValidNumber(std::to_string(value));
 
@@ -70,12 +65,7 @@ namespace yogi::semantic {
             utils::Errors::throwRangeError("Value exceeds 32-bit signed integer range", node, source);
     }
 
-    void BaseSemantic::analyzeUnsignedInteger(
-        const std::string& rValue,
-        const std::string& dataType,
-        const std::string& identifier,
-        const std::string& source,
-        const std::any& node) {
+    void BaseSemantic::analyzeUnsignedInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
         const bool isValidNumber = utils::Helpers::isValidNumber(rValue);
         const auto value = utils::Helpers::parseFloat(rValue);
 
@@ -114,12 +104,7 @@ namespace yogi::semantic {
         }
     }
 
-    void BaseSemantic::analyze64BitInteger(
-        const std::string& rValue,
-        const std::string& dataType,
-        const std::string& identifier,
-        const std::string& source,
-        const std::any& node) {
+    void BaseSemantic::analyze64BitInteger(const std::string& rValue, const std::string& dataType, const std::string& identifier, const std::string& source, const std::any& node) {
         const bool isNegative = !rValue.empty() && rValue[0] == '-';
 
         // ---------------------------------------------

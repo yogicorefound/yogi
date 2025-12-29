@@ -7,102 +7,99 @@
 #include "semantic/variables/Variables.h"
 
 namespace yogi::semantic {
-    json Arrays::analyzeArrayDeclaration(const json& node, const std::string& source) {
-        const std::string type = node["Type"]["raw"];
-        const std::string size = node["Type"]["size"];
-        const std::string identifier = node["Identifier"]["value"];
+    visitor::nodes::ArrayDeclarationNode Arrays::analyzeArrayDeclaration(const visitor::nodes::ArrayDeclarationNode& node, const std::string& source) {
+        const auto items = node.elements;
+        if (const int length = items.size(); node.size != "auto" && length > std::stoi(node.size)) {
+            utils::Errors::throwRangeError("Expected array size of " + node.size + ", but received " + std::to_string(length) + " elements.", node, source);
+        }
 
-        const auto items = node["value"]["items"];
-        if (const int length = items.size(); size != "auto" && length > std::stoi(size)) {
-            utils::Errors::
-                throwRangeError("Expected array size of " + size + ", but received " + std::to_string(length) + " elements.", node["value"], source);
+        for (const auto& item : items) {
+            const auto [itemType, itemValue, itemNode] = utils::Helpers::resolveItem(item.value);
+
+            checkNumberRange(node.type, itemValue, node, source);
+            analyzeArrayItems(node.identifier, node.type, itemValue, item.type, itemNode, source);
         }
 
         return node;
     }
 
-    void Arrays::analyzeArrayItems(
-        const std::string& identifier,
-        const std::string& returnType,
-        const std::string& rValue,
-        const std::string& boolValue,
-        const std::string& dataType,
-        const std::any& node,
-        const std::string& source) {
+    void Arrays::checkNumberRange(const std::string& dataType, const std::string& rValue, const std::any& node, const std::string& source) {
+        // Signed Integer
+        // =======================================================================================================================================
+        if (dataType == "int8[]") {
+            if (!utils::Helpers::fitsInInteger(rValue, 8)) {
+                utils::Errors::throwRangeError("Value exceeds 8-bit signed integer range", node, source);
+            }
+        }
+
+        if (dataType == "int[]" || dataType == "int32") {
+            if (!utils::Helpers::fitsInInteger(rValue, 32)) {
+                utils::Errors::throwRangeError("Value exceeds 32-bit signed integer range", node, source);
+            }
+        }
+
+        if (dataType == "int64[]") {
+            if (!utils::Helpers::fitsInInteger(rValue, 64)) {
+                utils::Errors::throwRangeError("Value exceeds 128-bit signed integer range", node, source);
+            }
+        }
+
+        // Unsigned Integer
+        // =======================================================================================================================================
+        if (dataType == "uint8[]") {
+            if (!utils::Helpers::fitsInInteger(rValue, 8)) {
+                utils::Errors::throwRangeError("Value exceeds 8-bit unsigned integer range", node, source);
+            }
+        }
+
+        if (dataType == "uint[]" || dataType == "uint32") {
+            if (!utils::Helpers::fitsInInteger(rValue, 32)) {
+                utils::Errors::throwRangeError("Value exceeds 32-bit unsigned integer range", node, source);
+            }
+        }
+
+        if (dataType == "uint64[]") {
+            if (!utils::Helpers::fitsInInteger(rValue, 64)) {
+                utils::Errors::throwRangeError("Value exceeds 64-bit unsigned integer range", node, source);
+            }
+        }
+
+        // Float
+        if (dataType == "float[]" || dataType == "float32") {
+            if (!utils::Helpers::fitsInInteger(rValue, 32)) {
+                utils::Errors::throwRangeError("Value exceeds 32-bit float range", node, source);
+            }
+        }
+
+        if (dataType == "float64[]") {
+            if (!utils::Helpers::fitsInInteger(rValue, 64)) {
+                utils::Errors::throwRangeError("Value exceeds 64-bit float range", node, source);
+            }
+        }
+    }
+
+    void Arrays::analyzeArrayItems(const std::string& identifier, const std::string& returnType, const std::string& rValue, const std::string& dataType, const std::any& node, const std::string& source) {
         analyze64BitInteger(rValue, dataType, identifier, source, node);
 
-        if (dataType.find("uint") != std::string::npos) {
+        if (dataType.starts_with("uint")) {
             analyzeUnsignedInteger(rValue, dataType, identifier, source, node);
-        } else if (dataType.find("int") != std::string::npos) {
+
+        } else if (dataType.starts_with("int")) {
             analyzeSignedInteger(rValue, dataType, identifier, source, node);
-        } else if (dataType.find("float") != std::string::npos) {
+
+        } else if (dataType.starts_with("float")) {
             analyzeFloat(rValue, dataType, source, node);
+
         } else if (dataType == "str" && returnType != "str") {
             utils::Errors::throwTypeError(identifier, dataType, node, source);
-        } else if (dataType == "bool") {
-            if (boolValue != "true" && boolValue != "false") {
-                utils::Errors::throwTypeError(identifier, dataType, node, source);
-            }
+
+        } else if (dataType == "bool" && returnType != "bool") {
+            utils::Errors::throwTypeError(identifier, dataType, node, source);
         }
     }
 
-    Arrays::ResolvedItem Arrays::resolveItem(const std::any& itemResult, Scope* scope, const std::string& source) {
-        if (itemResult.type() == typeid(visitor::nodes::IntegerLiteralNode)) {
-            auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(itemResult);
-            return {"int", n.value, itemResult};
-        }
-
-        if (itemResult.type() == typeid(visitor::nodes::FloatLiteralNode)) {
-            auto n = std::any_cast<visitor::nodes::FloatLiteralNode>(itemResult);
-            return {"float", n.value, itemResult};
-        }
-
-        if (itemResult.type() == typeid(visitor::nodes::StringLiteralNode)) {
-            auto n = std::any_cast<visitor::nodes::StringLiteralNode>(itemResult);
-            return {"str", n.value, itemResult};
-        }
-
-        if (itemResult.type() == typeid(visitor::nodes::BooleanLiteralNode)) {
-            auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(itemResult);
-            return {"bool", n.value, itemResult};
-        }
-
-        if (itemResult.type() == typeid(visitor::nodes::BinaryExpressionNode)) {
-            auto n = std::any_cast<visitor::nodes::BinaryExpressionNode>(itemResult);
-            return {n.resultType, n.value, itemResult};
-        }
-
-        if (itemResult.type() == typeid(visitor::nodes::IdentifierLiteral)) {
-            auto id = std::any_cast<visitor::nodes::IdentifierLiteral>(itemResult);
-
-            if (const auto varInfo = scope->lookupVariable(id.value); varInfo.has_value()) {
-                auto varNode = std::any_cast<visitor::nodes::VariableDeclarationNode>(varInfo.value());
-                return resolveItem(varNode.value, scope, source);
-            }
-
-            if (const auto varInfo = scope->lookupArray(id.value); varInfo.has_value()) {
-                auto varNode = std::any_cast<visitor::nodes::ArrayDeclarationNode>(varInfo.value());
-                return resolveItem(varNode.elements, scope, source);
-            }
-
-            utils::Errors::throwScopeError("Variable '" + id.value + "' is not declared", id.value, id, source);
-        }
-
-        utils::Errors::throwError("Error", "Unsupported array element type", itemResult, source);
-
-        return {}; // unreachable
-    }
-
-    void Arrays::processArrayItems(
-        const std::string& arrayType,
-        std::string& itemType,
-        std::any& itemValue,
-        std::string& boolValue,
-        std::string& rValue,
-        const std::any& itemResult,
-        Scope* scope,
-        const std::string& source) {
-        const auto [type, value, node] = resolveItem(itemResult, scope, source);
+    void Arrays::processArrayItems(const std::string& identifier, const std::string& arrayType, std::string& itemType, std::any& itemValue, std::string& boolValue, std::string& rValue, const std::any& itemResult, const std::string& source) {
+        const auto [type, value, node] = utils::Helpers::resolveItem(itemResult);
 
         itemType = type;
         rValue = value;
@@ -113,7 +110,7 @@ namespace yogi::semantic {
 
         // 🔒 Single, correct validation point
         if (!checkArrayDataType(arrayType, itemType, rValue)) {
-            utils::Errors::throwTypeError("Invalid array element type", arrayType, itemResult, source);
+            utils::Errors::throwTypeError(identifier, arrayType, itemResult, source);
         }
     }
 
@@ -157,15 +154,13 @@ namespace yogi::semantic {
         // -------------------------------
         if (isIntType(dataType)) {
             long long v{};
-            auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), v);
-            if (ec != std::errc() || ptr != value.data() + value.size())
+            if (const auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), v); ec != std::errc() || ptr != value.data() + value.size())
                 return false;
 
-            int bits = bitWidth(dataType);
-            long long min = -(1LL << (bits - 1));
-            long long max = (1LL << (bits - 1)) - 1;
+            const int bits = bitWidth(dataType);
+            const long long min = -(1LL << (bits - 1));
 
-            if (v < min || v > max)
+            if (const long long max = (1LL << (bits - 1)) - 1; v < min || v > max)
                 return false;
 
             // conversion rules
@@ -177,14 +172,12 @@ namespace yogi::semantic {
         // -------------------------------
         if (isUIntType(dataType)) {
             unsigned long long v{};
-            auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), v);
-            if (ec != std::errc() || ptr != value.data() + value.size())
+            if (auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), v); ec != std::errc() || ptr != value.data() + value.size())
                 return false;
 
-            int bits = bitWidth(dataType);
-            unsigned long long max = (bits == 64) ? std::numeric_limits<unsigned long long>::max() : ((1ULL << bits) - 1);
+            const int bits = bitWidth(dataType);
 
-            if (v > max)
+            if (const unsigned long long max = bits == 64 ? std::numeric_limits<unsigned long long>::max() : (1ULL << bits) - 1; v > max)
                 return false;
 
             return returnType == "int" || isFloatType(returnType);
@@ -195,7 +188,7 @@ namespace yogi::semantic {
         // -------------------------------
         if (isFloatType(dataType)) {
             try {
-                long double v = std::stold(value);
+                const long double v = std::stold(value);
                 (void)v; // value parsed successfully
             } catch (...) {
                 return false;
