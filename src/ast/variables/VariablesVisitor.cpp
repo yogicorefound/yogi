@@ -161,7 +161,7 @@ namespace yogi::visitor {
         auto node = nodes::VariableDeclarationNode(identifier, "", newValue, false, start, end);
 
         if (varNode->isConstant) {
-            throwReassignmentError("cannot reassign constant variable '" + identifier + "'", newValue, source);
+            throwReassignmentError("'" + identifier + "' is constant and cannot be modified", newValue, source);
         }
 
         if (varNode->value.type() == typeid(nodes::BinaryExpressionNode)) {

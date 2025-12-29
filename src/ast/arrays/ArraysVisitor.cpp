@@ -194,7 +194,7 @@ namespace yogi::visitor {
 
         const auto arrayNode = std::any_cast<nodes::ArrayDeclarationNode>(array.value());
         if (arrayNode.isConstant) {
-            throwReassignmentError("cannot reassign constant variable '" + identifier + "'", arrayNode, source);
+            throwReassignmentError("'" + identifier + "' is constant and cannot be modified", arrayNode, source);
         }
 
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
