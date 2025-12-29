@@ -61,7 +61,8 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("uint64[2] a = [1000000000, 2000000000]", "uint64", "a", "2", std::vector{1000000000, 2000000000}, false),
             //
             // // ===== array from identifier scenarios =====
-            std::make_tuple<std::string>("int[] a = [1,2] int[] b = a", "int", "b", "auto", std::vector{1, 2}, true)
+            std::make_tuple<std::string>("int[] a = [1,200] int[] b = a", "int", "b", "auto", std::vector{1, 200}, true),
+            std::make_tuple<std::string>("int[] a = [1,200] int[] b = a", "int", "b", "auto", std::vector{1, 200}, true)
 
         );
 

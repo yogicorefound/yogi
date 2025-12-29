@@ -7,8 +7,27 @@
 #include "semantic/variables/Variables.h"
 
 namespace yogi::semantic {
-    visitor::nodes::ArrayDeclarationNode Arrays::analyzeArrayDeclaration(const visitor::nodes::ArrayDeclarationNode& node, const std::string& source) {
+    void Arrays::analyzeUnOrSingedInteger(const std::string& dataType, const std::string& rValue, const std::string& identifier, const std::string& returnType, visitor::nodes::ArrayDeclarationNode& node, const std::string& source) {
+        if (dataType.find("uint") != std::string::npos) {
+            analyzeUnsignedInteger(rValue, dataType, identifier, source, node);
+
+        } else if (dataType.find("int") != std::string::npos) {
+            analyzeSignedInteger(rValue, dataType, identifier, source, node);
+
+        } else if (dataType.find("float") != std::string::npos) {
+            analyzeFloat(rValue, dataType, source, node);
+
+        } else if (dataType == "str" && returnType != "str") {
+            utils::Errors::throwTypeError(identifier, dataType, node, source);
+
+        } else if (dataType == "bool") {
+            utils::Errors::throwTypeError(identifier, dataType, node, source);
+        }
+    }
+
+    visitor::nodes::ArrayDeclarationNode Arrays::analyzeArrayDeclaration(visitor::nodes::ArrayDeclarationNode& node, const std::string& source) {
         const auto items = node.elements;
+
         if (const int length = items.size(); node.size != "auto" && length > std::stoi(node.size)) {
             utils::Errors::throwRangeError("Expected array size of " + node.size + ", but received " + std::to_string(length) + " elements.", node, source);
         }
@@ -16,6 +35,7 @@ namespace yogi::semantic {
         for (const auto& item : items) {
             const auto [itemType, itemValue, itemNode] = utils::Helpers::resolveItem(item.value);
 
+            analyzeUnOrSingedInteger(node.type, itemValue, node.identifier, itemType, node, source);
             checkNumberRange(node.type, itemValue, node, source);
             analyzeArrayItems(node.identifier, node.type, itemValue, item.type, itemNode, source);
         }
@@ -24,21 +44,24 @@ namespace yogi::semantic {
     }
 
     void Arrays::checkNumberRange(const std::string& dataType, const std::string& rValue, const std::any& node, const std::string& source) {
+        const auto value = utils::Helpers::parseFloat(rValue);
+        std::cout << "value > 0: " << (value > 0) << std::endl;
+
         // Signed Integer
         // =======================================================================================================================================
-        if (dataType == "int8[]") {
+        if (dataType == "int8") {
             if (!utils::Helpers::fitsInInteger(rValue, 8)) {
                 utils::Errors::throwRangeError("Value exceeds 8-bit signed integer range", node, source);
             }
         }
 
-        if (dataType == "int[]" || dataType == "int32") {
+        if (dataType == "int" || dataType == "int32") {
             if (!utils::Helpers::fitsInInteger(rValue, 32)) {
                 utils::Errors::throwRangeError("Value exceeds 32-bit signed integer range", node, source);
             }
         }
 
-        if (dataType == "int64[]") {
+        if (dataType == "int64") {
             if (!utils::Helpers::fitsInInteger(rValue, 64)) {
                 utils::Errors::throwRangeError("Value exceeds 128-bit signed integer range", node, source);
             }
@@ -46,32 +69,32 @@ namespace yogi::semantic {
 
         // Unsigned Integer
         // =======================================================================================================================================
-        if (dataType == "uint8[]") {
-            if (!utils::Helpers::fitsInInteger(rValue, 8)) {
+        if (dataType == "uint8") {
+            if (!utils::Helpers::fitsInInteger(rValue, 8) && value < 0) {
                 utils::Errors::throwRangeError("Value exceeds 8-bit unsigned integer range", node, source);
             }
         }
 
-        if (dataType == "uint[]" || dataType == "uint32") {
-            if (!utils::Helpers::fitsInInteger(rValue, 32)) {
+        if (dataType == "uint" || dataType == "uint32") {
+            if (!utils::Helpers::fitsInInteger(rValue, 32) && value < 0) {
                 utils::Errors::throwRangeError("Value exceeds 32-bit unsigned integer range", node, source);
             }
         }
 
-        if (dataType == "uint64[]") {
-            if (!utils::Helpers::fitsInInteger(rValue, 64)) {
+        if (dataType == "uint64") {
+            if (!utils::Helpers::fitsInInteger(rValue, 64) && value < 0) {
                 utils::Errors::throwRangeError("Value exceeds 64-bit unsigned integer range", node, source);
             }
         }
 
         // Float
-        if (dataType == "float[]" || dataType == "float32") {
+        if (dataType == "float" || dataType == "float32") {
             if (!utils::Helpers::fitsInInteger(rValue, 32)) {
                 utils::Errors::throwRangeError("Value exceeds 32-bit float range", node, source);
             }
         }
 
-        if (dataType == "float64[]") {
+        if (dataType == "float64") {
             if (!utils::Helpers::fitsInInteger(rValue, 64)) {
                 utils::Errors::throwRangeError("Value exceeds 64-bit float range", node, source);
             }
