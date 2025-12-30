@@ -96,7 +96,7 @@ namespace yogi::visitor {
                 utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
-            StringLiteralNode node(utils::Helpers::reverseString(pValue), mNode.start, mNode.end);
+            StringLiteralNode node(utils::Helpers::reverse(pValue), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
 
             return memberNode;

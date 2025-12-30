@@ -3,7 +3,6 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include <cmath>
 #include "includes/yogi/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
@@ -15,14 +14,13 @@ namespace yogi::visitor::nodes {
     const std::regex pattern(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})");
 
     TEST_CASE("Variables evaluation", "[MEMBER]") {
-        // List of test expressions: { input_text, expected_value, expected_result_type, top_operator }
         auto cases = GENERATE(
-            // string members
-
-            // TODO: Add more tests
-            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(1).repeat(2)", utils::Helpers::repeat(utils::Helpers::at(testString, 1), 2), "str"),
+            // TODO: "split", "match",  "unicode",
 
             // Done
+            std::make_tuple<std::string>("str a = \"" + testString + "\" a.reverse()", utils::Helpers::reverse(testString), "str"),
+            std::make_tuple<std::string>("str a = \"" + testString + "\" a.slice(0, 5)", utils::Helpers::slice(testString, 0, 5), "str"),
+            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(1).repeat(2)", utils::Helpers::repeat(utils::Helpers::at(testString, 1), 2), "str"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(0)", std::string(1, testString.at(0)), "str"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.size()", std::to_string(testString.size()), "int"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.lower()", utils::Helpers::toLower(testString), "str"),
@@ -38,7 +36,7 @@ namespace yogi::visitor::nodes {
 
         auto [text, expectedValue, expectedType] = cases;
         const auto ast = Yogi::testAST(text);
-        const auto memberNode = std::any_cast<nodes::MemberExpressionNode>(ast.body[1].children[0]);
+        const auto memberNode = std::any_cast<MemberExpressionNode>(ast.body[1].children[0]);
         const auto [type, value, node] = utils::Helpers::resolveItem(memberNode.value);
 
         REQUIRE(value == expectedValue);

@@ -244,7 +244,7 @@ namespace yogi::utils::helpers {
         return result;
     }
 
-    std::string StringMembers::reverseString(const std::string& text) {
+    std::string StringMembers::reverse(const std::string& text) {
         std::vector<std::string> chars;
         for (size_t i = 0; i < text.size();) {
             const unsigned char c = text[i];
