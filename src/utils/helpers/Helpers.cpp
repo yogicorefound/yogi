@@ -11,8 +11,16 @@
 #include <string>
 #include <vector>
 #include "antlr4-runtime.h"
+#include "libs/uni-algo/include/uni_algo/norm.h"
 
 namespace yogi::utils {
+
+    bool Helpers::areCanonicallyEqual(const std::string& str1, const std::string& str2) {
+        const std::string norm1 = una::norm::to_nfc_utf8(str1);
+        const std::string norm2 = una::norm::to_nfc_utf8(str2);
+
+        return norm1 == norm2;
+    }
 
     bool Helpers::checkDataType(const std::string& dataType, const std::string& returnType) {
         if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {

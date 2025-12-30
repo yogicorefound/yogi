@@ -35,5 +35,7 @@ namespace yogi::utils {
         static ResolvedItem resolveItem(const std::any& itemResult);
         static visitor::nodes::Kind resolveKind(const std::any& itemResult);
         static std::string resolveDataType(const std::any& itemResult);
+
+        static bool areCanonicallyEqual(const std::string& str1, const std::string& str2);
     };
 } // namespace yogi::utils

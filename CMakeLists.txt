@@ -90,6 +90,7 @@ if (NOT ENABLE_TESTING)
             ${ANTLR4_RUNTIME_INCLUDE}
             ${LLVM_INCLUDE_DIRS}
             ${LLVM_ROOT}/include
+            ${LIBS_DIR}/uni-algo/include
     )
 
     target_link_directories(yogi PRIVATE
@@ -102,6 +103,7 @@ if (NOT ENABLE_TESTING)
     target_link_libraries(yogi
             antlr4-runtime
             "${ANTLR4_RUNTIME_LIB}/libantlr4-runtime.4.13.2.dylib"
+            "${LIBS_DIR}/uni-algo/build/libuni-algo.a"
             ${llvm_libs}
     )
 
