@@ -82,12 +82,20 @@ namespace yogi::visitor {
         auto stringLiteralNode = std::any_cast<StringLiteralNode>(resolveNode);
         // Properties (no arguments needed)
         if (member == "size" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
+            }
+
             IntegerLiteralNode node(std::to_string(pValue.size()), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::INTEGER_LITERAL, mNode.start, mNode.end);
             return memberNode;
         }
 
         if (member == "reverse" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
+            }
+
             StringLiteralNode node(utils::Helpers::reverseString(pValue), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
 
@@ -95,6 +103,10 @@ namespace yogi::visitor {
         }
 
         if (member == "lower" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
+            }
+
             StringLiteralNode node(utils::Helpers::toLower(pValue), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
 
@@ -102,6 +114,10 @@ namespace yogi::visitor {
         }
 
         if (member == "upper" && isMethod) {
+            if (arguments.size() > 0) {
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
+            }
+
             StringLiteralNode node(utils::Helpers::toUpper(pValue), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
             return memberNode;
@@ -109,7 +125,7 @@ namespace yogi::visitor {
 
         if (member == "title" && isMethod) {
             if (arguments.size() > 0) {
-                utils::Errors::throwError("Error", "'title' requires exactly 1 argument, but received " + std::to_string(arguments.size()), pValue, source);
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             StringLiteralNode node(utils::Helpers::toTitle(pValue), mNode.start, mNode.end);
@@ -119,7 +135,7 @@ namespace yogi::visitor {
 
         if (member == "includes" && isMethod) {
             if (arguments.size() != 1) {
-                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), pValue, source);
+                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             const auto argument = arguments[0];
@@ -142,7 +158,7 @@ namespace yogi::visitor {
                 const auto variableScoped = scope->lookupVariable(identifier->value);
 
                 if (!variableScoped.has_value()) {
-                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, mNode, source);
                 }
 
                 const auto varNode = variableScoped.value();
@@ -171,11 +187,11 @@ namespace yogi::visitor {
         }
 
         if (member == "startWith" && isMethod) {
-            const auto argument = arguments[0];
             if (arguments.size() != 1) {
                 throw std::runtime_error("Error: 'startWith' requires exactly 1 argument, got " + std::to_string(arguments.size()));
             }
 
+            const auto argument = arguments[0];
             if (auto exprPtr = std::any_cast<BinaryExpressionNode>(&arguments[0])) {
                 auto& expression = *exprPtr;
                 if (expression.resultType != "str") {
@@ -223,11 +239,11 @@ namespace yogi::visitor {
         }
 
         if (member == "endsWith" && isMethod) {
-            const auto argument = arguments[0];
             if (arguments.size() != 1) {
                 throw std::runtime_error("Error: 'startWith' requires exactly 1 argument, got " + std::to_string(arguments.size()));
             }
 
+            const auto argument = arguments[0];
             if (auto exprPtr = std::any_cast<BinaryExpressionNode>(&arguments[0])) {
                 auto& expression = *exprPtr;
                 if (expression.resultType != "str") {
@@ -331,7 +347,7 @@ namespace yogi::visitor {
 
         if (member == "trim" && isMethod) {
             if (arguments.size() > 0) {
-                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), stringLiteralNode, source);
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             StringLiteralNode node(utils::Helpers::trim(pValue), mNode.start, mNode.end);
@@ -341,7 +357,7 @@ namespace yogi::visitor {
 
         if (member == "trimStart" && isMethod) {
             if (arguments.size() > 0) {
-                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), stringLiteralNode, source);
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             StringLiteralNode node(utils::Helpers::trimStart(pValue), mNode.start, mNode.end);
@@ -351,7 +367,7 @@ namespace yogi::visitor {
 
         if (member == "trimEnd" && isMethod) {
             if (arguments.size() > 0) {
-                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), stringLiteralNode, source);
+                utils::Errors::throwError("Error", "'" + member + "' doesn't accept arguments, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             StringLiteralNode node(utils::Helpers::trimEnd(pValue), mNode.start, mNode.end);
@@ -418,7 +434,7 @@ namespace yogi::visitor {
 
         if (member == "split" && isMethod) {
             if (arguments.size() != 1) {
-                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), stringLiteralNode, source);
+                utils::Errors::throwError("Error", "'title' requires exactly 0 argument, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             const auto [type, value, node] = utils::Helpers::resolveItem(arguments[0]);
@@ -442,7 +458,7 @@ namespace yogi::visitor {
 
         if (member == "at" && isMethod) {
             if (arguments.size() != 1) {
-                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), pValue, source);
+                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             const auto argument = arguments[0];
@@ -478,7 +494,7 @@ namespace yogi::visitor {
 
         if (member == "repeat" && isMethod) {
             if (arguments.size() != 1) {
-                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), pValue, source);
+                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), mNode, source);
             }
 
             const auto argument = arguments[0];
@@ -513,11 +529,9 @@ namespace yogi::visitor {
         }
 
         if (member == "slice" && isMethod) {
-            // Por defecto, retorna toda la cadena
             int start = 0;
             int end = static_cast<int>(pValue.size());
 
-            // Resolver argumentos si se pasan
             std::function<int(std::any)> argumentResolver;
             argumentResolver = [source, scope](std::any argument) -> int {
                 if (argument.type() == typeid(IdentifierLiteral)) {
@@ -580,7 +594,7 @@ namespace yogi::visitor {
 
         if (member == "match" && isMethod) {
             if (arguments.size() != 1) {
-                utils::Errors::throwError("Error", "'match' requires exactly 1 argument", pValue, source);
+                utils::Errors::throwError("Error", "'match' requires exactly 1 argument", mNode, source);
             }
 
             const auto argument = arguments[0];
@@ -628,7 +642,7 @@ namespace yogi::visitor {
 
         if (member == "unicode" && isMethod) {
             if (arguments.size() != 1) {
-                utils::Errors::throwError("Error", "'match' requires exactly 1 argument", pValue, source);
+                utils::Errors::throwError("Error", "'match' requires exactly 1 argument", mNode, source);
             }
 
             const auto argument = arguments[0];
