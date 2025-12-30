@@ -4,17 +4,17 @@
 
 #pragma once
 
+#include <ast/nodes/BaseNode.h>
 #include <regex>
 #include "antlr4-runtime.h"
 #include "libs/json.hpp"
 #include "math/math.h"
-
-#include <ast/nodes/BaseNode.h>
+#include "members/members.h"
 
 using json = nlohmann::ordered_json;
 
 namespace yogi::utils {
-    class Helpers : public helpers::Math {
+    class Helpers : public helpers::Math, public helpers::Members {
         static json getPosition(const antlr4::Token* token);
 
        public:
@@ -24,15 +24,6 @@ namespace yogi::utils {
         static std::string formatFloatNumberDecimal(const std::string& text, int maxDecimals);
 
         static bool checkDataType(const std::string& dataType, const std::string& returnType);
-
-        static std::string toUpper(std::string s);
-        static std::string toLower(std::string s);
-        static std::string toTitle(std::string s);
-        static std::string trim(std::string s);
-        static std::string trimStart(std::string s);
-        static std::string trimEnd(std::string s);
-        static std::vector<std::string> split(const std::string& text, const std::variant<std::string, std::regex>& pattern);
-        static std::string replace(const std::string& input, const std::variant<std::string, std::regex>& search, const std::string& replacement);
 
         static json createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop);
         static std::string parseString(const std::string& rawInput);

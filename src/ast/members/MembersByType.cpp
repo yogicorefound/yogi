@@ -58,27 +58,9 @@ namespace yogi::visitor {
 
     std::vector<std::string> MembersByType::strAvailableMembers() {
         const std::vector<std::string> members =
-            {"size",
-             "lower",
-             "upper",
-             "title",
-             "includes",
-             "startWith",
-             "endsWith",
-             "find",
-             "trim",
-             "trimStart",
-             "trimEnd",
-             "replace",
-             "split",
+            {"size", "lower", "upper", "title",   "includes",  "startWith", "endsWith", "find", "trim", "trimStart", "trimEnd", "replace", "split",
 
-             "at",
-             "match",
-             "slice",
-             "unicode",
-             "normalize",
-             "repeat",
-             "reverse"
+             "at",   "match", "slice", "unicode", "normalize", "repeat",    "reverse"
 
             }; //
 
@@ -450,6 +432,42 @@ namespace yogi::visitor {
             }
 
             auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_STRING_ELEMENTS, mNode.start, mNode.end);
+            return memberNode;
+        }
+
+        if (member == "at" && isMethod) {
+            if (arguments.size() != 1) {
+                utils::Errors::throwError("Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()), pValue, source);
+            }
+
+            const auto argument = arguments[0];
+            if (argument.type() == typeid(IdentifierLiteral)) {
+                const auto identifier = std::any_cast<IdentifierLiteral>(&argument);
+                const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                if (!variableScoped.has_value()) {
+                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                }
+
+                const auto varNode = variableScoped.value();
+                const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                if (varNode->varType != "int") {
+                    utils::Errors::throwError("Error", "Argument must be a integer", varNode, source);
+                }
+
+                StringLiteralNode node(utils::Helpers::at(pValue, std::stoll(value)), mNode.start, mNode.end);
+                auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
+                return memberNode;
+            }
+
+            const auto& [type, value, arrNode] = utils::Helpers::resolveItem(argument);
+            if (type != "int") {
+                utils::Errors::throwError("Error", "Argument must be a integer", arrNode, source);
+            }
+
+            StringLiteralNode node(utils::Helpers::at(pValue, std::stoll(value)), mNode.start, mNode.end);
+            auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
             return memberNode;
         }
 

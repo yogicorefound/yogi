@@ -5,12 +5,10 @@
 #include "Helpers.h"
 #include <ast/nodes/nodes.h>
 #include <utils/errors/Errors.h>
-#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <variant>
 #include <vector>
 #include "antlr4-runtime.h"
 
@@ -44,71 +42,6 @@ namespace yogi::utils {
         return false;
     }
 
-    std::vector<std::string> Helpers::split(const std::string& text, const std::variant<std::string, std::regex>& pattern) {
-        std::vector<std::string> result;
-
-        if (std::holds_alternative<std::string>(pattern)) {
-            const std::string& sep = std::get<std::string>(pattern);
-
-            if (sep.empty()) {
-                // Optional: split into characters
-                for (char c : text) {
-                    result.emplace_back(1, c);
-                }
-                return result;
-            }
-
-            size_t start = 0;
-            size_t pos;
-
-            while ((pos = text.find(sep, start)) != std::string::npos) {
-                result.push_back(text.substr(start, pos - start));
-                start = pos + sep.length();
-            }
-
-            result.push_back(text.substr(start));
-            return result;
-        }
-
-        const std::regex& rx = std::get<std::regex>(pattern);
-
-        std::sregex_token_iterator it(text.begin(), text.end(), rx, -1);
-        std::sregex_token_iterator end;
-
-        for (; it != end; ++it) {
-            result.push_back(it->str());
-        }
-
-        return result;
-    }
-
-    std::string Helpers::replace(const std::string& input, const std::variant<std::string, std::regex>& search, const std::string& replacement) {
-        std::string result;
-
-        if (std::holds_alternative<std::string>(search)) {
-            // Reemplazo literal
-            const std::string& literal = std::get<std::string>(search);
-            if (literal.empty()) {
-                throw std::runtime_error("replace(): search string cannot be empty");
-            }
-
-            size_t pos = 0;
-            size_t found;
-            while ((found = input.find(literal, pos)) != std::string::npos) {
-                result.append(input, pos, found - pos);
-                result.append(replacement);
-                pos = found + literal.size();
-            }
-            result.append(input, pos, input.size() - pos);
-        } else if (std::holds_alternative<std::regex>(search)) {
-            // Reemplazo usando regex
-            const std::regex& re = std::get<std::regex>(search);
-            result = std::regex_replace(input, re, replacement);
-        }
-
-        return result;
-    }
-
     std::string Helpers::formatFloatNumberDecimal(const std::string& text, const int maxDecimals = -1) {
         double value;
         try {
@@ -138,53 +71,6 @@ namespace yogi::utils {
         }
 
         return result;
-    }
-
-    std::string Helpers::toUpper(std::string s) {
-        std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::toupper(c); });
-        return s;
-    }
-
-    std::string Helpers::trimStart(std::string s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-        return s;
-    }
-
-    std::string Helpers::trimEnd(std::string s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
-        return s;
-    }
-
-    std::string Helpers::trim(std::string s) {
-        auto notSpace = [](unsigned char ch) { return !std::isspace(ch); };
-
-        // left trim
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), notSpace));
-
-        // right trim
-        s.erase(std::find_if(s.rbegin(), s.rend(), notSpace).base(), s.end());
-
-        return s;
-    }
-
-    std::string Helpers::toLower(std::string s) {
-        std::ranges::transform(s, s.begin(), [](const unsigned char c) { return std::tolower(c); });
-        return s;
-    }
-
-    std::string Helpers::toTitle(std::string s) {
-        bool newWord = true;
-        for (char& c : s) {
-            if (std::isspace(static_cast<unsigned char>(c))) {
-                newWord = true;
-            } else if (newWord) {
-                c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
-                newWord = false;
-            } else {
-                c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-            }
-        }
-        return s;
     }
 
     long long Helpers::parseNumberString(const std::string& raw) {
@@ -334,7 +220,6 @@ namespace yogi::utils {
         return pos;
     }
 
-
     json Helpers::createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop) {
         json node;
         node["kind"] = kind;
@@ -365,6 +250,7 @@ namespace yogi::utils {
 
         return value;
     }
+
     // Helper function to get kind name as string
     std::string getKindName(const visitor::nodes::Kind kind) {
         using Kind = visitor::nodes::Kind;
@@ -442,7 +328,6 @@ namespace yogi::utils {
             const auto& strLiteral = std::any_cast<const std::vector<StringLiteralNode>&>(node);
 
             json elements = json::array();
-            ;
             for (auto s : strLiteral) {
                 elements.push_back(nodeToJson(s));
             }

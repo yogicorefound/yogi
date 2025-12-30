@@ -18,6 +18,11 @@ namespace yogi::visitor::nodes {
         // List of test expressions: { input_text, expected_value, expected_result_type, top_operator }
         auto cases = GENERATE(
             // string members
+
+            // TODO: Add more tests
+            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(0)", std::any_cast<std::string>(testString.at(0)), "str"),
+
+            // Done
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.size()", std::to_string(testString.size()), "int"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.lower()", utils::Helpers::toLower(testString), "str"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.upper()", utils::Helpers::toUpper(testString), "str"),
