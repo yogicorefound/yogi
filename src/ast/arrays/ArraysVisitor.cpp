@@ -62,12 +62,8 @@ namespace yogi::visitor {
                 const auto& memberNode = std::any_cast<nodes::MemberExpressionNode>(arrayValues);
 
                 if (memberNode.kind == nodes::Kind::ARRAY_STRING_ELEMENTS) {
-                    if (arrayType != "str") {
-                        throwTypeError(identifier, arrayType, memberNode, source);
-                    }
-
                     for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
-                        const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
+                        const auto [itemType, itemValue, itemNode] = resolveItem(item);
                         if (itemType != arrayType) {
                             throwTypeError(identifier, arrayType, itemNode, source);
                         }

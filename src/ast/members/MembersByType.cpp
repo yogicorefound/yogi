@@ -58,8 +58,7 @@ namespace yogi::visitor {
 
     std::vector<std::string> MembersByType::strAvailableMembers() {
         const std::vector<std::string> members =
-            {"size",    "lower", "upper", "title",  "includes", "startWith", "endsWith", "find",      "trim",   "trimStart", "trimEnd",
-             "replace", "split", "at",    "repeat", "match",    "slice",     "unicode",  "normalize", "reverse"
+            {"size", "lower", "upper", "title", "includes", "startWith", "endsWith", "find", "trim", "trimStart", "trimEnd", "replace", "split", "at", "repeat", "match", "slice", "unicode", "reverse"
 
             }; //
 
@@ -618,6 +617,61 @@ namespace yogi::visitor {
 
             auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_STRING_ELEMENTS, mNode.start, mNode.end);
             return memberNode;
+        }
+
+        if (member == "unicode" && isMethod) {
+            if (arguments.size() != 1) {
+                utils::Errors::throwError("Error", "'match' requires exactly 1 argument", pValue, source);
+            }
+
+            const auto argument = arguments[0];
+            try {
+                if (argument.type() == typeid(IdentifierLiteral)) {
+                    const auto identifier = std::any_cast<IdentifierLiteral>(&argument);
+                    const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                    if (!variableScoped.has_value()) {
+                        utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                    }
+
+                    const auto varNode = variableScoped.value();
+                    const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                    if (varNode->varType != "str") {
+                        utils::Errors::throwError("Error", "Argument must be string data type", varNode, source);
+                    }
+
+                    const auto results = utils::Helpers::unicode(pValue, utils::Helpers::resolveUnicodeFormat(value));
+
+                    std::vector<StringLiteralNode> elements;
+                    for (const auto& child : results) {
+                        auto item = StringLiteralNode(child, mNode.start, mNode.end);
+                        elements.push_back(item);
+                    }
+
+                    auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_STRING_ELEMENTS, mNode.start, mNode.end);
+                    return memberNode;
+                }
+
+                if (argument.type() != typeid(StringLiteralNode)) {
+                    utils::Errors::throwError("Error", "Argument must be string data type", argument, source);
+                }
+
+                const auto [type, value, _] = utils::Helpers::resolveItem(argument);
+                const auto results = utils::Helpers::unicode(pValue, utils::Helpers::resolveUnicodeFormat(value));
+
+                std::vector<StringLiteralNode> elements;
+                for (const auto& child : results) {
+                    auto item = StringLiteralNode(child, mNode.start, mNode.end);
+                    elements.push_back(item);
+                }
+
+                auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_STRING_ELEMENTS, mNode.start, mNode.end);
+                return memberNode;
+
+            } catch (const std::exception& e) {
+                utils::Errors::throwError("Error", e.what(), argument, source);
+            }
         }
 
         utils::Errors::throwScopeError("member '" + member + "' not available for string type", member, stringLiteralNode, source);

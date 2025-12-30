@@ -4,6 +4,7 @@
 
 #include "StringMembers.h"
 #include <iostream>
+#include <sstream>
 
 namespace yogi::utils::helpers {
     std::string StringMembers::toUpper(std::string s) {
@@ -116,7 +117,7 @@ namespace yogi::utils::helpers {
         return result;
     }
 
-    std::string StringMembers::at(const std::string s, const long long i) {
+    std::string StringMembers::at(const std::string& s, const long long i) {
         return std::string(1, s.at(i));
     }
 
@@ -175,6 +176,72 @@ namespace yogi::utils::helpers {
         }
 
         return results; // Retorna array, aunque sea vacío
+    }
+
+    StringMembers::UnicodeFormat StringMembers::resolveUnicodeFormat(const std::string& format) {
+        if (format == "hex")
+            return UnicodeFormat::HEX;
+        if (format == "decimal")
+            return UnicodeFormat::DECIMAL;
+        if (format == "utf-8")
+            return UnicodeFormat::UTF8;
+
+        throw std::runtime_error("Invalid unicode format: " + format);
+    }
+
+    std::vector<uint32_t> StringMembers::utf8ToCodepoints(const std::string& text) {
+        std::vector<uint32_t> result;
+
+        for (size_t i = 0; i < text.size();) {
+            uint32_t cp = 0;
+
+            if (const unsigned char c = text[i]; (c & 0x80) == 0) {
+                cp = c;
+                i += 1;
+            } else if ((c & 0xE0) == 0xC0) {
+                cp = (c & 0x1F) << 6 | text[i + 1] & 0x3F;
+                i += 2;
+            } else if ((c & 0xF0) == 0xE0) {
+                cp = (c & 0x0F) << 12 | (text[i + 1] & 0x3F) << 6 | text[i + 2] & 0x3F;
+                i += 3;
+            } else {
+                cp = (c & 0x07) << 18 | (text[i + 1] & 0x3F) << 12 | (text[i + 2] & 0x3F) << 6 | text[i + 3] & 0x3F;
+                i += 4;
+            }
+
+            result.push_back(cp);
+        }
+
+        return result;
+    }
+
+    std::vector<std::string> StringMembers::unicode(const std::string& text, const UnicodeFormat format) {
+        std::vector<std::string> result;
+        if (format == UnicodeFormat::UTF8) {
+            // UTF‑8 → bytes
+            for (unsigned char c : text) {
+                std::ostringstream oss;
+                oss << "0x" << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << static_cast<int>(c);
+                result.push_back(oss.str());
+            }
+            return result;
+        }
+
+        // HEX / DECIMAL → codepoints
+
+        for (auto codepoints = utf8ToCodepoints(text); uint32_t cp : codepoints) {
+            std::ostringstream oss;
+
+            if (format == UnicodeFormat::HEX) {
+                oss << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << cp;
+            } else if (format == UnicodeFormat::DECIMAL) {
+                oss << cp;
+            }
+
+            result.push_back(oss.str());
+        }
+
+        return result;
     }
 
 } // namespace yogi::utils::helpers

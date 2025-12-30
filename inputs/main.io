@@ -1,7 +1,3 @@
-str a = "Brayhan"
+str a = "é"
 
-regex pattern = r"/[(a-z | A-Z | 0-9)]/"
-str[] b = a.match(pattern)
-
-
-
+str[] b = a.unicode("utf-8")
