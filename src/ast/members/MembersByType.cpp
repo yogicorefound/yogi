@@ -57,22 +57,30 @@ namespace yogi::visitor {
     }
 
     std::vector<std::string> MembersByType::strAvailableMembers() {
-        const std::vector<std::string> members = {
-            "size",
-            "lower",
-            "upper",
-            "title",
-            "includes",
-            "startWith",
-            "endsWith",
-            "find",
-            "trim",
-            "trimStart",
-            "trimEnd",
-            "replace",
-            "split",
-            "slice",
-        };
+        const std::vector<std::string> members =
+            {"size",
+             "lower",
+             "upper",
+             "title",
+             "includes",
+             "startWith",
+             "endsWith",
+             "find",
+             "trim",
+             "trimStart",
+             "trimEnd",
+             "replace",
+             "split",
+
+             "at",
+             "match",
+             "slice",
+             "unicode",
+             "normalize",
+             "repeat",
+             "reverse"
+
+            }; //
 
         return members;
     }
@@ -100,7 +108,6 @@ namespace yogi::visitor {
         }
 
         if (member == "lower" && isMethod) {
-
             StringLiteralNode node(utils::Helpers::toLower(pValue), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
 

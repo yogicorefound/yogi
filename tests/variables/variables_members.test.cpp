@@ -8,9 +8,9 @@
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {
-    const std::string testString = "hello, world!";
+    constexpr std::string testString = "hello, world!";
+    constexpr auto index = testString.find("world");
 
-    const auto index = testString.find("world");
     auto findIndex = index != std::string::npos ? std::to_string(index) : "-1";
     const std::regex pattern(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})");
 
