@@ -44,8 +44,6 @@ namespace yogi::semantic {
     }
 
     void Arrays::checkNumberRange(const std::string& dataType, const std::string& rValue, const std::any& node, const std::string& source) {
-        const auto value = utils::Helpers::parseFloat(rValue);
-
         // Signed Integer
         // =======================================================================================================================================
         if (dataType == "int8") {
@@ -69,19 +67,19 @@ namespace yogi::semantic {
         // Unsigned Integer
         // =======================================================================================================================================
         if (dataType == "uint8") {
-            if (!utils::Helpers::fitsInInteger(rValue, 8) && value < 0) {
+            if (!utils::Helpers::fitsInInteger(rValue, 8) && utils::Helpers::parseFloat(rValue) < 0) {
                 utils::Errors::throwRangeError("Value exceeds 8-bit unsigned integer range", node, source);
             }
         }
 
         if (dataType == "uint" || dataType == "uint32") {
-            if (!utils::Helpers::fitsInInteger(rValue, 32) && value < 0) {
+            if (!utils::Helpers::fitsInInteger(rValue, 32) && utils::Helpers::parseFloat(rValue) < 0) {
                 utils::Errors::throwRangeError("Value exceeds 32-bit unsigned integer range", node, source);
             }
         }
 
         if (dataType == "uint64") {
-            if (!utils::Helpers::fitsInInteger(rValue, 64) && value < 0) {
+            if (!utils::Helpers::fitsInInteger(rValue, 64) && utils::Helpers::parseFloat(rValue) < 0) {
                 utils::Errors::throwRangeError("Value exceeds 64-bit unsigned integer range", node, source);
             }
         }

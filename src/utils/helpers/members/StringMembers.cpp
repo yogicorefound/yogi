@@ -3,6 +3,7 @@
 //
 
 #include "StringMembers.h"
+#include <iostream>
 
 namespace yogi::utils::helpers {
     std::string StringMembers::toUpper(std::string s) {
@@ -157,4 +158,23 @@ namespace yogi::utils::helpers {
 
         return str.substr(start, end - start);
     }
+
+    std::vector<std::string> StringMembers::match(const std::string& str, const std::regex& pattern) {
+        std::vector<std::string> results;
+
+        try {
+            std::sregex_iterator begin(str.begin(), str.end(), pattern);
+            std::sregex_iterator end;
+
+            for (auto it = begin; it != end; ++it) {
+                results.push_back(it->str());
+            }
+        } catch (const std::regex_error& e) {
+            std::cerr << "Regex error: " << e.what() << std::endl;
+            // Opcional: lanzar excepción en tu lenguaje
+        }
+
+        return results; // Retorna array, aunque sea vacío
+    }
+
 } // namespace yogi::utils::helpers

@@ -572,6 +572,54 @@ namespace yogi::visitor {
             return memberNode;
         }
 
+        if (member == "match" && isMethod) {
+            if (arguments.size() != 1) {
+                utils::Errors::throwError("Error", "'match' requires exactly 1 argument", pValue, source);
+            }
+
+            const auto argument = arguments[0];
+
+            if (argument.type() == typeid(IdentifierLiteral)) {
+                const auto identifier = std::any_cast<IdentifierLiteral>(&argument);
+                const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                if (!variableScoped.has_value()) {
+                    utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                }
+
+                const auto varNode = variableScoped.value();
+                const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                if (varNode->varType != "regex") {
+                    utils::Errors::throwError("Error", "Argument must be regex data type", varNode, source);
+                }
+                const auto pattern = std::regex(value);
+                const auto results = utils::Helpers::match(pValue, pattern);
+
+                std::vector<StringLiteralNode> elements;
+                for (const auto& child : results) {
+                    auto item = StringLiteralNode(child, mNode.start, mNode.end);
+                    elements.push_back(item);
+                }
+
+                auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_STRING_ELEMENTS, mNode.start, mNode.end);
+                return memberNode;
+            }
+
+            const auto patternNode = std::any_cast<RegexLiteralNode>(arguments[0]);
+            const auto pattern = std::regex(patternNode.value);
+            const auto results = utils::Helpers::match(pValue, pattern);
+
+            std::vector<StringLiteralNode> elements;
+            for (const auto& child : results) {
+                auto item = StringLiteralNode(child, mNode.start, mNode.end);
+                elements.push_back(item);
+            }
+
+            auto memberNode = MemberExpressionNode(elements, Kind::ARRAY_STRING_ELEMENTS, mNode.start, mNode.end);
+            return memberNode;
+        }
+
         utils::Errors::throwScopeError("member '" + member + "' not available for string type", member, stringLiteralNode, source);
         return MemberExpressionNode("", Kind::NONE_LITERAL, mNode.start, mNode.end);
     }

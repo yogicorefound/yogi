@@ -20,9 +20,10 @@ namespace yogi::visitor::nodes {
             // string members
 
             // TODO: Add more tests
-            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(0)", std::string(1, testString.at(0)), "str"),
+            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(1).repeat(2)", utils::Helpers::repeat(utils::Helpers::at(testString, 1), 2), "str"),
 
             // Done
+            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(0)", std::string(1, testString.at(0)), "str"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.size()", std::to_string(testString.size()), "int"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.lower()", utils::Helpers::toLower(testString), "str"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.upper()", utils::Helpers::toUpper(testString), "str"),

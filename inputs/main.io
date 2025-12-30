@@ -1,6 +1,7 @@
 str a = "Brayhan"
-int times = 5
-str b = a.upper().slice( 5)
+
+regex pattern = r"/[(a-z | A-Z | 0-9)]/"
+str[] b = a.match(pattern)
 
 
 
