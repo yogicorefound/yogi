@@ -1,5 +1,6 @@
 str a = "Brayhan"
-str b = a.at(1).upper()
+int times = 5
+str b = a.at(1).upper().repeat(1 + 4)
 
 
 

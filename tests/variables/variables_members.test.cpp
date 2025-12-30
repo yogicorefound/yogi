@@ -20,7 +20,7 @@ namespace yogi::visitor::nodes {
             // string members
 
             // TODO: Add more tests
-            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(0)", std::any_cast<std::string>(testString.at(0)), "str"),
+            std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(0)", std::string(1, testString.at(0)), "str"),
 
             // Done
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.size()", std::to_string(testString.size()), "int"),

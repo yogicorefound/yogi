@@ -18,6 +18,7 @@ namespace yogi::utils::helpers {
         static std::string trimEnd(std::string s);
         static std::string replace(const std::string& input, const std::variant<std::string, std::regex>& search, const std::string& replacement);
         static std::string at(std::string s, long long i);
+        static std::string repeat(const std::string& s, int times);
         static std::vector<std::string> split(const std::string& text, const std::variant<std::string, std::regex>& pattern);
     };
 } // namespace yogi::utils::helpers

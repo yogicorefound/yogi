@@ -118,4 +118,16 @@ namespace yogi::utils::helpers {
     std::string StringMembers::at(const std::string s, const long long i) {
         return std::string(1, s.at(i));
     }
+
+    std::string StringMembers::repeat(const std::string& s, const int times) {
+        if (times <= 0) return "";
+        std::string result;
+        result.reserve(s.size() * times);
+
+        for (int i = 0; i < times; ++i) {
+            result += s; // Concatenación directa
+        }
+
+        return result;
+    }
 } // namespace yogi::utils::helpers
