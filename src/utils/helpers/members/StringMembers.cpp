@@ -120,7 +120,8 @@ namespace yogi::utils::helpers {
     }
 
     std::string StringMembers::repeat(const std::string& s, const int times) {
-        if (times <= 0) return "";
+        if (times <= 0)
+            return "";
         std::string result;
         result.reserve(s.size() * times);
 
@@ -129,5 +130,31 @@ namespace yogi::utils::helpers {
         }
 
         return result;
+    }
+
+    std::string StringMembers::slice(const std::string& str, long long start, long long end) {
+        const int len = static_cast<int>(str.size());
+
+        if (start < 0) {
+            start += len;
+        }
+
+        if (end < 0) {
+            end += len;
+        }
+
+        if (start < 0) {
+            start = 0;
+        }
+
+        if (end > len) {
+            end = len;
+        }
+
+        if (start > end) {
+            return "";
+        }
+
+        return str.substr(start, end - start);
     }
 } // namespace yogi::utils::helpers

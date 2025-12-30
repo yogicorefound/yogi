@@ -506,6 +506,72 @@ namespace yogi::visitor {
             return memberNode;
         }
 
+        if (member == "slice" && isMethod) {
+            // Por defecto, retorna toda la cadena
+            int start = 0;
+            int end = static_cast<int>(pValue.size());
+
+            // Resolver argumentos si se pasan
+            std::function<int(std::any)> argumentResolver;
+            argumentResolver = [source, scope](std::any argument) -> int {
+                if (argument.type() == typeid(IdentifierLiteral)) {
+                    const auto identifier = std::any_cast<IdentifierLiteral>(&argument);
+                    const auto variableScoped = scope->lookupVariable(identifier->value);
+
+                    if (!variableScoped.has_value()) {
+                        utils::Errors::throwScopeError("Variable '" + identifier->value + "' is not declared", identifier->value, identifier, source);
+                    }
+
+                    const auto varNode = variableScoped.value();
+                    const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+
+                    if (varNode->varType != "int") {
+                        utils::Errors::throwError("Error", "Argument must be an integer", varNode, source);
+                    }
+
+                    return std::stoll(value);
+                }
+
+                const auto& [type, value, arrNode] = utils::Helpers::resolveItem(argument);
+                if (type != "int") {
+                    utils::Errors::throwError("Error", "Argument must be an integer", arrNode, source);
+                }
+
+                return std::stoll(value);
+            };
+
+            // Si se pasa al menos un argumento → sobrescribimos start
+            if (arguments.size() >= 1) {
+                start = argumentResolver(arguments[0]);
+            }
+
+            // Si se pasa un segundo argumento → sobrescribimos end
+            if (arguments.size() >= 2) {
+                end = argumentResolver(arguments[1]);
+            }
+
+            // Validación opcional: start y end dentro de límites
+            if (start < 0) {
+                start += static_cast<int>(pValue.size());
+            }
+            if (end < 0) {
+                end += static_cast<int>(pValue.size());
+            }
+            if (start < 0) {
+                start = 0;
+            }
+            if (end > static_cast<int>(pValue.size())) {
+                end = static_cast<int>(pValue.size());
+            }
+            if (start > end) {
+                start = end;
+            }
+
+            StringLiteralNode node(utils::Helpers::slice(pValue, start, end), mNode.start, mNode.end);
+            auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
+            return memberNode;
+        }
+
         utils::Errors::throwScopeError("member '" + member + "' not available for string type", member, stringLiteralNode, source);
         return MemberExpressionNode("", Kind::NONE_LITERAL, mNode.start, mNode.end);
     }
