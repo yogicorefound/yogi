@@ -120,13 +120,12 @@ namespace yogi::visitor {
 
             parser->inVarMode = true;
             for (auto itemCtx : arrayItemsWithBrackets) {
-                const auto item = visit(itemCtx);
-
-                // Extract value and type from the item
                 std::string itemType;
                 std::any itemValue;
+                std::string boolValue;
+                std::string rValue;
 
-                if (item.type() == typeid(nodes::IdentifierLiteral)) {
+                if (const auto item = visit(itemCtx); item.type() == typeid(nodes::IdentifierLiteral)) {
                     auto node = std::any_cast<nodes::IdentifierLiteral>(item);
                     const auto variable = scope->lookupVariable(node.value);
                     if (!variable.has_value()) {
@@ -136,10 +135,9 @@ namespace yogi::visitor {
                     const auto& varNode = variable.value();
                     itemValue = varNode->value;
                     itemType = varNode->varType;
+                    processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, item, source);
 
                 } else {
-                    std::string boolValue;
-                    std::string rValue;
                     processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, item, source);
                 }
 
