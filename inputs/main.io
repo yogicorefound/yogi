@@ -1,3 +1,3 @@
-str a = "é"
+str a = "Hola é😊"
 
-str[] b = a.unicode("utf-8")
+str b = a.reverse()

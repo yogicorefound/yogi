@@ -87,6 +87,13 @@ namespace yogi::visitor {
             return memberNode;
         }
 
+        if (member == "reverse" && isMethod) {
+            StringLiteralNode node(utils::Helpers::reverseString(pValue), mNode.start, mNode.end);
+            auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);
+
+            return memberNode;
+        }
+
         if (member == "lower" && isMethod) {
             StringLiteralNode node(utils::Helpers::toLower(pValue), mNode.start, mNode.end);
             auto memberNode = MemberExpressionNode(node, Kind::STRING_LITERAL, mNode.start, mNode.end);

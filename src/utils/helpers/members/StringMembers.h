@@ -22,6 +22,7 @@ namespace yogi::utils::helpers {
         static std::string at(const std::string& s, long long i);
         static std::string repeat(const std::string& s, int times);
         static std::string slice(const std::string& str, long long start, long long end);
+        static std::string reverseString(const std::string& text);
 
         static UnicodeFormat resolveUnicodeFormat(const std::string& format);
 

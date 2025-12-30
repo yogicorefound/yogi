@@ -244,4 +244,34 @@ namespace yogi::utils::helpers {
         return result;
     }
 
+    std::string StringMembers::reverseString(const std::string& text) {
+        std::vector<std::string> chars;
+        for (size_t i = 0; i < text.size();) {
+            const unsigned char c = text[i];
+            size_t charLen;
+
+            if ((c & 0x80) == 0)
+                charLen = 1; // 1-byte ASCII
+            else if ((c & 0xE0) == 0xC0)
+                charLen = 2; // 2-byte
+            else if ((c & 0xF0) == 0xE0)
+                charLen = 3; // 3-byte
+            else
+                charLen = 4; // 4-byte
+
+            chars.push_back(text.substr(i, charLen));
+            i += charLen;
+        }
+
+        // Reverse the vector
+        std::ranges::reverse(chars);
+
+        // Join back into a string
+        std::string result;
+        for (const auto& s : chars)
+            result += s;
+
+        return result;
+    }
+
 } // namespace yogi::utils::helpers
