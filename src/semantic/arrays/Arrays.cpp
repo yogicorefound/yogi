@@ -120,7 +120,6 @@ namespace yogi::semantic {
 
     void Arrays::processArrayItems(const std::string& identifier, const std::string& arrayType, std::string& itemType, std::any& itemValue, std::string& boolValue, std::string& rValue, const std::any& itemResult, const std::string& source) {
         const auto [type, value, node] = utils::Helpers::resolveItem(itemResult);
-
         itemType = type;
         rValue = value;
         itemValue = node;
@@ -131,6 +130,22 @@ namespace yogi::semantic {
         // 🔒 Single, correct validation point
         if (!checkArrayDataType(arrayType, itemType, rValue)) {
             utils::Errors::throwTypeError(identifier, arrayType, itemResult, source);
+        }
+    }
+
+    void Arrays::checkArrayItemFloatRange(const std::string& arrayType, const std::any& value, const std::any& node, const std::string& source) {
+        const auto [itemType, itemValue, _] = utils::Helpers::resolveItem(value);
+
+        if (arrayType == "float" || arrayType == "float32") {
+            if (!utils::Helpers::fitsInFloat32(itemValue)) {
+                utils::Errors::throwRangeError("Value exceeds IEEE-754 32-bits float range", node, source);
+            }
+        }
+
+        if (arrayType == "float64") {
+            if (!utils::Helpers::fitsInFloat64(itemValue)) {
+                utils::Errors::throwRangeError("value exceeds IEEE-754 64-bits float range", node, source);
+            }
         }
     }
 

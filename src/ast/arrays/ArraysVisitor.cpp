@@ -135,10 +135,13 @@ namespace yogi::visitor {
                     const auto& varNode = variable.value();
                     itemValue = varNode->value;
                     itemType = varNode->varType;
-                    processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, item, source);
+
+                    processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, itemValue, source);
+                    checkArrayItemFloatRange(arrayType, varNode->value, item, source);
 
                 } else {
                     processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, item, source);
+                    checkArrayItemFloatRange(arrayType, item, item, source);
                 }
 
                 // Add element to array

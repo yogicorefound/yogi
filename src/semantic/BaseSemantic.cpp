@@ -91,15 +91,17 @@ namespace yogi::semantic {
     }
 
     void BaseSemantic::analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const std::any& node) {
+        std::cout << "fitsInFloat64: " << utils::Helpers::fitsInFloat64(rValue) << std::endl;
         if (dataType == "float" || dataType == "float32") {
             if (!utils::Helpers::fitsInFloat32(rValue)) {
-                utils::Errors::throwRangeError("<float32> type exceeds 32-bit float range", node, source);
+                utils::Errors::throwRangeError("<float32> exceeds IEEE-754 32-bits float range", node, source);
             }
         }
 
+
         if (dataType == "float64") {
-            if (const auto fitIn64 = utils::Helpers::fitsInFloat64(rValue); !fitIn64) {
-                utils::Errors::throwRangeError("<float64> type exceeds 64-bit float range", node, source);
+            if (!utils::Helpers::fitsInFloat64(rValue)) {
+                utils::Errors::throwRangeError("value exceeds IEEE-754 64-bits float range", node, source);
             }
         }
     }

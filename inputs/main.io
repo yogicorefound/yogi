@@ -1,3 +1,2 @@
-str a = "Hola é😊"
-float64[] samples = [0.1, 0.2, a] // need to be ch
-
+float64 a = 1e40
+float32[] b = [10.5, a]

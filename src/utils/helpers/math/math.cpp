@@ -7,8 +7,6 @@
 #include <cmath>
 #include <string>
 #include "antlr4-runtime.h"
-#include <stdexcept>
-
 
 namespace yogi::utils::helpers {
 
@@ -17,7 +15,7 @@ namespace yogi::utils::helpers {
     }
 
     bool Math::exceedsUInt64(const std::string& raw) {
-        static const std::string U64_MAX = "18446744073709551615"; // 2^64 - 1
+        static constexpr std::string U64_MAX = "18446744073709551615"; // 2^64 - 1
         std::string s = raw;
 
         // Unsigned values must not have sign
@@ -37,7 +35,6 @@ namespace yogi::utils::helpers {
         return strGreater(s, U64_MAX);
     }
 
-
     // Parse integer literal (decimal o exponencial)
     Math::DecimalInteger Math::parseDecimalInteger(const std::string& literal) {
         DecimalInteger out;
@@ -49,8 +46,7 @@ namespace yogi::utils::helpers {
             s = s.substr(1);
         }
 
-        size_t ePos = s.find_first_of("eE");
-        if (ePos != std::string::npos) {
+        if (const size_t ePos = s.find_first_of("eE"); ePos != std::string::npos) {
             out.mantissa = s.substr(0, ePos);
             std::cout << "Mantissa: " << s.substr(ePos + 1) << std::endl;
             out.exponent = std::stoll(s.substr(ePos + 1));
@@ -69,7 +65,6 @@ namespace yogi::utils::helpers {
         return out;
     }
 
-
     // Calcula el exponente efectivo para integer
     int Math::effectiveExponent(const DecimalInteger& v) {
         std::string digits = v.mantissa;
@@ -80,22 +75,20 @@ namespace yogi::utils::helpers {
         return v.exponent + static_cast<int>(digits.size()) - 1;
     }
 
-    // Función universal: fitsInInteger
-    bool Math::fitsInInteger(const std::string& numLiteral, int bitSize) {
-        DecimalInteger v = parseDecimalInteger(numLiteral);
+    bool Math::fitsInInteger(const std::string& numLiteral, const int bitSize) {
+        const DecimalInteger v = parseDecimalInteger(numLiteral);
 
-        int64_t maxVal = getSignedMax(bitSize);
-        int64_t minVal = getSignedMin(bitSize);
+        const int64_t maxVal = getSignedMax(bitSize);
+        const int64_t minVal = getSignedMin(bitSize);
 
-        bool isNegative = !v.mantissa.empty() && v.mantissa[0] == '-';
+        const bool isNegative = !v.mantissa.empty() && v.mantissa[0] == '-';
+        const int effExp = effectiveExponent(v);
+        const int64_t absMax = isNegative ? -minVal : maxVal;
+
         std::string digits = isNegative ? v.mantissa.substr(1) : v.mantissa;
-
-        int effExp = effectiveExponent(v);
-
-        // obtener exponente máximo del límite
-        int64_t absMax = isNegative ? -minVal : maxVal;
         std::string rhs = std::to_string(absMax);
-        int expMax = static_cast<int>(rhs.size() - 1);
+
+        const int expMax = static_cast<int>(rhs.size() - 1);
 
         if (effExp < expMax)
             return true;
@@ -121,24 +114,19 @@ namespace yogi::utils::helpers {
         constexpr int MAX_EFFECTIVE_EXP = 9;
 
         if (!v.mantissa.empty() && v.mantissa[0] == '-') {
-            // número negativo → debe ser >= INT32_MIN
             return effExp <= MAX_EFFECTIVE_EXP;
         }
         return effExp <= MAX_EFFECTIVE_EXP;
     }
 
     bool Math::fitsInInt64(const std::string& literal) {
-        DecimalInteger v = parseDecimalInteger(literal); // parsea mantissa + exponent
+        const DecimalInteger v = parseDecimalInteger(literal);
 
-        // Calcular exponente efectivo
-        int effExp = effectiveExponent(v);
-
-        // int64 máximo ≈ 9.223372036854775807e18 → exponente efectivo = 18
+        const int effExp = effectiveExponent(v);
         constexpr int MAX_EFFECTIVE_EXP = 18;
 
         if (v.mantissa[0] == '-') {
-            // número negativo → debe ser >= INT64_MIN
-            return effExp <= MAX_EFFECTIVE_EXP; // ajustable según mantissa
+            return effExp <= MAX_EFFECTIVE_EXP;
         }
 
         return effExp <= MAX_EFFECTIVE_EXP;
@@ -186,14 +174,12 @@ namespace yogi::utils::helpers {
             return s.substr(pos);
         };
 
-        std::string a = normalize(num);
-        std::string b = normalize(max);
+        const std::string a = normalize(num);
+        const std::string b = normalize(max);
 
-        // 2️⃣ Comparar longitud
         if (a.size() != b.size())
             return a.size() > b.size();
 
-        // 3️⃣ Comparación lexicográfica (segura para decimal)
         return a > b;
     }
 
@@ -220,17 +206,15 @@ namespace yogi::utils::helpers {
         return std::modf(number, &intPart) == 0.0;
     }
 
-    bool Math::couldBeFloat(double value) {
+    bool Math::couldBeFloat(const double value) {
         return !couldBeInteger(value);
     }
 
-
     bool Math::couldBeInteger(const double value) {
-        constexpr  double epsilon = 1e-12;
-        const double intPart = static_cast<long long>(value);
-        return (value - intPart) < epsilon && (value - intPart) > -epsilon;
+        constexpr double epsilon = 1e-12;
+        const double intPart = value;
+        return value - intPart < epsilon && value - intPart > -epsilon;
     }
-
 
     bool Math::isValidNumber(const std::string& str) {
         if (str.empty())
@@ -283,13 +267,13 @@ namespace yogi::utils::helpers {
     }
 
     bool Math::fitsInFloat32(const std::string& literal) {
-        DecimalFloat v = parseDecimalFloat(literal);
+        const DecimalFloat v = parseDecimalFloat(literal);
 
         // float32 max: 3.402823466e38
         constexpr int MAX_EFFECTIVE_EXP = 38;
-        const std::string MAX_MANTISSA = "3402823466"; // 10-digit mantissa
+        constexpr std::string MAX_MANTISSA = "3402823466"; // 10-digit mantissa
 
-        int effExp = v.exponent + static_cast<int>(v.mantissa.size()) - 1;
+        const int effExp = v.exponent + static_cast<int>(v.mantissa.size()) - 1;
 
         if (effExp < MAX_EFFECTIVE_EXP)
             return true; // seguro que cabe
@@ -311,12 +295,11 @@ namespace yogi::utils::helpers {
     }
 
     bool Math::fitsInFloat64(const std::string& literal) {
-        DecimalFloat v = parseDecimalFloat(literal);
+        const DecimalFloat v = parseDecimalFloat(literal);
 
         // float64 max exponent ≈ 308 (1.7976931348623157e+308)
         constexpr int MAX_EFFECTIVE_EXP = 308;
-
-        int effExp = v.exponent + static_cast<int>(v.mantissa.size()) - 1;
+        const int effExp = v.exponent + static_cast<int>(v.mantissa.size()) - 1;
 
         return effExp <= MAX_EFFECTIVE_EXP;
     }
@@ -369,7 +352,7 @@ namespace yogi::utils::helpers {
         const DecimalFloat v = parseDecimalFloat(literal);
 
         // FLOAT_MAX = 3.402823466e+38
-        const std::string maxMantissa = "3402823466";
+        constexpr std::string maxMantissa = "3402823466";
 
         if (constexpr int maxExponent = 29; v.exponent != maxExponent)
             return v.exponent > maxExponent;
@@ -384,10 +367,10 @@ namespace yogi::utils::helpers {
         if (literal.empty() || literal[0] != '-')
             return false;
 
-        DecimalFloat v = parseDecimalFloat(literal);
+        const DecimalFloat v = parseDecimalFloat(literal);
 
         // float max magnitude = 3.402823466e+38
-        static const std::string MAX_MANTISSA = "3402823466";
+        static constexpr std::string MAX_MANTISSA = "3402823466";
         static constexpr int MAX_EXPONENT = 29;
 
         // Compare absolute value

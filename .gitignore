@@ -10,7 +10,7 @@ libs/antlr4
 
 /src/parser/Tokens/Main.tokens
 /src/parser/antlr
-/antlr4/
+/libs/antlr4/
 /ast.json
 /src/modules/runtime.bc
 /src/parser/generated/

@@ -9,7 +9,7 @@ run:
 	@cd ./build && cmake .. -DENABLE_TESTING_FOR_TYPES_HINTS=OFF
 	@cd ./build && make -j
 	@cd ./build && ./yogi ../inputs/main.io
-# -p
+
 
 run-tests:
 	@cd ./build && cmake .. -DENABLE_TESTING=ON
