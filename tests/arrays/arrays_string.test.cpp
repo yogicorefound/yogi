@@ -3,10 +3,10 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include <bitset>
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/ArrayNode.h>
 #include <random>
 #include <string>
-#include "includes/yogi/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {
@@ -33,7 +33,7 @@ namespace yogi::visitor::nodes {
 
         auto [text, type, name, size, expectedItems, isMuliLine] = cases;
         const auto ast = Yogi::testAST(text);
-        const auto& node = std::any_cast<ArrayDeclarationNode>(ast.body[isMuliLine ? 1 : 0].children.at(0));
+        const auto& node = std::any_cast<ArrayDeclarationNode>(ast.body[isMuliLine ? 1 : 0]);
 
         REQUIRE(node.kind == Kind::ARRAY_DECLARATION);
         REQUIRE(node.type == type);

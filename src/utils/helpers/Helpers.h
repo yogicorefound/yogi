@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <ast/nodes/BaseNode.h>
+#include <visitors/nodes/BaseNode.h>
 #include <regex>
 #include "antlr4-runtime.h"
 #include "libs/json.hpp"

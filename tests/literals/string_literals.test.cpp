@@ -3,8 +3,8 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include <cmath>
-#include "includes/yogi/yogi.h"
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/LiteralNode.h>
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {
@@ -22,7 +22,7 @@ namespace yogi::visitor::nodes {
         std::string text = c;
 
         const auto ast = Yogi::testAST(text);
-        const auto& node = std::any_cast<StringLiteralNode>(ast.body[0].children.at(0));
+        const auto& node = std::any_cast<StringLiteralNode>(ast.body.at(0));
 
         INFO("String value");
         REQUIRE(node.value == expected_value);

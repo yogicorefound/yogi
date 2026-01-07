@@ -3,8 +3,8 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include <cmath>
-#include "includes/yogi/yogi.h"
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/LiteralNode.h>
 #include "libs/catch2/catch_amalgamated.hpp"
 
 using namespace yogi::visitor::nodes;
@@ -16,7 +16,7 @@ TEST_CASE("Boolean evaluation", "[BOOLEAN_LITERAL]") {
     std::string text = c;
 
     const auto ast = yogi::Yogi::testAST(text);
-    const auto& node = std::any_cast<BooleanLiteralNode>(ast.body[0].children.at(0));
+    const auto& node = std::any_cast<BooleanLiteralNode>(ast.body[0]);
 
     INFO("Boolean kind");
     REQUIRE(node.kind == Kind::BOOLEAN_LITERAL);

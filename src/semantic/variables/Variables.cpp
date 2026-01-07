@@ -3,7 +3,7 @@
 //
 
 #include "semantic/variables/Variables.h"
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 #include <string>
 #include <unordered_set>
 #include "semantic/BaseSemantic.h"
@@ -117,8 +117,6 @@ namespace yogi::semantic {
             throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
 
-        // Type checking
-        std::cout << "fitsInFloat64: " << returnType << std::endl;
         if (!checkDataType(dataType, returnType, rValue)) {
             utils::Errors::throwTypeError(identifier, dataType, node.value, source);
         }
@@ -207,7 +205,6 @@ namespace yogi::semantic {
         } catch (const std::bad_any_cast& e) {
             throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
-        // std::cout << "fitsInFloat64: " << returnType << std::endl;
 
         // Type checking - ensure new value matches variable's declared type
         if (!checkDataType(node.varType, returnType, rValue)) {

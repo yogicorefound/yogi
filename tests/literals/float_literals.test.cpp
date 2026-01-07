@@ -2,10 +2,10 @@
 // Created by Brayhan De Aza on 12/12/25.
 //
 
-#include <includes/yogi/wrapper.h>
 #include <utils/helpers/Helpers.h>
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/LiteralNode.h>
 #include <cmath>
-#include "includes/yogi/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
 using namespace yogi::visitor::nodes;
@@ -17,7 +17,7 @@ TEST_CASE("Float evaluation", "[FLOAT_LITERAL]") {
     std::string text = c;
 
     const auto ast = yogi::Yogi::testAST(text);
-    const auto& node = std::any_cast<FloatLiteralNode>(ast.body[0].children.at(0));
+    const auto& node = std::any_cast<FloatLiteralNode>(ast.body[0]);
 
     INFO("Float kind");
     REQUIRE(node.kind == Kind::FLOAT_LITERAL);

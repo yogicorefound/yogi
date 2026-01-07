@@ -25,7 +25,7 @@ set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 # ============================================================
 #                       PATHS
 # ============================================================
-set(GENERATED_DIR "${CMAKE_SOURCE_DIR}/src/parser/generated")
+set(GENERATED_DIR "${CMAKE_SOURCE_DIR}/src/antlr/generated")
 set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/src")
 set(TESTS_DIR "${CMAKE_SOURCE_DIR}/tests")
 set(LIBS_DIR "${CMAKE_SOURCE_DIR}/libs")

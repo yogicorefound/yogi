@@ -3,7 +3,8 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include "includes/yogi/yogi.h"
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/VariableNode.h>
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {
@@ -23,7 +24,7 @@ namespace yogi::visitor::nodes {
         auto [text, expectedValue, expectedType] = cases;
         const auto ast = Yogi::testAST(text);
 
-        const auto memberNode = std::any_cast<VariableDeclarationNode>(ast.body[1].children[0]);
+        const auto memberNode = std::any_cast<VariableDeclarationNode>(ast.body[1]);
         const auto [type, value, node] = utils::Helpers::resolveItem(memberNode.value);
 
         REQUIRE(value == expectedValue);

@@ -91,7 +91,6 @@ namespace yogi::semantic {
     }
 
     void BaseSemantic::analyzeFloat(const std::string& rValue, const std::string& dataType, const std::string& source, const std::any& node) {
-        std::cout << "fitsInFloat64: " << utils::Helpers::fitsInFloat64(rValue) << std::endl;
         if (dataType == "float" || dataType == "float32") {
             if (!utils::Helpers::fitsInFloat32(rValue)) {
                 utils::Errors::throwRangeError("<float32> exceeds IEEE-754 32-bits float range", node, source);
