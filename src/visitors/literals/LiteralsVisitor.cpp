@@ -4,8 +4,8 @@
 
 #include "LiteralsVisitor.h"
 
-#include <visitors/nodes/nodes.h>
 #include <catch2/catch_amalgamated.hpp>
+#include <visitors/nodes/nodes.h>
 
 namespace yogi::visitor {
     std::any LiteralsVisitor::visitLiterals(Grammar::LiteralsContext* ctx) {
@@ -66,14 +66,19 @@ namespace yogi::visitor {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        if (ctx->getText().starts_with("0b") || ctx->getText().starts_with("0x") || ctx->getText().starts_with("0o") || ctx->getText().contains("_")) {
-            auto node = nodes::IntegerLiteralNode(std::to_string(parseInteger(ctx->getText())), start, end);
+        const auto rValue = ctx->getText();
+
+        if (rValue.starts_with("0b") || rValue.starts_with("0x") || rValue.starts_with("0o") || rValue.contains("_")) {
+            auto node = nodes::IntegerLiteralNode(std::to_string(parseInteger(rValue)), start, end);
             return node;
         }
 
-        // exceedsInt64();
+        if (rValue.contains("e") || rValue.contains("E")) {
+            auto node = nodes::FloatLiteralNode(rValue, start, end);
+            return node;
+        }
 
-        auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
+        auto node = nodes::IntegerLiteralNode(rValue, start, end);
         return node;
     }
 

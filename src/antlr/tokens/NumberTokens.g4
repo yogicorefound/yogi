@@ -10,7 +10,6 @@ FLOAT
     | [+-]? DIGIT+ '.' DIGIT* EXPONENT?
     | '.' DIGIT+ EXPONENT?
     | [+-]? '0x' DIGIT+ 'p' [+-]? DIGIT+
-    | [+-]? DIGIT+  EXPONENT?
     ;
 
 FLOAT_UNDERSCORE_EXPONENT
@@ -28,4 +27,5 @@ INTEGER
     | [+-]? '0o' OCT_DIGIT+ // Octal
     | [+-]? '0b' BINARY_DIGIT+ // Binary
     | [+-]? DIGIT+ (UNDERSCORE* DIGIT)*
+    | [+-]? DIGIT+  EXPONENT?
     ;

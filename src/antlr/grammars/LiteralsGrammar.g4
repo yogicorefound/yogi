@@ -38,8 +38,8 @@ stringLiteral
 
 //regexLiteral: REGEX_START REGEX_CONTENT REGEX_END;
 
-integerLiteral: INTEGER;
 floatLiteral: FLOAT;
+integerLiteral: INTEGER;
 booleanLiteral: BOOLEAN;
 noneLiteral: NONE;
 identifierLiteral: IDENTIFIER;
