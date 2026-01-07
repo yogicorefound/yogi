@@ -60,11 +60,10 @@ namespace yogi::visitor {
         parser->inVarMode = true;
         const auto visitDataType = visit(ctx->variableDataType());
         const auto arrayTypeKind = resolveKind(visitDataType);
-        const auto [_, typeValue, dataTypeNode] = Helpers::resolveItem(visitDataType);
+        const auto [_, typeValue, dataTypeNode] = resolveItem(visitDataType);
         if (scope->existsInCurrent(identifier)) {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
         }
-
 
         // Visit the expression instead of variableValue
         std::any value = visit(ctx->expression());
@@ -77,14 +76,12 @@ namespace yogi::visitor {
                 throwTypeError(identifier, typeValue, memberExpression.value, source);
             }
 
-
-
             // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
             const bool isConstant = toUpper(identifier) == identifier;
-            const auto [memberType, memberValue, memberNode] = Helpers::resolveItem(memberExpression.value);
-            const auto& node = nodes::VariableDeclarationNode(identifier, typeValue, memberNode, isConstant, start, end);
+            const auto [memberType, memberValue, memberNode] = resolveItem(memberExpression.value);
+            auto node = nodes::VariableDeclarationNode(identifier, typeValue, memberNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(node, source, false);
+            analyzeVariableDeclaration(node, source);
             scope->declareVariable(identifier, node);
 
             return node;
@@ -100,20 +97,19 @@ namespace yogi::visitor {
         if (value.type() == typeid(nodes::BinaryExpressionNode)) {
             auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
 
-
             if (typeValue.starts_with("float")) {
                 auto floatLiteralNode = nodes::FloatLiteralNode(node.value, node.start, node.end);
-                const auto& varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
-                analyzeVariableDeclaration(varNode, source, false);
+                auto varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
+                analyzeVariableDeclaration(varNode, source);
                 scope->declareVariable(identifier, varNode);
 
                 return varNode;
             }
 
-            auto floatLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
-            const auto& varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
+            auto integerLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
+            auto varNode = nodes::VariableDeclarationNode(identifier, typeValue, integerLiteralNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(varNode, source, false);
+            analyzeVariableDeclaration(varNode, source);
             scope->declareVariable(identifier, varNode);
 
             return varNode;
@@ -128,18 +124,17 @@ namespace yogi::visitor {
             }
 
             const auto regexNode = nodes::RegexLiteralNode(rValue, start, end);
-            const auto& node = nodes::VariableDeclarationNode(identifier, type, regexNode, isConstant, start, end);
+            auto node = nodes::VariableDeclarationNode(identifier, type, regexNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(node, source, false);
+            analyzeVariableDeclaration(node, source);
             scope->declareVariable(identifier, node);
 
             return node;
         }
 
-
         // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
-        const auto& node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);
-        analyzeVariableDeclaration(node, source, true);
+        auto node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);
+        analyzeVariableDeclaration(node, source);
         scope->declareVariable(identifier, node);
 
         return node;
