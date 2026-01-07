@@ -1,5 +1,5 @@
 #include "MembersVisitor.h"
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 
 namespace yogi::visitor {
 

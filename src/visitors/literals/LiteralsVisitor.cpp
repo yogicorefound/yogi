@@ -4,7 +4,7 @@
 
 #include "LiteralsVisitor.h"
 
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 #include <catch2/catch_amalgamated.hpp>
 
 namespace yogi::visitor {

@@ -4,7 +4,7 @@
 
 #pragma once
 #include "GrammarVisitor.h"
-#include "ast/base/BaseVisitor.h"
+#include "visitors/base/BaseVisitor.h"
 
 namespace yogi::visitor {
     class LiteralsVisitor : public virtual BaseVisitor {

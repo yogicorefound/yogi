@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <ast/nodes/ProgramNode.h>
+#include <visitors/nodes/ProgramNode.h>
 #include <llvm/IR/Module.h>
 #include <any>
 

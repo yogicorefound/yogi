@@ -3,7 +3,7 @@
 //
 
 #include "Helpers.h"
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 #include <utils/errors/Errors.h>
 #include <iomanip>
 #include <iostream>

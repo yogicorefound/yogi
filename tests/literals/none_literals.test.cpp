@@ -3,7 +3,7 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include "includes/yogi/yogi.h"
+#include "../../src/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
 using namespace yogi::visitor::nodes;

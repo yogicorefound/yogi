@@ -17,13 +17,13 @@ run-tests:
 
 
 grammar:
-	@cd ./src/parser/tokens && antlr -Dlanguage=Cpp Tokens.g4 -o ../generated/ -visitor
-	@cd ./src/parser/grammars && antlr -Dlanguage=Cpp Grammar.g4 -o ../generated/ -visitor
+	@cd ./src/antlr/tokens && antlr -Dlanguage=Cpp Tokens.g4 -o ../generated/ -visitor
+	@cd ./src/antlr/grammars && antlr -Dlanguage=Cpp Grammar.g4 -o ../generated/ -visitor
 
 clean:
 	@rm -rf build gen .idea && mkdir "build"
-	@cd ./src/parser && rm -rf generated .antlr *.tokens *.tokens.txt
-	@cd ./src/parser/tokens && rm -rf generated .antlr *.tokens *.tokens.txt
+	@cd ./src/antlr && rm -rf generated .antlr *.tokens *.tokens.txt
+	@cd ./src/antlr/tokens && rm -rf generated .antlr *.tokens *.tokens.txt
 
 runtime:
 	@clang++ -std=c++20 -O3 -emit-llvm -c \

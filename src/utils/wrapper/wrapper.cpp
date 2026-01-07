@@ -6,10 +6,10 @@
 
 #include <Grammar.h>
 #include <Tokens.h>
-#include <ast/program/ProgramVisitor.h>
 #include <core/llvm/emitter/CodeEmitter.h>
 #include <core/llvm/ir/IR.h>
 #include <utils/errors/AntlrErrorListener.h>
+#include <visitors/program/ProgramVisitor.h>
 
 #include "antlr4-runtime.h"
 

@@ -6,7 +6,7 @@
 
 #include "GrammarVisitor.h"
 #include "MembersByType.h"
-#include "ast/base/BaseVisitor.h"
+#include "visitors/base/BaseVisitor.h"
 
 namespace yogi::visitor {
 

@@ -3,7 +3,7 @@
 //
 
 #include "semantic/variables/Variables.h"
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 #include <string>
 #include <unordered_set>
 #include "semantic/BaseSemantic.h"

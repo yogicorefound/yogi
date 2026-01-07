@@ -3,7 +3,7 @@
 //
 
 #include "ProgramVisitor.h"
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 
 std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};

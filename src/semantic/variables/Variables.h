@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 #include <semantic/scopes/Scope.h>
 #include <string>
 

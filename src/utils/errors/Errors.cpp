@@ -3,7 +3,7 @@
 //
 
 #include "Errors.h"
-#include <ast/nodes/nodes.h>
+#include <visitors/nodes/nodes.h>
 #include <utils/helpers/Helpers.h>
 
 #include <algorithm>

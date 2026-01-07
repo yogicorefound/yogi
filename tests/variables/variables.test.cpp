@@ -7,7 +7,7 @@
 #include <random>
 #include <sstream>
 #include <string>
-#include "includes/yogi/yogi.h"
+#include "../../src/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {

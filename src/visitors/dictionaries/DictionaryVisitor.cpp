@@ -3,7 +3,7 @@
 //
 
 #include "DictionaryVisitor.h"
-#include "ast/nodes/nodes.h"
+#include "visitors/nodes/nodes.h"
 
 namespace yogi::visitor {
     using namespace yogi::visitor::nodes;

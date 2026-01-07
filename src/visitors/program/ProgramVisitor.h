@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "ast/arrays/ArraysVisitor.h"
-#include "ast/base/BaseVisitor.h"
-#include "ast/dictionaries/DictionaryVisitor.h"
-#include "ast/expressions/ExpressionVisitor.h"
-#include "ast/literals/LiteralsVisitor.h"
-#include "ast/members/MembersVisitor.h"
-#include "ast/variables/VariablesVisitor.h"
+#include "visitors/arrays/ArraysVisitor.h"
+#include "visitors/base/BaseVisitor.h"
+#include "visitors/dictionaries/DictionaryVisitor.h"
+#include "visitors/expressions/ExpressionVisitor.h"
+#include "visitors/literals/LiteralsVisitor.h"
+#include "visitors/members/MembersVisitor.h"
+#include "visitors/variables/VariablesVisitor.h"
 
 namespace yogi::visitor {
     class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor {
