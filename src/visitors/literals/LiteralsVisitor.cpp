@@ -169,7 +169,6 @@ namespace yogi::visitor {
                         node.value += contentNode.value;
                     } else if (result.type() == typeid(nodes::IdentifierLiteral)) {
                         auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
-                        std::cout << "IdentifierLiteral: " << contentNode.value << std::endl;
                         const auto variable = scope->lookupVariable(contentNode.value);
                         if (!variable.has_value()) {
                             throwScopeError("Variable not found", contentNode.value, node, source);

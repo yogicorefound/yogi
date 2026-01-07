@@ -180,7 +180,7 @@ namespace yogi::visitor::nodes {
 
         auto [text, type, name, expectedValue] = cases;
         const auto ast = Yogi::testAST(text);
-        const auto& node = std::any_cast<VariableDeclarationNode>(ast.body[0].children.at(0));
+        const auto& node = std::any_cast<VariableDeclarationNode>(ast.body.at(0));
         const auto [resolvedType, resolvedValue, resolvedNode] = utils::Helpers::resolveItem(node.value);
 
         REQUIRE(node.kind == Kind::VARIABLE_DECLARATION);

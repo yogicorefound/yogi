@@ -47,7 +47,7 @@ namespace yogi::core::ir {
         llvm::Value* variableAssignment(const visitor::nodes::VariableDeclarationNode& node);
         llvm::Value* arrayDeclaration(const visitor::nodes::ArrayDeclarationNode& node);
         llvm::Value* program(const visitor::nodes::ProgramNode& node);
-        llvm::Value* statement(const visitor::nodes::StatementNode& node);
+        llvm::Value* statement(const std::any& node);
 
         void loadAndLinkModulesFromFolder() const;
         bool linkModule(std::unique_ptr<llvm::Module> other) const;

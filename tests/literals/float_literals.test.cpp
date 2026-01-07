@@ -17,7 +17,7 @@ TEST_CASE("Float evaluation", "[FLOAT_LITERAL]") {
     std::string text = c;
 
     const auto ast = yogi::Yogi::testAST(text);
-    const auto& node = std::any_cast<FloatLiteralNode>(ast.body[0].children.at(0));
+    const auto& node = std::any_cast<FloatLiteralNode>(ast.body[0]);
 
     INFO("Float kind");
     REQUIRE(node.kind == Kind::FLOAT_LITERAL);

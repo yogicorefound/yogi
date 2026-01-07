@@ -48,7 +48,6 @@ namespace yogi::utils::helpers {
 
         if (const size_t ePos = s.find_first_of("eE"); ePos != std::string::npos) {
             out.mantissa = s.substr(0, ePos);
-            std::cout << "Mantissa: " << s.substr(ePos + 1) << std::endl;
             out.exponent = std::stoll(s.substr(ePos + 1));
         } else {
             out.mantissa = s;

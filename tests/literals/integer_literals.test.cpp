@@ -15,7 +15,7 @@ namespace yogi::visitor::nodes {
         std::string text = c;
 
         const auto ast = yogi::Yogi::testAST(text);
-        const auto& node = std::any_cast<IntegerLiteralNode>(ast.body[0].children.at(0));
+        const auto& node = std::any_cast<IntegerLiteralNode>(ast.body[0]);
 
         INFO("Integer value");
         REQUIRE(node.value == expected_value);

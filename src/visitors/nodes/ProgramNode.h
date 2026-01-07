@@ -10,14 +10,14 @@
 namespace yogi::visitor::nodes {
     // Program Node (root of AST - holds all top-level statements)
     struct ProgramNode : BaseNode {
-        std::vector<StatementNode> body;  // All top-level statements
+        std::vector<std::any> body;  // All top-level statements
 
         explicit ProgramNode(
             const Position start,
             const Position end
         ) : BaseNode(Kind::PROGRAM, start, end) {}
 
-        void addStatement(StatementNode stmt) {
+        void addStatement(std::any stmt) {
             body.push_back(std::move(stmt));
         }
     };

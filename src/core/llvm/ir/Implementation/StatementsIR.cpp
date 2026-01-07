@@ -6,28 +6,25 @@
 
 namespace yogi::core::ir {
 
-    llvm::Value* IR::statement(const visitor::nodes::StatementNode& node) {
+    llvm::Value* IR::statement(const std::any& node) {
         llvm::Value* lastVal = nullptr;
-
-        for (const auto& child : node.children) {
-            if (!child.has_value())
-                continue;
-
             try {
-                if (child.type() == typeid(visitor::nodes::VariableDeclarationNode)) {
-                    auto n = std::any_cast<visitor::nodes::VariableDeclarationNode>(child);
+                if (node.type() == typeid(visitor::nodes::VariableDeclarationNode)) {
+                    const auto n = std::any_cast<visitor::nodes::VariableDeclarationNode>(node);
                     lastVal = variableDeclaration(n);
-                } else if (child.type() == typeid(visitor::nodes::ArrayDeclarationNode)) {
-                    auto n = std::any_cast<visitor::nodes::ArrayDeclarationNode>(child);
+
+                } else if (node.type() == typeid(visitor::nodes::ArrayDeclarationNode)) {
+                    auto n = std::any_cast<visitor::nodes::ArrayDeclarationNode>(node);
                     lastVal = arrayDeclaration(n);
+
                 } else {
                     // Default: treat as expression
-                    lastVal = expression(child);
+                    lastVal = expression(node);
                 }
             } catch (const std::exception& e) {
                 throw std::runtime_error("Statement generation failed: " + std::string(e.what()));
             }
-        }
+
 
         return lastVal;
     }

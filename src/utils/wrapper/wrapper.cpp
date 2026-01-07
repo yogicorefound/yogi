@@ -21,8 +21,7 @@ namespace yogi {
     void Yogi::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
         printAST(ast);
-
-        // processLLVM(ast);
+        processLLVM(ast);
     }
 
     void Yogi::getContent(const int argc, const char* argv[]) {

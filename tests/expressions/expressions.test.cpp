@@ -24,7 +24,7 @@ namespace yogi::visitor::nodes {
 
         auto [text, expected_value, expected_type] = test_cases;
         const auto ast = Yogi::testAST(text);
-        const auto& expression = utils::Helpers::resolveItem(ast.body[0].children.at(0));
+        const auto& expression = utils::Helpers::resolveItem(ast.body[0]);
         const double value = std::round(std::stod(expression.value) * 100.0) / 100.0;
 
         // // Top-level checks

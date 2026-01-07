@@ -65,8 +65,10 @@ namespace yogi::visitor {
             throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
         }
 
+
         // Visit the expression instead of variableValue
         std::any value = visit(ctx->expression());
+
         parser->inVarMode = false;
         if (value.type() == typeid(nodes::MemberExpressionNode)) {
             const auto memberExpression = std::any_cast<nodes::MemberExpressionNode>(value);
@@ -74,6 +76,8 @@ namespace yogi::visitor {
             if (arrayTypeKind != memberExpression.kind) {
                 throwTypeError(identifier, typeValue, memberExpression.value, source);
             }
+
+
 
             // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
             const bool isConstant = toUpper(identifier) == identifier;
@@ -95,6 +99,7 @@ namespace yogi::visitor {
 
         if (value.type() == typeid(nodes::BinaryExpressionNode)) {
             auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
+
 
             if (typeValue.starts_with("float")) {
                 auto floatLiteralNode = nodes::FloatLiteralNode(node.value, node.start, node.end);
@@ -130,6 +135,7 @@ namespace yogi::visitor {
 
             return node;
         }
+
 
         // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
         const auto& node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);

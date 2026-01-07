@@ -114,12 +114,8 @@ namespace yogi::visitor {
             };
 
             std::string lv, lt, rv, rt;
-            try {
-                std::tie(lv, lt) = extract(leftAny);
-                std::tie(rv, rt) = extract(rightAny);
-            } catch (...) {
-                return nodes::BinaryExpressionNode(leftAny, rightAny, op, "0", "error", start, end);
-            }
+            std::tie(lv, lt) = extract(leftAny);
+            std::tie(rv, rt) = extract(rightAny);
 
             // ---------------------------------------------------
             // STRING CONCATENATION

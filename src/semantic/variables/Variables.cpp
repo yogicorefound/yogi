@@ -49,7 +49,6 @@ namespace yogi::semantic {
         std::string rValue;
         std::string stringValue;
 
-        std::cout << node.value.type().name();
         try {
             if (node.value.type() == typeid(IntegerLiteralNode)) {
                 auto val = std::any_cast<IntegerLiteralNode>(node.value);
@@ -117,11 +116,6 @@ namespace yogi::semantic {
         } catch (const std::bad_any_cast& e) {
             throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
-
-        // Type checking
-            std::cout << dataType;
-            std::cout << returnType;
-            std::cout << rValue;
 
         if (!checkDataType(dataType, returnType, rValue)) {
             utils::Errors::throwTypeError(identifier, dataType, node.value, source);
@@ -211,7 +205,6 @@ namespace yogi::semantic {
         } catch (const std::bad_any_cast& e) {
             throw std::runtime_error("Failed to cast variable value: " + std::string(e.what()));
         }
-        // std::cout << "fitsInFloat64: " << returnType << std::endl;
 
         // Type checking - ensure new value matches variable's declared type
         if (!checkDataType(node.varType, returnType, rValue)) {
