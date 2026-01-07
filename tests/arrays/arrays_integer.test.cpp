@@ -3,10 +3,11 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include <bitset>
 #include <random>
 #include <string>
-#include "../../src/yogi.h"
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/ArrayNode.h>
+
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {

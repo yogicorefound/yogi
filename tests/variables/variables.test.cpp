@@ -3,11 +3,12 @@
 //
 
 #include <utils/helpers/Helpers.h>
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/VariableNode.h>
 #include <bitset>
 #include <random>
 #include <sstream>
 #include <string>
-#include "../../src/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {
@@ -175,8 +176,7 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("str a = \"Hello, world!!!\"", "str", "a", "Hello, world!!!"),
             std::make_tuple<std::string>("str a = \"String\" + \" \" + \"Concatenation\"", "str", "a", "String Concatenation"),
             std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!"),
-            std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!")
-        );
+            std::make_tuple<std::string>("str a = f\"Hello, {\"world!!!\"}\"", "str", "a", "Hello, world!!!"));
 
         auto [text, type, name, expectedValue] = cases;
         const auto ast = Yogi::testAST(text);

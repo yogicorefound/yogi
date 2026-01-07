@@ -2,10 +2,10 @@
 // Created by Brayhan De Aza on 12/12/25.
 //
 
-#include <../../src/utils/wrapper/wrapper.h>
 #include <utils/helpers/Helpers.h>
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/LiteralNode.h>
 #include <cmath>
-#include "../../src/yogi.h"
 #include "libs/catch2/catch_amalgamated.hpp"
 
 using namespace yogi::visitor::nodes;

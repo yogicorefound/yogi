@@ -3,8 +3,8 @@
 //
 
 #include <utils/helpers/Helpers.h>
-#include <cmath>
-#include "../../src/yogi.h"
+#include <utils/wrapper/wrapper.h>
+#include <visitors/nodes/LiteralNode.h>
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {
