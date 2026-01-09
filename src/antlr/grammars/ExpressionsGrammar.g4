@@ -10,18 +10,53 @@ import LiteralsGrammar, MembersGrammar;
 // Top-level expression
 // --------------------
 expression
-    : relationalExpression
+    : bitwiseOrExpression
     ;
 
 // --------------------
-// Relational: >, <, >=, <=, ==, !=
+// Bitwise OR |
+// --------------------
+bitwiseOrExpression
+    : bitwiseXorExpression (BIT_OR bitwiseXorExpression)*
+    ;
+
+// --------------------
+// Bitwise XOR ^
+// --------------------
+bitwiseXorExpression
+    : bitwiseAndExpression (BIT_XOR bitwiseAndExpression)*
+    ;
+
+// --------------------
+// Bitwise AND &
+// --------------------
+bitwiseAndExpression
+    : equalityExpression (AMPERSAND equalityExpression)*
+    ;
+
+// --------------------
+// Equality: ==, !=
+// --------------------
+equalityExpression
+    : relationalExpression ((EQEQ | NEQ) relationalExpression)*
+    ;
+
+// --------------------
+// Relational: >, <, >=, <=
 // --------------------
 relationalExpression
-    : additiveExpression ((GT | LT | GTE | LTE | EQEQ | NEQ) additiveExpression)*
+    : shiftExpression ((GT | LT | GTE | LTE) shiftExpression)*
     ;
 
 // --------------------
-// Additive: +, - (numeric addition, + also string concatenation)
+// Shift: <<, >>
+// --------------------
+shiftExpression
+    : additiveExpression ((SHL | SHR) additiveExpression)*
+    ;
+
+// --------------------
+// Additive: +, -
 // --------------------
 additiveExpression
     : multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*
@@ -42,17 +77,17 @@ powerExpression
     ;
 
 // --------------------
-// Unary: !, +, -
+// Unary: !, ~, +, -
 // --------------------
 unaryExpression
-    : (NOT (NOT)* | PLUS | MINUS)? primaryExpression
+    : (NOT (NOT)* | BIT_NOT | PLUS | MINUS)? primaryExpression
     ;
 
 // --------------------
-// Primary: literals, identifiers, members, parentheses
+// Primary
 // --------------------
 primaryExpression
-    : LPAREN expression RPAREN           // parentheses allow nested full expressions
+    : LPAREN expression RPAREN
     | literals
     | memberExpression
     ;

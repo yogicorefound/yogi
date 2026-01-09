@@ -18,6 +18,12 @@ namespace yogi::visitor {
         std::any visitPrimaryExpression(Grammar::PrimaryExpressionContext* ctx) override;
         std::any visitRelationalExpression(Grammar::RelationalExpressionContext* ctx) override;
 
+        std::any visitBitwiseOrExpression(Grammar::BitwiseOrExpressionContext* ctx) override;
+        std::any visitBitwiseAndExpression(Grammar::BitwiseAndExpressionContext* ctx) override;
+        std::any visitBitwiseXorExpression(Grammar::BitwiseXorExpressionContext* ctx) override;
+        std::any visitEqualityExpression(Grammar::EqualityExpressionContext* ctx) override;
+        std::any visitShiftExpression(Grammar::ShiftExpressionContext* ctx) override;
+
        private:
         std::function<std::pair<double, std::string>(const std::any&)> extractValue;
     };

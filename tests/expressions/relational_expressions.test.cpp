@@ -35,7 +35,7 @@ namespace yogi::visitor::nodes {
             std::make_tuple<std::string>("(10 * 10) != (10 * 10)", "0", "bool"),
             std::make_tuple<std::string>("10 != 9", "1", "bool"),
 
-            std::make_tuple<std::string>("!(10 * 10)", "1", "bool")
+            std::make_tuple<std::string>("!!(10 * 10)", "1", "bool")
 
         );
 

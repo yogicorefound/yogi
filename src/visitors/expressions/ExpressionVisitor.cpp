@@ -53,17 +53,17 @@ namespace yogi::visitor {
     // Expression
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
-        return visit(ctx->relationalExpression());
+        return visit(ctx->bitwiseOrExpression());
     }
 
     // --------------------------------------------------------
     // Relational: >, <, >=, <=, ==, !=
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitRelationalExpression(Grammar::RelationalExpressionContext* ctx) {
-        std::any left = visit(ctx->additiveExpression(0));
+        std::any left = visit(ctx->shiftExpression(0));
 
-        for (size_t i = 1; i < ctx->additiveExpression().size(); ++i) {
-            std::any right = visit(ctx->additiveExpression(i));
+        for (size_t i = 1; i < ctx->shiftExpression().size(); ++i) {
+            std::any right = visit(ctx->shiftExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
             const auto [lValue, lType] = extract(left, scope);
@@ -107,6 +107,133 @@ namespace yogi::visitor {
         }
 
         return left;
+    }
+
+    std::any ExpressionVisitor::visitEqualityExpression(Grammar::EqualityExpressionContext* ctx) {
+        std::any left = visit(ctx->relationalExpression(0));
+
+        for (size_t i = 1; i < ctx->relationalExpression().size(); ++i) {
+            std::any right = visit(ctx->relationalExpression(i));
+            std::string op = ctx->children[2 * i - 1]->getText();
+
+            const auto [lValue, lType] = extract(left, scope);
+            const auto [rValue, rType] = extract(right, scope);
+
+            bool result = false;
+
+            if (lType == "int" && rType == "int") {
+                BigInt l(lValue), r(rValue);
+                result = (op == "==") ? (l == r) : (l != r);
+            } else if (lType == "float" || rType == "float") {
+                double l = std::stod(lValue);
+                double r = std::stod(rValue);
+                result = (op == "==") ? (l == r) : (l != r);
+            } else if (lType == "str" && rType == "str") {
+                result = (op == "==") ? (lValue == rValue) : (lValue != rValue);
+            } else {
+                throw std::runtime_error("Invalid operands for equality operator");
+            }
+
+            left = BooleanLiteralNode(result ? "1" : "0", {}, {});
+        }
+
+        return left;
+    }
+
+    std::any ExpressionVisitor::visitBitwiseAndExpression(Grammar::BitwiseAndExpressionContext* ctx) {
+        std::any result = visit(ctx->equalityExpression(0));
+
+        for (size_t i = 1; i < ctx->equalityExpression().size(); ++i) {
+            std::any rhs = visit(ctx->equalityExpression(i));
+
+            const auto [lValue, lType] = extract(result, scope);
+            const auto [rValue, rType] = extract(rhs, scope);
+
+            if (lType != "int" || rType != "int")
+                throw std::runtime_error("Bitwise '&' requires integer operands");
+
+            BigInt l(lValue);
+            BigInt r(rValue);
+
+            result = IntegerLiteralNode((l & r).str(), {}, {});
+        }
+
+        return result;
+    }
+
+    std::any ExpressionVisitor::visitShiftExpression(Grammar::ShiftExpressionContext* ctx) {
+        std::any result = visit(ctx->additiveExpression(0));
+
+        for (size_t i = 1; i < ctx->additiveExpression().size(); ++i) {
+            std::any rhs = visit(ctx->additiveExpression(i));
+            std::string op = ctx->children[2 * i - 1]->getText();
+
+            const auto [lValue, lType] = extract(result, scope);
+            const auto [rValue, rType] = extract(rhs, scope);
+
+            if (lType != "int" || rType != "int")
+                throw std::runtime_error("Shift operators require integer operands");
+
+            BigInt l(lValue);
+            BigInt r(rValue);
+
+            if (r < 0)
+                throw std::runtime_error("Negative shift count");
+
+            if (op == "<<")
+                result = IntegerLiteralNode((l << r.convert_to<unsigned>()).str(), {}, {});
+            else
+                result = IntegerLiteralNode((l >> r.convert_to<unsigned>()).str(), {}, {});
+        }
+
+        return result;
+    }
+
+    // --------------------------------------------------------
+    // Bitwise: XOR
+    // --------------------------------------------------------
+    std::any ExpressionVisitor::visitBitwiseXorExpression(Grammar::BitwiseXorExpressionContext* ctx) {
+        std::any result = visit(ctx->bitwiseAndExpression(0));
+
+        for (size_t i = 1; i < ctx->bitwiseAndExpression().size(); ++i) {
+            std::any rhs = visit(ctx->bitwiseAndExpression(i));
+
+            const auto [lValue, lType] = extract(result, scope);
+            const auto [rValue, rType] = extract(rhs, scope);
+
+            if (lType != "int" || rType != "int")
+                throw std::runtime_error("Bitwise '^' requires integer operands");
+
+            BigInt l(lValue);
+            BigInt r(rValue);
+
+            result = IntegerLiteralNode((l ^ r).str(), {}, {});
+        }
+
+        return result;
+    }
+
+    // --------------------------------------------------------
+    // Bitwise OR: |
+    // --------------------------------------------------------
+    std::any ExpressionVisitor::visitBitwiseOrExpression(Grammar::BitwiseOrExpressionContext* ctx) {
+        std::any result = visit(ctx->bitwiseXorExpression(0));
+
+        for (size_t i = 1; i < ctx->bitwiseXorExpression().size(); ++i) {
+            std::any rhs = visit(ctx->bitwiseXorExpression(i));
+
+            const auto [lValue, lType] = extract(result, scope);
+            const auto [rValue, rType] = extract(rhs, scope);
+
+            if (lType != "int" || rType != "int")
+                throw std::runtime_error("Bitwise '|' requires integer operands");
+
+            BigInt l(lValue);
+            BigInt r(rValue);
+            result = IntegerLiteralNode((l | r).str(), {}, {});
+        }
+
+        return result;
     }
 
     // --------------------------------------------------------
@@ -245,57 +372,70 @@ namespace yogi::visitor {
     // --------------------------------------------------------
     // Unary: +, -, !
     // --------------------------------------------------------
+    // --------------------------------------------------------
+    // Unary: +, -, !, ~
+    // --------------------------------------------------------
     std::any ExpressionVisitor::visitUnaryExpression(Grammar::UnaryExpressionContext* ctx) {
         std::any value = visit(ctx->primaryExpression());
 
+        // Resolve identifier
         if (value.type() == typeid(IdentifierLiteral)) {
-            const auto identifierLiteral = std::any_cast<IdentifierLiteral>(value);
-            const auto variable = scope->lookupVariable(identifierLiteral.value);
-            if (!variable.has_value()) {
-                throwScopeError("variable '" + identifierLiteral.value + "' not declared", identifierLiteral.value, value, source);
-            }
-            value = variable.value()->value;
+            const auto id = std::any_cast<IdentifierLiteral>(value);
+            const auto var = scope->lookupVariable(id.value);
+            if (!var.has_value())
+                throwScopeError("variable '" + id.value + "' not declared", id.value, value, source);
+            value = var.value()->value;
         }
 
+        // ---------- Logical NOT (!) ----------
         if (ctx->NOT().size() > 0) {
             const auto [vValue, vType] = extract(value, scope);
             bool b;
 
-            if (vType == "bool") {
-                b = vValue == "true";
-            } else if (vType == "int") {
-                BigInt num(vValue);
-                b = num != 0;
+            if (vType == "int") {
+                b = BigInt(vValue) != 0;
             } else if (vType == "float") {
-                double num = std::stod(vValue);
-                b = num != 0.0;
+                b = std::stod(vValue) != 0.0;
             } else if (vType == "str") {
                 b = !vValue.empty();
+            } else if (vType == "bool") {
+                b = vValue == "1";
             } else {
-                throw std::runtime_error("Operator '!' requires a boolean, numeric, or string literal");
+                throw std::runtime_error("Invalid operand for '!'");
             }
 
-            if (ctx->NOT().size() % 2 == 0) {
+            if (ctx->NOT().size() % 2 == 0)
                 return BooleanLiteralNode(b ? "1" : "0", {}, {});
-            }
 
             return BooleanLiteralNode(b ? "0" : "1", {}, {});
         }
 
-        if (ctx->PLUS() || ctx->MINUS()) {
-            const auto [eValue, eType] = extract(value, scope);
-            if (eType != "int" && eType != "float")
-                throw std::runtime_error("Unary operator requires numeric operand");
+        // ---------- Bitwise NOT (~) ----------
+        if (ctx->BIT_NOT()) {
+            const auto [vValue, vType] = extract(value, scope);
 
-            if (eType == "int") {
-                BigInt num(eValue);
+            if (vType != "int")
+                throw std::runtime_error("Operator '~' requires integer operand");
+
+            BigInt num(vValue);
+            return IntegerLiteralNode((~num).str(), {}, {});
+        }
+
+        // ---------- Unary + / - ----------
+        if (ctx->PLUS() || ctx->MINUS()) {
+            const auto [vValue, vType] = extract(value, scope);
+
+            if (vType != "int" && vType != "float")
+                throw std::runtime_error("Unary +/- requires numeric operand");
+
+            if (vType == "int") {
+                BigInt num(vValue);
                 if (ctx->MINUS())
                     num = -num;
-
                 return IntegerLiteralNode(num.str(), {}, {});
             }
 
-            double num = std::stod(eValue);
+            double num = std::stod(vValue);
             if (ctx->MINUS())
                 num = -num;
             return FloatLiteralNode(std::to_string(num), {}, {});
