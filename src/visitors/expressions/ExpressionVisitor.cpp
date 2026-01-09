@@ -280,20 +280,22 @@ namespace yogi::visitor {
         }
 
         if (ctx->PLUS() || ctx->MINUS()) {
+            std::cout << "eValue";
             const auto [eValue, eType] = extract(value, scope);
             if (eType != "int" && eType != "float")
                 throw std::runtime_error("Unary operator requires numeric operand");
 
             if (eType == "int") {
-                BigInt num(eValue);
+                BigInt num(eValue); // eValue limpio, sin '+'
                 if (ctx->MINUS())
-                    num = -num;
+                    num = -num; // solo invertir si hay '-'
+                // si es '+', no hacer nada
                 return IntegerLiteralNode(num.str(), {}, {});
             }
 
-            double num = std::stod(eValue);
+            double num = std::stod(eValue); // eValue limpio
             if (ctx->MINUS())
-                num = -num;
+                num = -num; // solo invertir si hay '-'
             return FloatLiteralNode(std::to_string(num), {}, {});
         }
 
