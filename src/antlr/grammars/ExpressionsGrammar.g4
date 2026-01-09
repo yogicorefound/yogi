@@ -10,9 +10,22 @@ import LiteralsGrammar, MembersGrammar;
 // Top-level expression
 // --------------------
 expression
-    : bitwiseOrExpression
+    : logicalOrExpression
     ;
 
+// --------------------
+// Logical OR: ||
+// --------------------
+logicalOrExpression
+    : logicalAndExpression (OROR logicalAndExpression)*
+    ;
+
+// --------------------
+// Logical AND: &&
+// --------------------
+logicalAndExpression
+    : bitwiseOrExpression (ANDAND bitwiseOrExpression)*
+    ;
 // --------------------
 // Bitwise OR |
 // --------------------

@@ -49,11 +49,58 @@ namespace yogi::visitor {
         throw std::runtime_error("Unsupported operand type in extract");
     };
 
+    bool isTruthy(const std::any& value, semantic::Scope* scope) {
+        const auto [v, t] = extract(value, scope);
+
+        if (t == "bool")
+            return v == "1";
+        if (t == "int")
+            return BigInt(v) != 0;
+        if (t == "float")
+            return std::stod(v) != 0.0;
+        if (t == "str")
+            return !v.empty();
+
+        throw std::runtime_error("Invalid type in logical expression");
+    }
+
     // --------------------------------------------------------
     // Expression
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
-        return visit(ctx->bitwiseOrExpression());
+        return visit(ctx->logicalOrExpression());
+    }
+
+    std::any ExpressionVisitor::visitLogicalOrExpression(Grammar::LogicalOrExpressionContext* ctx) {
+        std::any left = visit(ctx->logicalAndExpression(0));
+
+        for (size_t i = 1; i < ctx->logicalAndExpression().size(); ++i) {
+            if (isTruthy(left, scope)) {
+                // short-circuit
+                return BooleanLiteralNode("1", {}, {});
+            }
+
+            const std::any right = visit(ctx->logicalAndExpression(i));
+            left = right;
+        }
+
+        return BooleanLiteralNode(isTruthy(left, scope) ? "1" : "0", {}, {});
+    }
+
+    std::any ExpressionVisitor::visitLogicalAndExpression(Grammar::LogicalAndExpressionContext* ctx) {
+        std::any left = visit(ctx->bitwiseOrExpression(0));
+
+        for (size_t i = 1; i < ctx->bitwiseOrExpression().size(); ++i) {
+            if (!isTruthy(left, scope)) {
+                // short-circuit
+                return BooleanLiteralNode("0", {}, {});
+            }
+
+            const std::any right = visit(ctx->bitwiseOrExpression(i));
+            left = right;
+        }
+
+        return BooleanLiteralNode(isTruthy(left, scope) ? "1" : "0", {}, {});
     }
 
     // --------------------------------------------------------
@@ -123,13 +170,13 @@ namespace yogi::visitor {
 
             if (lType == "int" && rType == "int") {
                 BigInt l(lValue), r(rValue);
-                result = (op == "==") ? (l == r) : (l != r);
+                result = op == "==" ? l == r : l != r;
             } else if (lType == "float" || rType == "float") {
                 double l = std::stod(lValue);
                 double r = std::stod(rValue);
-                result = (op == "==") ? (l == r) : (l != r);
+                result = op == "==" ? l == r : l != r;
             } else if (lType == "str" && rType == "str") {
-                result = (op == "==") ? (lValue == rValue) : (lValue != rValue);
+                result = op == "==" ? lValue == rValue : lValue != rValue;
             } else {
                 throw std::runtime_error("Invalid operands for equality operator");
             }

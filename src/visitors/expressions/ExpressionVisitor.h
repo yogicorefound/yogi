@@ -23,6 +23,8 @@ namespace yogi::visitor {
         std::any visitBitwiseXorExpression(Grammar::BitwiseXorExpressionContext* ctx) override;
         std::any visitEqualityExpression(Grammar::EqualityExpressionContext* ctx) override;
         std::any visitShiftExpression(Grammar::ShiftExpressionContext* ctx) override;
+        std::any visitLogicalAndExpression(Grammar::LogicalAndExpressionContext* ctx) override;
+        std::any visitLogicalOrExpression(Grammar::LogicalOrExpressionContext* ctx) override;
 
        private:
         std::function<std::pair<double, std::string>(const std::any&)> extractValue;

@@ -77,6 +77,8 @@ DOT: '.';
 COMMA: ',';
 
 AMPERSAND: '&';
+ANDAND: '&&';
+OROR: '||';
 LT: '<';
 LTE: '<=';
 GT: '>';
