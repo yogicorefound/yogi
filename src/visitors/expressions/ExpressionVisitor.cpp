@@ -257,7 +257,7 @@ namespace yogi::visitor {
             value = variable.value()->value;
         }
 
-        if (ctx->NOT()) {
+        if (ctx->NOT().size() > 0) {
             const auto [vValue, vType] = extract(value, scope);
             bool b;
 
@@ -275,7 +275,11 @@ namespace yogi::visitor {
                 throw std::runtime_error("Operator '!' requires a boolean, numeric, or string literal");
             }
 
-            return BooleanLiteralNode(b ? "1" : "0", {}, {});
+            if (ctx->NOT().size() % 2 == 0) {
+                return BooleanLiteralNode(b ? "1" : "0", {}, {});
+            }
+
+            return BooleanLiteralNode(b ? "0" : "1", {}, {});
         }
 
         if (ctx->PLUS() || ctx->MINUS()) {

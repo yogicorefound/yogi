@@ -45,7 +45,7 @@ powerExpression
 // Unary: !, +, -
 // --------------------
 unaryExpression
-    : (NOT | PLUS | MINUS)? primaryExpression
+    : (NOT (NOT)* | PLUS | MINUS)? primaryExpression
     ;
 
 // --------------------
