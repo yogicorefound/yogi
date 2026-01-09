@@ -16,9 +16,9 @@ namespace yogi::visitor {
         std::any visitPowerExpression(Grammar::PowerExpressionContext* ctx) override;
         std::any visitUnaryExpression(Grammar::UnaryExpressionContext* ctx) override;
         std::any visitPrimaryExpression(Grammar::PrimaryExpressionContext* ctx) override;
+        std::any visitRelationalExpression(Grammar::RelationalExpressionContext* ctx) override;
 
        private:
         std::function<std::pair<double, std::string>(const std::any&)> extractValue;
-
     };
 } // namespace yogi::visitor

@@ -65,6 +65,7 @@ MUL: '*';
 DIV: '/';
 MOD: '%';
 EQ: '=';
+EQEQ: '==';
 NOT: '!';
 LPAREN: '(';
 RPAREN: ')';
@@ -74,9 +75,13 @@ LBRACKET: '[';
 RBRACKET: ']';
 DOT: '.';
 COMMA: ',';
+
 AMPERSAND: '&';
-LESSTHAN: '<';
-GREATERTHAN: '>';
+LT: '<';
+LTE: '=<';
+GT: '>';
+GTE: '>=';
+NEQ: '!=';
 COLON: ':';
 
 // --------------------------------------------------------------------

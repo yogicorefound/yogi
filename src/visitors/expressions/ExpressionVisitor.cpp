@@ -53,7 +53,61 @@ namespace yogi::visitor {
     // Expression
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
-        return visit(ctx->additiveExpression());
+        return visit(ctx->relationalExpression());
+    }
+
+    // --------------------------------------------------------
+    // Relational: >, <, >=, <=, ==, !=
+    // --------------------------------------------------------
+    std::any ExpressionVisitor::visitRelationalExpression(Grammar::RelationalExpressionContext* ctx) {
+        std::any left = visit(ctx->additiveExpression(0));
+
+        for (size_t i = 1; i < ctx->additiveExpression().size(); ++i) {
+            std::any right = visit(ctx->additiveExpression(i));
+            std::string op = ctx->children[2 * i - 1]->getText(); // operador en medio
+
+            const auto [lValue, lType] = extract(left, scope);
+            const auto [rValue, rType] = extract(right, scope);
+
+            if ((lType != rType) && !(lType == "int" && rType == "float") && !(lType == "float" && rType == "int")) {
+                throw std::runtime_error("Cannot compare different types: " + lType + " " + op + " " + rType);
+            }
+
+            bool result = false;
+            if (lType == "int" || lType == "float") {
+                double l = (lType == "int") ? std::stoll(lValue) : std::stod(lValue);
+                double r = (rType == "int") ? std::stoll(rValue) : std::stod(rValue);
+
+                if (op == ">")
+                    result = l > r;
+                else if (op == "<")
+                    result = l < r;
+                else if (op == ">=")
+                    result = l >= r;
+                else if (op == "<=")
+                    result = l <= r;
+                else if (op == "==")
+                    result = l == r;
+                else if (op == "!=")
+                    result = l != r;
+
+            } else if (lType == "str") { // Strings
+                if (op == "==")
+                    result = lValue == rValue;
+                else if (op == "!=")
+                    result = lValue != rValue;
+                else
+                    throw std::runtime_error("Invalid string comparison operator: " + op);
+
+            } else {
+                throw std::runtime_error("Unsupported operand type for relational operator: " + lType);
+            }
+
+            // Retornamos BooleanLiteralNode con "true"/"false"
+            left = BooleanLiteralNode(result ? "true" : "false", {}, {});
+        }
+
+        return left;
     }
 
     // --------------------------------------------------------
@@ -190,13 +244,11 @@ namespace yogi::visitor {
     }
 
     // --------------------------------------------------------
-    // Unary: +, -
+    // Unary: +, -, !
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitUnaryExpression(Grammar::UnaryExpressionContext* ctx) {
-        // Primero obtenemos el valor de la expresión interna (primary o recursiva)
         std::any value = visit(ctx->primaryExpression());
 
-        // Resolver identificadores si es necesario
         if (value.type() == typeid(IdentifierLiteral)) {
             const auto identifierLiteral = std::any_cast<IdentifierLiteral>(value);
             const auto variable = scope->lookupVariable(identifierLiteral.value);
@@ -206,9 +258,6 @@ namespace yogi::visitor {
             value = variable.value()->value;
         }
 
-        // -------------------------------------------------
-        // Operador NOT '!'
-        // -------------------------------------------------
         if (ctx->NOT()) {
             const auto [vValue, vType] = extract(value, scope);
             bool b;
@@ -222,17 +271,14 @@ namespace yogi::visitor {
                 double num = std::stod(vValue);
                 b = (num != 0.0);
             } else if (vType == "str") {
-                b = !vValue.empty(); // empty string → false, non-empty → true
+                b = !vValue.empty();
             } else {
                 throw std::runtime_error("Operator '!' requires a boolean, numeric, or string literal");
             }
 
-            return BooleanLiteralNode(b ? "0" : "1", {}, {});
+            return BooleanLiteralNode(b ? "0" : "1", {}, {}); // <- importante "false"/"true"
         }
 
-        // -------------------------------------------------
-        // Operadores + y - unarios
-        // -------------------------------------------------
         if (ctx->PLUS() || ctx->MINUS()) {
             const auto [eValue, eType] = extract(value, scope);
             if (eType != "int" && eType != "float")
@@ -251,7 +297,6 @@ namespace yogi::visitor {
             return FloatLiteralNode(std::to_string(num), {}, {});
         }
 
-        // Si no hay operador, retornamos el valor tal cual
         return value;
     }
 
