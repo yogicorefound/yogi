@@ -1,3 +1,8 @@
-float x = 10.0
-x = x + 10
+str a = "hello, "
+a = a + f"{"World!!" + "10"}"
+
+bool b = false
+b = b
+
+int c = 10 % 3 + 4
 

@@ -12,7 +12,6 @@ namespace yogi::visitor {
     using namespace nodes;
     using BigInt = boost::multiprecision::int128_t; // or cpp_int for arbitrary size
 
-
     // --------------------------------------------------------
     // Extract helper
     // --------------------------------------------------------
@@ -67,27 +66,28 @@ namespace yogi::visitor {
             std::any rhs = visit(ctx->multiplicativeExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
-            auto lhsVal = extract(result, scope);
-            auto rhsVal = extract(rhs, scope);
+            const auto [lValue, lType] = extract(result, scope);
+            const auto [rValue, rType] = extract(rhs, scope);
 
             // STRING CONCAT
-            if (op == "+" && lhsVal.type == "str" && rhsVal.type == "str") {
-                result = StringLiteralNode(lhsVal.value + rhsVal.value, {}, {});
+            if (op == "+" && lType == "str" && rType == "str") {
+                result = StringLiteralNode(lValue + rValue, {}, {});
                 continue;
             }
 
             // INTEGER or FLOAT
-            if ((lhsVal.type == "int" || lhsVal.type == "float") && (rhsVal.type == "int" || rhsVal.type == "float")) {
+            if ((lType == "int" || lType == "float") && (rType == "int" || rType == "float")) {
                 // Integer operation → BigInt
-                if (lhsVal.type == "int" && rhsVal.type == "int") {
-                    BigInt l(lhsVal.value);
-                    BigInt r(rhsVal.value);
-                    BigInt out = (op == "+") ? l + r : l - r;
-                    result = IntegerLiteralNode(out.str(), {}, {}); // exact string representation
-                } else { // float operation
-                    double l = (lhsVal.type == "int") ? std::stoll(lhsVal.value) : std::stod(lhsVal.value);
-                    double r = (rhsVal.type == "int") ? std::stoll(rhsVal.value) : std::stod(rhsVal.value);
-                    double out = (op == "+") ? l + r : l - r;
+                if (lType == "int" && rType == "int") {
+                    BigInt l(lValue);
+                    BigInt r(rValue);
+                    BigInt out = op == "+" ? l + r : l - r;
+                    result = IntegerLiteralNode(out.str(), {}, {});
+
+                } else {
+                    double l = lType == "int" ? std::stoll(lValue) : std::stod(lValue);
+                    double r = rType == "int" ? std::stoll(rValue) : std::stod(rValue);
+                    double out = op == "+" ? l + r : l - r;
                     result = FloatLiteralNode(std::to_string(out), {}, {});
                 }
                 continue;
@@ -109,36 +109,45 @@ namespace yogi::visitor {
             std::any rhs = visit(ctx->powerExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
-            auto lhsVal = extract(result, scope);
-            auto rhsVal = extract(rhs, scope);
+            const auto [lValue, lType] = extract(result, scope);
 
-            if (lhsVal.type == "int" && rhsVal.type == "int" && op != "/") {
-                BigInt l(lhsVal.value);
-                BigInt r(rhsVal.value);
+            if (const auto [rValue, rType] = extract(rhs, scope); lType == "int" && rType == "int" && op != "/") {
+                BigInt l(lValue);
+                BigInt r(rValue);
                 BigInt out;
+
                 if (op == "*")
                     out = l * r;
+
                 else if (op == "%") {
                     if (r == 0)
                         throw std::runtime_error("Modulo by zero");
                     out = l % r;
                 }
                 result = IntegerLiteralNode(out.str(), {}, {});
+
             } else { // float computation
-                double l = (lhsVal.type == "int") ? std::stoll(lhsVal.value) : std::stod(lhsVal.value);
-                double r = (rhsVal.type == "int") ? std::stoll(rhsVal.value) : std::stod(rhsVal.value);
-                double out;
+                double l = lType == "int" ? std::stoll(lValue) : std::stod(lValue);
+                double r = rType == "int" ? std::stoll(rValue) : std::stod(rValue);
+                double out = 0;
+
                 if (op == "*")
                     out = l * r;
+
                 else if (op == "/") {
                     if (r == 0)
                         throw std::runtime_error("Division by zero");
+
                     out = l / r;
+
                 } else if (op == "%") {
-                    if (r == 0)
+                    if (r == 0) {
                         throw std::runtime_error("Modulo by zero");
+                    }
+
                     out = std::fmod(l, r);
                 }
+
                 result = FloatLiteralNode(std::to_string(out), {}, {});
             }
         }
@@ -154,28 +163,30 @@ namespace yogi::visitor {
         if (!ctx->powerExpression())
             return left;
 
-        std::any right = visit(ctx->powerExpression());
-        auto lhsVal = extract(left, scope);
-        auto rhsVal = extract(right, scope);
+        const std::any right = visit(ctx->powerExpression());
+        const auto [lValue, lType] = extract(left, scope);
+        const auto [rValue, rType] = extract(right, scope);
 
         // INTEGER ** INTEGER using BigInt
-        if (lhsVal.type == "int" && rhsVal.type == "int") {
-            BigInt base(lhsVal.value);
-            BigInt exp(rhsVal.value);
+        if (lType == "int" && rType == "int") {
+            const BigInt base(lValue);
+            const BigInt exp(rValue);
             if (exp < 0) { // negative → float
-                double out = std::pow(base.convert_to<double>(), exp.convert_to<double>());
+                const double out = std::pow(base.convert_to<double>(), exp.convert_to<double>());
                 return FloatLiteralNode(std::to_string(out), {}, {});
             }
+
             BigInt out = 1;
             for (BigInt i = 0; i < exp; ++i)
                 out *= base;
             return IntegerLiteralNode(out.str(), {}, {});
-        } else { // float computation
-            double base = (lhsVal.type == "int") ? std::stoll(lhsVal.value) : std::stod(lhsVal.value);
-            double exp = (rhsVal.type == "int") ? std::stoll(rhsVal.value) : std::stod(rhsVal.value);
-            double out = std::pow(base, exp);
-            return FloatLiteralNode(std::to_string(out), {}, {});
         }
+
+        const double base = lType == "int" ? std::stoll(lValue) : std::stod(lValue);
+        const double exp = rType == "int" ? std::stoll(rValue) : std::stod(rValue);
+        const double out = std::pow(base, exp);
+
+        return FloatLiteralNode(std::to_string(out), {}, {});
     }
 
     // --------------------------------------------------------
@@ -183,32 +194,44 @@ namespace yogi::visitor {
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitUnaryExpression(Grammar::UnaryExpressionContext* ctx) {
         std::any value = visit(ctx->primaryExpression());
+
+        if (value.type() == typeid(IdentifierLiteral)) {
+            const auto identifierLiteral = std::any_cast<IdentifierLiteral>(value);
+            const auto variable = scope->lookupVariable(identifierLiteral.value);
+            if (!variable.has_value()) {
+                throwScopeError("variable '" + identifierLiteral.value + "' is already declared", identifierLiteral.value, value, source);
+            }
+
+            value = variable.value()->value;
+        }
+
         if (!ctx->PLUS() && !ctx->MINUS())
             return value;
 
-        auto val = extract(value, scope);
-        if (val.type != "int" && val.type != "float")
+        const auto [eValue, eType] = extract(value, scope);
+        if (eType != "int" && eType != "float")
             throw std::runtime_error("Unary operator requires numeric operand");
 
-        if (val.type == "int") {
-            BigInt num(val.value);
+        if (eType == "int") {
+            BigInt num(eValue);
             if (ctx->MINUS())
                 num = -num;
             return IntegerLiteralNode(num.str(), {}, {});
-        } else {
-            double num = std::stod(val.value);
-            if (ctx->MINUS())
-                num = -num;
-            return FloatLiteralNode(std::to_string(num), {}, {});
         }
+
+        double num = std::stod(eValue);
+        if (ctx->MINUS())
+            num = -num;
+        return FloatLiteralNode(std::to_string(num), {}, {});
     }
 
     // --------------------------------------------------------
     // Primary: literals, identifiers, member, parentheses
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitPrimaryExpression(Grammar::PrimaryExpressionContext* ctx) {
-        if (ctx->literals())
+        if (ctx->literals()) {
             return visit(ctx->literals());
+        }
         if (ctx->memberExpression())
             return visit(ctx->memberExpression());
         if (ctx->LPAREN())
