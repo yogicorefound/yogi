@@ -25,6 +25,7 @@ namespace yogi::visitor {
         std::any visitShiftExpression(Grammar::ShiftExpressionContext* ctx) override;
         std::any visitLogicalAndExpression(Grammar::LogicalAndExpressionContext* ctx) override;
         std::any visitLogicalOrExpression(Grammar::LogicalOrExpressionContext* ctx) override;
+        std::any visitConditionalExpression(Grammar::ConditionalExpressionContext* ctx) override;
 
        private:
         std::function<std::pair<double, std::string>(const std::any&)> extractValue;

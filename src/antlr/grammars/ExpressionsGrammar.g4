@@ -10,7 +10,14 @@ import LiteralsGrammar, MembersGrammar;
 // Top-level expression
 // --------------------
 expression
-    : logicalOrExpression
+    : conditionalExpression
+    ;
+
+// --------------------
+// Conditional ternary: ?:
+// --------------------
+conditionalExpression
+    : logicalOrExpression (QUESTION expression COLON expression)?
     ;
 
 // --------------------
@@ -26,6 +33,7 @@ logicalOrExpression
 logicalAndExpression
     : bitwiseOrExpression (ANDAND bitwiseOrExpression)*
     ;
+
 // --------------------
 // Bitwise OR |
 // --------------------
@@ -57,6 +65,7 @@ equalityExpression
 // --------------------
 // Relational: >, <, >=, <=
 // --------------------
+// permite comparaciones encadenadas: a < b < c
 relationalExpression
     : shiftExpression ((GT | LT | GTE | LTE) shiftExpression)*
     ;

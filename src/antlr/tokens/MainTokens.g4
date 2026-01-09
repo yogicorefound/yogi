@@ -85,6 +85,7 @@ GT: '>';
 GTE: '>=';
 NEQ: '!=';
 COLON: ':';
+QUESTION: '?';
 BIT_OR: '|';
 BIT_XOR: '^';
 BIT_NOT: '~';

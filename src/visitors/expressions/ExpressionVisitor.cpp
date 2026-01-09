@@ -68,7 +68,26 @@ namespace yogi::visitor {
     // Expression
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitExpression(Grammar::ExpressionContext* ctx) {
-        return visit(ctx->logicalOrExpression());
+        return visit(ctx->conditionalExpression());
+    }
+
+    // --------------------------------------------------------
+    // Conditional ternary: condition ? expr1 : expr2
+    // --------------------------------------------------------
+    std::any ExpressionVisitor::visitConditionalExpression(Grammar::ConditionalExpressionContext* ctx) {
+        std::any condition = visit(ctx->logicalOrExpression());
+
+        const bool cond = isTruthy(condition, scope);
+
+        if (ctx->expression().size() != 2) {
+            return condition;
+        }
+
+        if (cond) {
+            return visit(ctx->expression(0));
+        }
+
+        return visit(ctx->expression(1));
     }
 
     std::any ExpressionVisitor::visitLogicalOrExpression(Grammar::LogicalOrExpressionContext* ctx) {
@@ -76,15 +95,15 @@ namespace yogi::visitor {
 
         for (size_t i = 1; i < ctx->logicalAndExpression().size(); ++i) {
             if (isTruthy(left, scope)) {
-                // short-circuit
-                return BooleanLiteralNode("1", {}, {});
+                // short-circuit → devuelve el valor real, no solo true
+                return left;
             }
 
             const std::any right = visit(ctx->logicalAndExpression(i));
             left = right;
         }
 
-        return BooleanLiteralNode(isTruthy(left, scope) ? "1" : "0", {}, {});
+        return left;
     }
 
     std::any ExpressionVisitor::visitLogicalAndExpression(Grammar::LogicalAndExpressionContext* ctx) {
@@ -92,15 +111,15 @@ namespace yogi::visitor {
 
         for (size_t i = 1; i < ctx->bitwiseOrExpression().size(); ++i) {
             if (!isTruthy(left, scope)) {
-                // short-circuit
-                return BooleanLiteralNode("0", {}, {});
+                // short-circuit → devuelve el valor real
+                return left;
             }
 
             const std::any right = visit(ctx->bitwiseOrExpression(i));
             left = right;
         }
 
-        return BooleanLiteralNode(isTruthy(left, scope) ? "1" : "0", {}, {});
+        return left;
     }
 
     // --------------------------------------------------------
