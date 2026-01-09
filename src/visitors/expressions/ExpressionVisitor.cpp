@@ -1,24 +1,24 @@
-//
 // Created by Brayhan De Aza on 12/4/25.
-//
 
-#include "ExpressionVisitor.h"
+#include <boost/multiprecision/cpp_int.hpp>
+#ifdef EOF
+#undef EOF
+#endif
 #include <visitors/nodes/nodes.h>
-
-#include <cmath>
-#include <functional>
-#include <stdexcept>
+#include "ExpressionVisitor.h"
 
 namespace yogi::visitor {
 
     using namespace nodes;
+    using BigInt = boost::multiprecision::int128_t; // or cpp_int for arbitrary size
+
 
     // --------------------------------------------------------
     // Extract helper
     // --------------------------------------------------------
     struct ExtractResult {
         std::string value;
-        std::string type;
+        std::string type; // "int", "float", "str", "bool"
     };
 
     std::function<ExtractResult(const std::any&, semantic::Scope*)> extract = [](const std::any& value, semantic::Scope* scope) -> ExtractResult {
@@ -58,7 +58,7 @@ namespace yogi::visitor {
     }
 
     // --------------------------------------------------------
-    // Additive: +, - (numeric or string concatenation)
+    // Additive: +, -
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitAdditiveExpression(Grammar::AdditiveExpressionContext* ctx) {
         std::any result = visit(ctx->multiplicativeExpression(0));
@@ -70,23 +70,26 @@ namespace yogi::visitor {
             auto lhsVal = extract(result, scope);
             auto rhsVal = extract(rhs, scope);
 
-            // STRING CONCATENATION
+            // STRING CONCAT
             if (op == "+" && lhsVal.type == "str" && rhsVal.type == "str") {
                 result = StringLiteralNode(lhsVal.value + rhsVal.value, {}, {});
                 continue;
             }
 
-            // NUMERIC OPERATIONS
+            // INTEGER or FLOAT
             if ((lhsVal.type == "int" || lhsVal.type == "float") && (rhsVal.type == "int" || rhsVal.type == "float")) {
-                double l = std::stod(lhsVal.value);
-                double r = std::stod(rhsVal.value);
-                double out = (op == "+") ? l + r : l - r;
-
-                std::string finalType = (lhsVal.type == "float" || rhsVal.type == "float") ? "float" : "int";
-                if (finalType == "int")
-                    result = IntegerLiteralNode(std::to_string(static_cast<int>(out)), {}, {});
-                else
+                // Integer operation → BigInt
+                if (lhsVal.type == "int" && rhsVal.type == "int") {
+                    BigInt l(lhsVal.value);
+                    BigInt r(rhsVal.value);
+                    BigInt out = (op == "+") ? l + r : l - r;
+                    result = IntegerLiteralNode(out.str(), {}, {}); // exact string representation
+                } else { // float operation
+                    double l = (lhsVal.type == "int") ? std::stoll(lhsVal.value) : std::stod(lhsVal.value);
+                    double r = (rhsVal.type == "int") ? std::stoll(rhsVal.value) : std::stod(rhsVal.value);
+                    double out = (op == "+") ? l + r : l - r;
                     result = FloatLiteralNode(std::to_string(out), {}, {});
+                }
                 continue;
             }
 
@@ -109,28 +112,35 @@ namespace yogi::visitor {
             auto lhsVal = extract(result, scope);
             auto rhsVal = extract(rhs, scope);
 
-            double l = std::stod(lhsVal.value);
-            double r = std::stod(rhsVal.value);
-            double out = 0.0;
-
-            if (op == "*")
-                out = l * r;
-            else if (op == "/") {
-                if (r == 0)
-                    throw std::runtime_error("Division by zero");
-                out = l / r;
-            } else if (op == "%") {
-                if (r == 0)
-                    throw std::runtime_error("Modulo by zero");
-                out = std::fmod(l, r);
-            }
-
-            std::string finalType = (lhsVal.type == "float" || rhsVal.type == "float" || op == "/") ? "float" : "int";
-
-            if (finalType == "int")
-                result = IntegerLiteralNode(std::to_string(static_cast<int>(out)), {}, {});
-            else
+            if (lhsVal.type == "int" && rhsVal.type == "int" && op != "/") {
+                BigInt l(lhsVal.value);
+                BigInt r(rhsVal.value);
+                BigInt out;
+                if (op == "*")
+                    out = l * r;
+                else if (op == "%") {
+                    if (r == 0)
+                        throw std::runtime_error("Modulo by zero");
+                    out = l % r;
+                }
+                result = IntegerLiteralNode(out.str(), {}, {});
+            } else { // float computation
+                double l = (lhsVal.type == "int") ? std::stoll(lhsVal.value) : std::stod(lhsVal.value);
+                double r = (rhsVal.type == "int") ? std::stoll(rhsVal.value) : std::stod(rhsVal.value);
+                double out;
+                if (op == "*")
+                    out = l * r;
+                else if (op == "/") {
+                    if (r == 0)
+                        throw std::runtime_error("Division by zero");
+                    out = l / r;
+                } else if (op == "%") {
+                    if (r == 0)
+                        throw std::runtime_error("Modulo by zero");
+                    out = std::fmod(l, r);
+                }
                 result = FloatLiteralNode(std::to_string(out), {}, {});
+            }
         }
 
         return result;
@@ -148,16 +158,24 @@ namespace yogi::visitor {
         auto lhsVal = extract(left, scope);
         auto rhsVal = extract(right, scope);
 
-        double base = std::stod(lhsVal.value);
-        double exp = std::stod(rhsVal.value);
-        double out = std::pow(base, exp);
-
-        std::string finalType = (lhsVal.type == "float" || rhsVal.type == "float" || exp < 0 || std::floor(exp) != exp) ? "float" : "int";
-
-        if (finalType == "int")
-            return IntegerLiteralNode(std::to_string(static_cast<int>(out)), {}, {});
-        else
+        // INTEGER ** INTEGER using BigInt
+        if (lhsVal.type == "int" && rhsVal.type == "int") {
+            BigInt base(lhsVal.value);
+            BigInt exp(rhsVal.value);
+            if (exp < 0) { // negative → float
+                double out = std::pow(base.convert_to<double>(), exp.convert_to<double>());
+                return FloatLiteralNode(std::to_string(out), {}, {});
+            }
+            BigInt out = 1;
+            for (BigInt i = 0; i < exp; ++i)
+                out *= base;
+            return IntegerLiteralNode(out.str(), {}, {});
+        } else { // float computation
+            double base = (lhsVal.type == "int") ? std::stoll(lhsVal.value) : std::stod(lhsVal.value);
+            double exp = (rhsVal.type == "int") ? std::stoll(rhsVal.value) : std::stod(rhsVal.value);
+            double out = std::pow(base, exp);
             return FloatLiteralNode(std::to_string(out), {}, {});
+        }
     }
 
     // --------------------------------------------------------
@@ -172,14 +190,17 @@ namespace yogi::visitor {
         if (val.type != "int" && val.type != "float")
             throw std::runtime_error("Unary operator requires numeric operand");
 
-        double num = std::stod(val.value);
-        if (ctx->MINUS())
-            num = -num;
-
-        if (val.type == "int")
-            return IntegerLiteralNode(std::to_string(static_cast<int>(num)), {}, {});
-        else
+        if (val.type == "int") {
+            BigInt num(val.value);
+            if (ctx->MINUS())
+                num = -num;
+            return IntegerLiteralNode(num.str(), {}, {});
+        } else {
+            double num = std::stod(val.value);
+            if (ctx->MINUS())
+                num = -num;
             return FloatLiteralNode(std::to_string(num), {}, {});
+        }
     }
 
     // --------------------------------------------------------

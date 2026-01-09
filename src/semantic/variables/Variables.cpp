@@ -144,7 +144,7 @@ namespace yogi::semantic {
 
         // Create result node with normalized value
         if (dataType.find("uint") != std::string::npos || dataType.find("int") != std::string::npos) {
-            node.value = std::any(IntegerLiteralNode(utils::Helpers::formatFloatNumberDecimal(rValue, -1), node.start, node.end));
+            node.value = std::any(IntegerLiteralNode(rValue, node.start, node.end));
         }
 
         // Normalize float values
