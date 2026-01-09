@@ -78,7 +78,7 @@ COMMA: ',';
 
 AMPERSAND: '&';
 LT: '<';
-LTE: '=<';
+LTE: '<=';
 GT: '>';
 GTE: '>=';
 NEQ: '!=';

@@ -64,19 +64,19 @@ namespace yogi::visitor {
 
         for (size_t i = 1; i < ctx->additiveExpression().size(); ++i) {
             std::any right = visit(ctx->additiveExpression(i));
-            std::string op = ctx->children[2 * i - 1]->getText(); // operador en medio
+            std::string op = ctx->children[2 * i - 1]->getText();
 
             const auto [lValue, lType] = extract(left, scope);
             const auto [rValue, rType] = extract(right, scope);
 
-            if ((lType != rType) && !(lType == "int" && rType == "float") && !(lType == "float" && rType == "int")) {
+            if (lType != rType && !(lType == "int" && rType == "float") && !(lType == "float" && rType == "int")) {
                 throw std::runtime_error("Cannot compare different types: " + lType + " " + op + " " + rType);
             }
 
             bool result = false;
             if (lType == "int" || lType == "float") {
-                double l = (lType == "int") ? std::stoll(lValue) : std::stod(lValue);
-                double r = (rType == "int") ? std::stoll(rValue) : std::stod(rValue);
+                const double l = lType == "int" ? std::stoll(lValue) : std::stod(lValue);
+                const double r = rType == "int" ? std::stoll(rValue) : std::stod(rValue);
 
                 if (op == ">")
                     result = l > r;
@@ -103,8 +103,7 @@ namespace yogi::visitor {
                 throw std::runtime_error("Unsupported operand type for relational operator: " + lType);
             }
 
-            // Retornamos BooleanLiteralNode con "true"/"false"
-            left = BooleanLiteralNode(result ? "true" : "false", {}, {});
+            left = BooleanLiteralNode(result ? "1" : "0", {}, {});
         }
 
         return left;
@@ -263,39 +262,38 @@ namespace yogi::visitor {
             bool b;
 
             if (vType == "bool") {
-                b = (vValue == "true");
+                b = vValue == "true";
             } else if (vType == "int") {
                 BigInt num(vValue);
-                b = (num != 0);
+                b = num != 0;
             } else if (vType == "float") {
                 double num = std::stod(vValue);
-                b = (num != 0.0);
+                b = num != 0.0;
             } else if (vType == "str") {
                 b = !vValue.empty();
             } else {
                 throw std::runtime_error("Operator '!' requires a boolean, numeric, or string literal");
             }
 
-            return BooleanLiteralNode(b ? "0" : "1", {}, {}); // <- importante "false"/"true"
+            return BooleanLiteralNode(b ? "1" : "0", {}, {});
         }
 
         if (ctx->PLUS() || ctx->MINUS()) {
-            std::cout << "eValue";
             const auto [eValue, eType] = extract(value, scope);
             if (eType != "int" && eType != "float")
                 throw std::runtime_error("Unary operator requires numeric operand");
 
             if (eType == "int") {
-                BigInt num(eValue); // eValue limpio, sin '+'
+                BigInt num(eValue);
                 if (ctx->MINUS())
-                    num = -num; // solo invertir si hay '-'
-                // si es '+', no hacer nada
+                    num = -num;
+
                 return IntegerLiteralNode(num.str(), {}, {});
             }
 
-            double num = std::stod(eValue); // eValue limpio
+            double num = std::stod(eValue);
             if (ctx->MINUS())
-                num = -num; // solo invertir si hay '-'
+                num = -num;
             return FloatLiteralNode(std::to_string(num), {}, {});
         }
 
