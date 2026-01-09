@@ -28,7 +28,7 @@ powerExpression
 
 // Unary: +, -
 unaryExpression
-    : (PLUS | MINUS)? primaryExpression
+    : (NOT | PLUS | MINUS)? primaryExpression
     ;
 
 // Primary: literals, identifiers, members, parentheses

@@ -193,36 +193,66 @@ namespace yogi::visitor {
     // Unary: +, -
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitUnaryExpression(Grammar::UnaryExpressionContext* ctx) {
+        // Primero obtenemos el valor de la expresión interna (primary o recursiva)
         std::any value = visit(ctx->primaryExpression());
 
+        // Resolver identificadores si es necesario
         if (value.type() == typeid(IdentifierLiteral)) {
             const auto identifierLiteral = std::any_cast<IdentifierLiteral>(value);
             const auto variable = scope->lookupVariable(identifierLiteral.value);
             if (!variable.has_value()) {
-                throwScopeError("variable '" + identifierLiteral.value + "' is already declared", identifierLiteral.value, value, source);
+                throwScopeError("variable '" + identifierLiteral.value + "' not declared", identifierLiteral.value, value, source);
             }
-
             value = variable.value()->value;
         }
 
-        if (!ctx->PLUS() && !ctx->MINUS())
-            return value;
+        // -------------------------------------------------
+        // Operador NOT '!'
+        // -------------------------------------------------
+        if (ctx->NOT()) {
+            const auto [vValue, vType] = extract(value, scope);
+            bool b;
 
-        const auto [eValue, eType] = extract(value, scope);
-        if (eType != "int" && eType != "float")
-            throw std::runtime_error("Unary operator requires numeric operand");
+            if (vType == "bool") {
+                b = (vValue == "true");
+            } else if (vType == "int") {
+                BigInt num(vValue);
+                b = (num != 0);
+            } else if (vType == "float") {
+                double num = std::stod(vValue);
+                b = (num != 0.0);
+            } else if (vType == "str") {
+                b = !vValue.empty(); // empty string → false, non-empty → true
+            } else {
+                throw std::runtime_error("Operator '!' requires a boolean, numeric, or string literal");
+            }
 
-        if (eType == "int") {
-            BigInt num(eValue);
-            if (ctx->MINUS())
-                num = -num;
-            return IntegerLiteralNode(num.str(), {}, {});
+            return BooleanLiteralNode(b ? "0" : "1", {}, {});
         }
 
-        double num = std::stod(eValue);
-        if (ctx->MINUS())
-            num = -num;
-        return FloatLiteralNode(std::to_string(num), {}, {});
+        // -------------------------------------------------
+        // Operadores + y - unarios
+        // -------------------------------------------------
+        if (ctx->PLUS() || ctx->MINUS()) {
+            const auto [eValue, eType] = extract(value, scope);
+            if (eType != "int" && eType != "float")
+                throw std::runtime_error("Unary operator requires numeric operand");
+
+            if (eType == "int") {
+                BigInt num(eValue);
+                if (ctx->MINUS())
+                    num = -num;
+                return IntegerLiteralNode(num.str(), {}, {});
+            }
+
+            double num = std::stod(eValue);
+            if (ctx->MINUS())
+                num = -num;
+            return FloatLiteralNode(std::to_string(num), {}, {});
+        }
+
+        // Si no hay operador, retornamos el valor tal cual
+        return value;
     }
 
     // --------------------------------------------------------

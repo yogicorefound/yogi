@@ -8,6 +8,7 @@ options {
     public:
         bool inVarMode = false;
         bool inSkipMode = false;
+        bool isNotOperator = false;
 }
 
 import DictionaryGrammar, VariableGrammar, ArraysGrammar, MembersGrammar,  LiteralsGrammar, ExpressionsGrammar;

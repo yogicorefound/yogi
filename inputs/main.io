@@ -1,7 +1,6 @@
-str a = "hello, "
-a = a + f"{"World!!" + "10"}"
+str a = "Brayhan De Aza"
 
-bool b = !false
-b = b
+bool b = false
+b = !(10 * 10 / 6)
 
 

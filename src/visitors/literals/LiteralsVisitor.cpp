@@ -112,15 +112,9 @@ namespace yogi::visitor {
     std::any LiteralsVisitor::visitBooleanLiteral(Grammar::BooleanLiteralContext* ctx) {
         const std::string literal = parseString(ctx->getText());
 
+        const std::string value = literal == "true" ? "1" : "0";
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-
-        bool rValue = literal == "true";
-        if (ctx->NOT()) {
-            rValue = !rValue;
-        }
-
-        const std::string value = rValue ? "1" : "0";
 
         auto node = nodes::BooleanLiteralNode(value, start, end);
         return node;
