@@ -115,6 +115,7 @@ namespace yogi {
         // Feed Grammar into Visitor and generate AST
         // ---------------------------------------------
         auto ast = visitor.visit(tree);
+
         auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
         return node;

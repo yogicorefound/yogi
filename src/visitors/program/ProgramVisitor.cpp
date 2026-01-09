@@ -21,9 +21,10 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
 }
 
 std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx) {
+
     // Expression statement
     if (ctx->expression()) {
-        const std::any expressionResult = visit(ctx->expression());
+        const auto expressionResult = visit(ctx->expression());
         return expressionResult;
     }
 

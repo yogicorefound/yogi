@@ -6,34 +6,34 @@ options {
 
 import LiteralsGrammar, MembersGrammar;
 
-
+// Top-level expression
 expression
     : additiveExpression
     ;
 
-// Additive operators: + and - (numeric addition; + also used for string concatenation)
+// Additive: +, - (numeric addition, + also string concatenation)
 additiveExpression
     : multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*
     ;
 
-// Multiplicative operators: *, /, %
+// Multiplicative: *, /, %
 multiplicativeExpression
     : powerExpression ((MUL | DIV | MOD) powerExpression)*
     ;
 
-// Power operator: ** (right-associative)
+// Power: ** (right-associative)
 powerExpression
     : unaryExpression (MUL MUL powerExpression)?
     ;
 
-// Unary operators: +, -
+// Unary: +, -
 unaryExpression
     : (PLUS | MINUS)? primaryExpression
     ;
 
-// Primary expressions: literals, identifiers, member access, parentheses
+// Primary: literals, identifiers, members, parentheses
 primaryExpression
-    : literals
+    : LPAREN expression RPAREN           // parentheses allow nested full expressions
+    | literals
     | memberExpression
-    | LPAREN expression RPAREN
     ;
