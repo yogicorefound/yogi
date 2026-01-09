@@ -41,6 +41,6 @@ stringLiteral
 
 floatLiteral: FLOAT;
 integerLiteral: INTEGER;
-booleanLiteral: BOOLEAN;
+booleanLiteral: NOT? BOOLEAN;
 noneLiteral: NONE;
-identifierLiteral: IDENTIFIER;
+identifierLiteral: NOT? IDENTIFIER;

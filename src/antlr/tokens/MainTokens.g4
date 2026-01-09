@@ -65,7 +65,7 @@ MUL: '*';
 DIV: '/';
 MOD: '%';
 EQ: '=';
-
+NOT: '!';
 LPAREN: '(';
 RPAREN: ')';
 LBRACE: '{';
