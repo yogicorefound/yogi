@@ -1,4 +1,2 @@
-
-int radius = 2
-int area = +radius
+float a = 10 / 9
 

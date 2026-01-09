@@ -25,8 +25,7 @@ arrayItems
     | floatLiteral
     | booleanLiteral
     | noneLiteral
-    | concatenationExpression
-    | binaryExpression
+    | expression
     ;
 
 arrayReAssignment: IDENTIFIER EQ LBRACKET (expression (COMMA expression)*)? RBRACKET;

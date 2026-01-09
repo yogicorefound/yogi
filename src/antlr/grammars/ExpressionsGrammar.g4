@@ -6,35 +6,34 @@ options {
 
 import LiteralsGrammar, MembersGrammar;
 
+
 expression
-          : booleanLiteral
-          | numberLiterals
-          | binaryExpression
-          | concatenationExpression
-          | identifierLiteral
-          | memberExpression
-          ;
-
-
-concatenationExpression
-    :  ((stringLiterals | identifierLiteral) (PLUS (stringLiterals | identifierLiteral))*)+
+    : additiveExpression
     ;
 
-binaryExpression
-    : <assoc=right> binaryExpression MUL MUL binaryExpression
-    | binaryExpression (MUL | DIV | MOD) binaryExpression
-    | binaryExpression (PLUS | MINUS) binaryExpression
-    | (PLUS | MINUS) binaryExpression        // unary
-    | LPAREN binaryExpression RPAREN
-    | literals
+// Additive operators: + and - (numeric addition; + also used for string concatenation)
+additiveExpression
+    : multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*
     ;
 
+// Multiplicative operators: *, /, %
+multiplicativeExpression
+    : powerExpression ((MUL | DIV | MOD) powerExpression)*
+    ;
 
-//
-//binaryExpression
-//    : literals
-//    | LPAREN binaryExpression RPAREN
-//    | binaryExpression MUL MUL binaryExpression // to the power
-//    | binaryExpression (MUL | DIV | MOD) binaryExpression
-//    | binaryExpression (PLUS | MINUS) binaryExpression
-//    ;
+// Power operator: ** (right-associative)
+powerExpression
+    : unaryExpression (MUL MUL powerExpression)?
+    ;
+
+// Unary operators: +, -
+unaryExpression
+    : (PLUS | MINUS)? primaryExpression
+    ;
+
+// Primary expressions: literals, identifiers, member access, parentheses
+primaryExpression
+    : literals
+    | memberExpression
+    | LPAREN expression RPAREN
+    ;
