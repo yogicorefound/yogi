@@ -19,8 +19,7 @@ namespace yogi::visitor {
         semantic::Scope* scope;
 
        public:
-        explicit BaseVisitor(std::string& source, Grammar* parser)
-            : source(source), parser(parser), rootScope(std::make_unique<semantic::Scope>(nullptr)), scope(rootScope.get()) {}
+        explicit BaseVisitor(std::string& source, Grammar* parser) : source(source), parser(parser), rootScope(std::make_unique<semantic::Scope>(nullptr)), scope(rootScope.get()) {}
 
         void enterScope();
         void exitScope();

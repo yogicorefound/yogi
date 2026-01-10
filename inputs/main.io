@@ -1,5 +1,8 @@
-if(true) {
+int a = 20
 
-} else if(false) {
-
+if( false ) {
+    int a = a + 10 // shadow
+} else {
+    a = a
 }
+

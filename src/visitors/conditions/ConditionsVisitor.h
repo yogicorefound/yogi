@@ -4,18 +4,12 @@
 
 #pragma once
 
-#include "visitors/arrays/ArraysVisitor.h"
 #include "visitors/base/BaseVisitor.h"
 #include "visitors/dictionaries/DictionaryVisitor.h"
-#include "visitors/expressions/ExpressionVisitor.h"
-#include "visitors/literals/LiteralsVisitor.h"
 #include "visitors/members/MembersVisitor.h"
-#include "visitors/variables/VariablesVisitor.h"
 
 namespace yogi::visitor {
     class ConditionsVisitor : public virtual BaseVisitor {
-
-
        public:
         std::any visitIfStatement(Grammar::IfStatementContext* ctx) override;
         std::any visitElseIfStatement(Grammar::ElseIfStatementContext* ctx) override;
