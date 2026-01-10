@@ -482,12 +482,12 @@ namespace yogi::utils {
                 for (const auto& stmt : bBody) {
                     body.push_back(nodeToJson(stmt));
                 }
-                branchJson["body"] = body;
                 branchJson["kind"] = branchJson["condition"] != nullptr ? "IF_STATEMENT" : "ELSE_STATEMENT"; // optional: you can just keep "branch" if you prefer
+                branchJson["body"] = body;
                 branchesJson.push_back(branchJson);
             }
 
-            return {{"kind", "IF_STATEMENT"}, {"branches", branchesJson}};
+            return {{"branches", branchesJson}};
         }
 
         return {{"kind", "Unknown"}, {"type", node.type().name()}};
