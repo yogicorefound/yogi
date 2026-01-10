@@ -39,8 +39,9 @@ LBRACE_IN_FSTRING
 
 // end of f-string
 FORMATTED_STRING_END
-    : '"' -> popMode
+    : ('"' | '\'') -> popMode
     ;
+
 
 // EXPR_MODE — expression inside f-string
 mode EXPR_MODE;
@@ -86,7 +87,6 @@ LPAREN_IN_EXPR  : '(' -> type(LPAREN);
 RPAREN_IN_EXPR  : ')' -> type(RPAREN);
 
 
-
 // Literals
 NONE_IN_EXPR        : 'none' -> type(NONE);
 BOOLEAN_IN_EXPR     : ('true' | 'false') -> type(BOOLEAN);
@@ -98,8 +98,8 @@ INTEGER_IN_EXPR     : DIGIT+ -> type(INTEGER);
 ID_IN_EXPR          : [a-zA-Z_] [a-zA-Z_0-9]* -> type(IDENTIFIER);
 
 // Strings
+SINGLE_QUOTE_STRING_IN_EXPR      : '\'' (ESC_SEQ | ~['\\\r\n])* '\'' -> type(STRING);
 STRING_IN_EXPR      : '"' (ESC_SEQ | ~["\\\r\n])* '"' -> type(STRING);
-SINGLE_QUOTE_STRING_IN_EXPR      : '\'' (ESC_SEQ | ~["\\\r\n])* '\'' -> type(STRING);
 
 EXPR_WS : [ \t\r\n]+ -> skip;
 

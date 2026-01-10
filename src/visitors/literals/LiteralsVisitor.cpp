@@ -180,7 +180,7 @@ namespace yogi::visitor {
                             throwTypeError("Variable is not a variable declaration", contentNode.value, node, source);
                         }
 
-                        const auto [type, value, _] = Helpers::resolveItem(varNode->value);
+                        const auto [type, value, _] = resolveItem(varNode->value);
                         node.value += value;
 
                     } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
