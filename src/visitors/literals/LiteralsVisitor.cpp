@@ -167,7 +167,7 @@ namespace yogi::visitor {
                         node.value += contentNode.value;
                     } else if (result.type() == typeid(nodes::BooleanLiteralNode)) {
                         auto contentNode = std::any_cast<nodes::BooleanLiteralNode>(result);
-                        node.value += contentNode.value;
+                        node.value += contentNode.value == "1" ? "true" : "false";
                     } else if (result.type() == typeid(nodes::IdentifierLiteral)) {
                         auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
                         const auto variable = scope->lookupVariable(contentNode.value);
