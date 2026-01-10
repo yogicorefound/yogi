@@ -33,6 +33,10 @@ namespace yogi::visitor {
             auto n = std::any_cast<StringLiteralNode>(value);
             return {n.value, "str"};
         }
+        if (value.type() == typeid(RegexLiteralNode)) {
+            auto n = std::any_cast<RegexLiteralNode>(value);
+            return {n.value, "regex"};
+        }
         if (value.type() == typeid(BooleanLiteralNode)) {
             auto n = std::any_cast<BooleanLiteralNode>(value);
             return {n.value, "bool"};
@@ -61,7 +65,7 @@ namespace yogi::visitor {
         if (t == "str")
             return !v.empty();
 
-        throw std::runtime_error("Invalid type in logical expression");
+        return false;
     }
 
     // --------------------------------------------------------
