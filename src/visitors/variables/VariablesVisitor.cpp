@@ -172,7 +172,7 @@ namespace yogi::visitor {
         node.varType = varNode->varType;
 
         analyzeVariableReassignment(node, source);
-        scope->updateVariable("var:" + identifier, node);
+        scope->updateVariable(identifier, node);
         return node;
     }
 

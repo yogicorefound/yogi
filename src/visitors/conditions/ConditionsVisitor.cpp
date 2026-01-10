@@ -14,6 +14,7 @@ namespace yogi::visitor {
         auto ifStatement = nodes::IfStatementNode(start, end);
 
         // --- Visit main "if" branch ---
+        // Only enter a new scope for declarations
         enterScope();
         const auto condition = visit(ctx->expression());
         const auto body = visit(ctx->ifStatementBody());
@@ -26,7 +27,6 @@ namespace yogi::visitor {
             const auto elseIfNodeAny = visit(elseIfCtx);
             const auto elseIfNode = std::any_cast<nodes::IfStatementNode>(elseIfNodeAny);
 
-            // Each else if branch gets its own scope already in visitElseIfStatement
             for (const auto& branch : elseIfNode.branches) {
                 ifStatement.branches.push_back(branch);
             }
@@ -50,7 +50,7 @@ namespace yogi::visitor {
 
         auto ifStatement = nodes::IfStatementNode(start, end);
 
-        // Enter scope for this else-if branch
+        // Enter scope only for declarations inside this else-if
         enterScope();
         const auto condition = visit(ctx->expression());
         const auto body = visit(ctx->ifStatementBody());
@@ -61,7 +61,7 @@ namespace yogi::visitor {
     }
 
     std::any ConditionsVisitor::visitElseStatement(Grammar::ElseStatementContext* ctx) {
-        // Enter scope for else branch
+        // Enter scope only for declarations in else
         enterScope();
         const auto body = visit(ctx->ifStatementBody());
         exitScope();

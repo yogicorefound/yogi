@@ -9,6 +9,7 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
+    enterScope();
     // Create program node
     auto node = nodes::ProgramNode(start, end);
     for (const auto child : ctx->children) {
@@ -16,12 +17,11 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
             node.addStatement(std::move(statement));
         }
     }
-
+    exitScope();
     return node;
 }
 
 std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx) {
-
     // Expression statement
     if (ctx->expression()) {
         const auto expressionResult = visit(ctx->expression());
