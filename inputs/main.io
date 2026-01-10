@@ -1,9 +1,6 @@
-int a = 20
+int a = -20
 
-if( true ) {
-    int a = a + 10
-    a = a
+if(10 - 10 + 0.1) {
+
 }
-
-a = a
 

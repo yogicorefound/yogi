@@ -9,12 +9,16 @@ options {
 
 
 ifStatement
-    : IF LPAREN expression RPAREN ifStatementBody (elseIfStatement* elseStatement?)
+    : IF LPAREN ifStatementCondition RPAREN ifStatementBody (elseIfStatement* elseStatement?)
     ;
 
 
 elseIfStatement
-    : ELSE IF LPAREN expression? RPAREN ifStatementBody
+    : ELSE IF LPAREN ifStatementCondition? RPAREN ifStatementBody
+    ;
+
+ifStatementCondition
+    :  expression
     ;
 
 elseStatement

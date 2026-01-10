@@ -2,10 +2,15 @@
 // Created by Brayhan De Aza on 11/27/25.
 //
 
-#include "ConditionsVisitor.h"
+#include <boost/multiprecision/cpp_int.hpp>
+#ifdef EOF
+#undef EOF
+#endif
 #include <visitors/nodes/nodes.h>
+#include "ConditionsVisitor.h"
 
 namespace yogi::visitor {
+    using BigInt = boost::multiprecision::int128_t; // or cpp_int for arbitrary size
 
     std::any ConditionsVisitor::visitIfStatement(Grammar::IfStatementContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
@@ -14,9 +19,8 @@ namespace yogi::visitor {
         auto ifStatement = nodes::IfStatementNode(start, end);
 
         // --- Visit main "if" branch ---
-        // Only enter a new scope for declarations
         enterScope();
-        const auto condition = visit(ctx->expression());
+        const auto condition = visit(ctx->ifStatementCondition());
         const auto body = visit(ctx->ifStatementBody());
         exitScope();
 
@@ -25,9 +29,8 @@ namespace yogi::visitor {
         // --- Visit "else if" branches ---
         for (const auto elseIfCtx : ctx->elseIfStatement()) {
             const auto elseIfNodeAny = visit(elseIfCtx);
-            const auto elseIfNode = std::any_cast<nodes::IfStatementNode>(elseIfNodeAny);
 
-            for (const auto& branch : elseIfNode.branches) {
+            for (const auto elseIfNode = std::any_cast<nodes::IfStatementNode>(elseIfNodeAny); const auto& branch : elseIfNode.branches) {
                 ifStatement.branches.push_back(branch);
             }
         }
@@ -52,12 +55,30 @@ namespace yogi::visitor {
 
         // Enter scope only for declarations inside this else-if
         enterScope();
-        const auto condition = visit(ctx->expression());
+        const auto condition = visit(ctx->ifStatementCondition());
         const auto body = visit(ctx->ifStatementBody());
         exitScope();
 
         ifStatement.addBranch(condition, std::any_cast<std::vector<std::any>>(body));
         return ifStatement;
+    }
+
+    std::any ConditionsVisitor::visitIfStatementCondition(Grammar::IfStatementConditionContext* ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        const auto expression = visit(ctx->expression());
+        const auto [type, value, node] = resolveItem(expression);
+
+        bool isTrue = true;
+        if (type == "str" || type == "regex") {
+            isTrue = value.size() > 0;
+
+        } else {
+            isTrue = std::stold(value) != 0;
+        }
+
+        return nodes::BooleanLiteralNode(isTrue ? "1" : "0", start, end);
     }
 
     std::any ConditionsVisitor::visitElseStatement(Grammar::ElseStatementContext* ctx) {
