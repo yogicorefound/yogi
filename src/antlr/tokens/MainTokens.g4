@@ -54,6 +54,9 @@ FLOAT_TYPES
     | 'float64'    // 64-bit
     ;
 
+IF: 'if';
+ELSE: 'else';
+
 NONE: 'none';
 BOOLEAN: 'true' | 'false';
 

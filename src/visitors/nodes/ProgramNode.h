@@ -17,8 +17,8 @@ namespace yogi::visitor::nodes {
             const Position end
         ) : BaseNode(Kind::PROGRAM, start, end) {}
 
-        void addStatement(std::any stmt) {
-            body.push_back(std::move(stmt));
+        void addStatement(std::any statement) {
+            body.push_back(std::move(statement));
         }
     };
 

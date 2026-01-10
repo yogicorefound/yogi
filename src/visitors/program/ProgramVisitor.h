@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <visitors/conditions/ConditionsVisitor.h>
 #include "visitors/arrays/ArraysVisitor.h"
 #include "visitors/base/BaseVisitor.h"
 #include "visitors/dictionaries/DictionaryVisitor.h"
@@ -13,9 +14,10 @@
 #include "visitors/variables/VariablesVisitor.h"
 
 namespace yogi::visitor {
-    class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor {
+    class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor {
        public:
-        explicit Visitor(std::string& source, Grammar* parser) : BaseVisitor(source, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), source(source), parser(parser) {}
+        explicit Visitor(std::string& source, Grammar* parser)
+            : BaseVisitor(source, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), source(source), parser(parser) {}
 
         std::any visitProgram(Grammar::ProgramContext* ctx) override;
         std::any visitStatements(Grammar::StatementsContext* ctx) override;
@@ -25,4 +27,3 @@ namespace yogi::visitor {
         Grammar* parser;
     };
 } // namespace yogi::visitor
-

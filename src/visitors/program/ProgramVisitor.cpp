@@ -64,6 +64,12 @@ std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx
         return node;
     }
 
+    // None literal statement
+    if (ctx->ifStatement()) {
+        const std::any node = visit(ctx->ifStatement());
+        return node;
+    }
+
     // Return empty statement if nothing matches
     return nullptr;
 }
