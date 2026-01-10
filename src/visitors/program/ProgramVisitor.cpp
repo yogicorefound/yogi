@@ -48,7 +48,7 @@ std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx
 
     // Member expression statement
     if (ctx->memberExpression()) {
-        const std::any node = visit(ctx->memberExpression());
+        const auto node = visit(ctx->memberExpression());
         return node;
     }
 

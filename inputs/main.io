@@ -1,2 +1,4 @@
 // !(5 > 0) ? false : (5 == 10) ? true : false
-15 >> 1
+
+str a = "Hola"
+a = a.lower().upper() + "-Hello"
