@@ -139,11 +139,13 @@ namespace yogi::visitor {
             const auto [lValue, lType] = extract(left, scope);
             const auto [rValue, rType] = extract(right, scope);
 
+            // Allow string comparison if both operands are strings
             if (lType != rType && !(lType == "int" && rType == "float") && !(lType == "float" && rType == "int")) {
                 throw std::runtime_error("Cannot compare different types: " + lType + " " + op + " " + rType);
             }
 
             bool result = false;
+
             if (lType == "int" || lType == "float") {
                 const double l = lType == "int" ? std::stoll(lValue) : std::stod(lValue);
                 const double r = rType == "int" ? std::stoll(rValue) : std::stod(rValue);
@@ -166,6 +168,14 @@ namespace yogi::visitor {
                     result = lValue == rValue;
                 else if (op == "!=")
                     result = lValue != rValue;
+                else if (op == ">")
+                    result = lValue > rValue; // lexicographical
+                else if (op == "<")
+                    result = lValue < rValue;
+                else if (op == ">=")
+                    result = lValue >= rValue;
+                else if (op == "<=")
+                    result = lValue <= rValue;
                 else
                     throw std::runtime_error("Invalid string comparison operator: " + op);
 
