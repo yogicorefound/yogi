@@ -11,7 +11,7 @@ arrays
     ;
 
 arrayDeclaration
-    : arrayType IDENTIFIER EQ arrayValues
+    : arrayType IDENTIFIER (EQ arrayValues)?
     ;
 
 arrayValues

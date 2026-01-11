@@ -1,10 +1,1 @@
-bool[] cube3 = [
-    [
-        [true, false],
-        [false, true]
-    ],
-    [
-        [false, false],
-        [true, true]
-    ]
-]
+int[4,3] cube

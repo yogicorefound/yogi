@@ -11,16 +11,58 @@ namespace yogi::visitor {
     // -----------------------
     // Build array elements recursively for multidimensional arrays
     // -----------------------
+    // -----------------------
+    // Build array elements recursively for multidimensional arrays with default values
+    // -----------------------
     std::vector<nodes::ArrayElementNode>
     ArraysVisitor::buildArrayElementsRecursively(Grammar::ArrayItemsWithBracketsContext* ctx, const std::string& elementType, const std::vector<size_t>& dimensions, const nodes::Position& start, const nodes::Position& end) {
         std::vector<nodes::ArrayElementNode> elements;
 
+        auto getDefaultValue = [start, end](const std::string& type) -> std::any {
+            if (type == "int")
+                return nodes::IntegerLiteralNode{"0", start, end};
+            if (type == "float")
+                return nodes::FloatLiteralNode{"0.0", start, end};
+            if (type == "bool")
+                return nodes::BooleanLiteralNode{"0", start, end};
+            if (type == "str")
+                return nodes::StringLiteralNode{"", start, end};
+            if (type == "regex")
+                return nodes::RegexLiteralNode{"", start, end};
+            return nullptr;
+        };
+
+        // ---------------------
+        // Si ctx es nullptr, array vacío → llenar con valores by default
+        // ---------------------
+        if (!ctx) {
+            if (!dimensions.empty()) {
+                size_t expectedSize = dimensions[0];
+                std::vector<size_t> subDimensions(dimensions.begin() + 1, dimensions.end());
+
+                for (size_t i = 0; i < expectedSize; ++i) {
+                    if (subDimensions.empty()) {
+                        auto defaultNode = getDefaultValue(elementType);
+                        elements.push_back(nodes::ArrayElementNode(defaultNode, elementType, start, end));
+                    } else {
+                        auto subElements = buildArrayElementsRecursively(nullptr, elementType, subDimensions, start, end);
+                        elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
+                    }
+                }
+            }
+            return elements;
+        }
+
+        // ---------------------
+        // Caso normal: ctx tiene elementos
+        // ---------------------
         for (auto* itemCtx : ctx->arrayItem()) {
             if (itemCtx->arrayItemsWithBrackets()) {
                 std::vector<size_t> subDimensions;
                 if (!dimensions.empty()) {
                     subDimensions.assign(dimensions.begin() + 1, dimensions.end());
                 }
+
                 const auto subElements = buildArrayElementsRecursively(itemCtx->arrayItemsWithBrackets(), elementType, subDimensions, start, end);
                 elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
             } else {
@@ -35,8 +77,21 @@ namespace yogi::visitor {
             }
         }
 
-        if (!dimensions.empty() && elements.size() != dimensions[0]) {
-            throwError("ArraySizeViolation", "expected " + std::to_string(dimensions[0]) + " elements, but got " + std::to_string(elements.size()), start, source);
+        // ---------------------
+        // Fill remaining elements con default values si es necesario
+        // ---------------------
+        if (!dimensions.empty()) {
+            size_t expectedSize = dimensions[0];
+            while (elements.size() < expectedSize) {
+                std::vector<size_t> subDimensions(dimensions.begin() + 1, dimensions.end());
+                if (subDimensions.empty()) {
+                    auto defaultNode = getDefaultValue(elementType);
+                    elements.push_back(nodes::ArrayElementNode(defaultNode, elementType, start, end));
+                } else {
+                    auto subElements = buildArrayElementsRecursively(nullptr, elementType, subDimensions, start, end);
+                    elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
+                }
+            }
         }
 
         return elements;
@@ -64,8 +119,15 @@ namespace yogi::visitor {
 
         // Build elements recursively
         std::vector<nodes::ArrayElementNode> elements;
-        if (ctx->arrayValues()->arrayItemsWithBrackets()) {
+
+        // ✨ Si se proporcionan valores explícitos
+        if (ctx->arrayValues() && ctx->arrayValues()->arrayItemsWithBrackets()) {
             elements = buildArrayElementsRecursively(ctx->arrayValues()->arrayItemsWithBrackets(), elementType, dimensions, start, end);
+        }
+        // ✨ Si no hay valores, llenar con valores by default según dimensiones
+        else if (!dimensions.empty()) {
+            // Creamos un contexto ficticio vacío para la recursión
+            elements = buildArrayElementsRecursively(nullptr, elementType, dimensions, start, end);
         }
 
         // Register array in scope
