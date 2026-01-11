@@ -42,7 +42,7 @@ namespace yogi::semantic {
 
        private:
         struct ScopeNode {
-            visitor::nodes::Kind kind;
+            visitor::nodes::Kind kind; //
             std::shared_ptr<std::any> value;
         };
         std::unordered_map<std::string, ScopeNode> symbols = {};

@@ -462,7 +462,6 @@ namespace yogi::utils {
         // -------------------------------------------------
         // Fallback
         // -------------------------------------------------
-
         if (node.type() == typeid(IfStatementNode)) {
             const auto& n = std::any_cast<const IfStatementNode&>(node);
 
@@ -472,9 +471,11 @@ namespace yogi::utils {
 
                 // condition is null for "else"
                 if (bCondition.has_value()) {
-                    branchJson["condition"] = nodeToJson(bCondition);
+                    branchJson["condition"] = nodeToJson(bCondition); // ✅ Added .value()
+                    branchJson["kind"] = "IF_STATEMENT";
                 } else {
                     branchJson["condition"] = nullptr;
+                    branchJson["kind"] = "ELSE_STATEMENT";
                 }
 
                 // body
@@ -482,12 +483,11 @@ namespace yogi::utils {
                 for (const auto& stmt : bBody) {
                     body.push_back(nodeToJson(stmt));
                 }
-                branchJson["kind"] = branchJson["condition"] != nullptr ? "IF_STATEMENT" : "ELSE_STATEMENT"; // optional: you can just keep "branch" if you prefer
                 branchJson["body"] = body;
                 branchesJson.push_back(branchJson);
             }
 
-            return {{"branches", branchesJson}};
+            return {{"kind", "IF_STATEMENT"}, {"branches", branchesJson}};
         }
 
         return {{"kind", "Unknown"}, {"type", node.type().name()}};

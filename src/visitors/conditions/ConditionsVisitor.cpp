@@ -12,36 +12,94 @@
 namespace yogi::visitor {
     using BigInt = boost::multiprecision::int128_t; // or cpp_int for arbitrary size
 
+    bool isConstexprBool(const std::any& value) {
+        if (value.type() == typeid(nodes::BooleanLiteralNode))
+            return true;
+        if (value.type() == typeid(nodes::IntegerLiteralNode))
+            return true;
+        return false;
+    }
+
+    bool isTruthy(const std::any& node) {
+        const auto [t, v, n] = utils::Helpers::resolveItem(node);
+        return v == "1";
+    }
+
     std::any ConditionsVisitor::visitIfStatement(Grammar::IfStatementContext* ctx) {
+        const std::any condAny = visit(ctx->ifStatementCondition());
+
+        // Prepare AST node for the full if-statement tree
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        nodes::IfStatementNode ifStatement(start, end);
 
-        auto ifStatement = nodes::IfStatementNode(start, end);
+        bool executedBranch = false;
 
-        // --- Visit main "if" branch ---
-        enterScope();
-        const auto condition = visit(ctx->ifStatementCondition());
-        const auto body = visit(ctx->ifStatementBody());
-        exitScope();
+        // ---------- COMPILE-TIME FOLDING / EXECUTION ----------
+        if (isConstexprBool(condAny)) {
+            // IF
+            if (isTruthy(condAny)) {
+                enterScope();
+                auto result = visit(ctx->ifStatementBody()); // Execute only this
+                exitScope();
+                executedBranch = true;
 
-        ifStatement.addBranch(condition, std::any_cast<std::vector<std::any>>(body));
-
-        // --- Visit "else if" branches ---
-        for (const auto elseIfCtx : ctx->elseIfStatement()) {
-            const auto elseIfNodeAny = visit(elseIfCtx);
-
-            for (const auto elseIfNode = std::any_cast<nodes::IfStatementNode>(elseIfNodeAny); const auto& branch : elseIfNode.branches) {
-                ifStatement.branches.push_back(branch);
+                ifStatement.addBranch(condAny, std::any_cast<std::vector<std::any>>(result));
+            } else {
+                // Still add the false branch to tree (but do not execute)
+                ifStatement.addBranch(condAny, std::vector<std::any>{});
             }
+
+            // ELSE IF
+            for (const auto elseIfCtx : ctx->elseIfStatement()) {
+                const std::any elseIfCond = visit(elseIfCtx->ifStatementCondition());
+                if (isConstexprBool(elseIfCond) && isTruthy(elseIfCond) && !executedBranch) {
+                    enterScope();
+                    auto result = visit(elseIfCtx->ifStatementBody());
+                    exitScope();
+                    executedBranch = true;
+
+                    ifStatement.addBranch(elseIfCond, std::any_cast<std::vector<std::any>>(result));
+                } else {
+                    // Add branch to tree but do NOT execute
+                    ifStatement.addBranch(elseIfCond, std::vector<std::any>{});
+                }
+            }
+
+            // ELSE
+            if (ctx->elseStatement()) {
+                if (!executedBranch) {
+                    enterScope();
+                    auto result = visit(ctx->elseStatement());
+                    exitScope();
+                    ifStatement.addElse(std::any_cast<std::vector<std::any>>(result));
+                } else {
+                    // Add else node but leave body empty
+                    ifStatement.addElse(std::vector<std::any>{});
+                }
+            }
+
+            return ifStatement; // Return full tree
         }
 
-        // --- Visit "else" branch ---
-        if (const auto elseCtx = ctx->elseStatement()) {
+        // ---------- RUNTIME IF (cannot fold) ----------
+        {
             enterScope();
-            const auto elseBodyAny = visit(elseCtx);
+            const auto body = visit(ctx->ifStatementBody());
             exitScope();
+            ifStatement.addBranch(condAny, std::any_cast<std::vector<std::any>>(body));
+        }
 
-            ifStatement.addElse(std::any_cast<std::vector<std::any>>(elseBodyAny));
+        for (const auto elseIfCtx : ctx->elseIfStatement()) {
+            auto nodeAny = visit(elseIfCtx);
+            auto node = std::any_cast<nodes::IfStatementNode>(nodeAny);
+            for (const auto& b : node.branches)
+                ifStatement.branches.push_back(b);
+        }
+
+        if (ctx->elseStatement()) {
+            auto body = visit(ctx->elseStatement());
+            ifStatement.addElse(std::any_cast<std::vector<std::any>>(body));
         }
 
         return ifStatement;
@@ -64,21 +122,9 @@ namespace yogi::visitor {
     }
 
     std::any ConditionsVisitor::visitIfStatementCondition(Grammar::IfStatementConditionContext* ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-
-        const auto expression = visit(ctx->expression());
-        const auto [type, value, node] = resolveItem(expression);
-
-        bool isTrue = true;
-        if (type == "str" || type == "regex") {
-            isTrue = value.size() > 0;
-
-        } else {
-            isTrue = std::stold(value) != 0;
-        }
-
-        return nodes::BooleanLiteralNode(isTrue ? "1" : "0", start, end);
+        // Return the expression node without evaluating it
+        // The interpreter will evaluate it at runtime
+        return visit(ctx->expression());
     }
 
     std::any ConditionsVisitor::visitElseStatement(Grammar::ElseStatementContext* ctx) {

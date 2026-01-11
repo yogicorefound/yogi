@@ -6,7 +6,7 @@
 
 namespace yogi::semantic {
     bool Scope::declareVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info) {
-        if (symbols.contains(name))
+        if (existsInCurrent(name))
             return false;
 
         // Store a shared_ptr of the node directly
