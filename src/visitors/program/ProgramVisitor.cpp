@@ -23,7 +23,7 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
 std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx) {
     // Expression statement
     if (ctx->expression()) {
-        const std::any expressionResult = visit(ctx->expression());
+        const auto expressionResult = visit(ctx->expression());
         return expressionResult;
     }
 
@@ -47,7 +47,7 @@ std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx
 
     // Member expression statement
     if (ctx->memberExpression()) {
-        const std::any node = visit(ctx->memberExpression());
+        const auto node = visit(ctx->memberExpression());
         return node;
     }
 
@@ -60,6 +60,12 @@ std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx
     // None literal statement
     if (ctx->noneLiteral()) {
         const std::any node = visit(ctx->noneLiteral());
+        return node;
+    }
+
+    // None literal statement
+    if (ctx->ifStatement()) {
+        const std::any node = visit(ctx->ifStatement());
         return node;
     }
 

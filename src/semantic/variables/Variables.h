@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <visitors/nodes/nodes.h>
 #include <semantic/scopes/Scope.h>
+#include <visitors/nodes/nodes.h>
 #include <string>
 
 namespace yogi::semantic {
@@ -15,7 +15,7 @@ namespace yogi::semantic {
         static void analyzeVariableWithoutAssignment(const visitor::nodes::VariableDeclarationNode& node, const visitor::nodes::Position& start, const visitor::nodes::Position& end);
 
         // Analyze variable declaration with value
-        static void analyzeVariableDeclaration(const visitor::nodes::VariableDeclarationNode& node, const std::string& source, bool fromExplicit);
+        static void analyzeVariableDeclaration(visitor::nodes::VariableDeclarationNode& node, const std::string& source);
 
         static void analyzeVariableReassignment(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
         // Check if data type matches return type

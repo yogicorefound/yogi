@@ -8,10 +8,10 @@ grammar/*.base
 grammar/antlr
 libs/antlr4
 
-/src/antlr/Tokens/Main.tokens
 /src/antlr/antlr
 /libs/antlr4/
 /ast.json
 /src/modules/runtime.bc
 /src/antlr/generated/
 /libs/uni-algo/
+/src/antlr/tokens/*.tokens

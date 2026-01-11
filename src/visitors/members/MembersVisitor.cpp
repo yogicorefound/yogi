@@ -13,16 +13,15 @@ namespace yogi::visitor {
         }
 
         const auto identifier = std::any_cast<nodes::IdentifierLiteral>(atom);
-
         const auto lookupVariable = scope->lookupVariable(identifier.value);
         if (!lookupVariable.has_value()) {
             throwScopeError("variable '" + identifier.value + "' is not declared", identifier.value, atom, source);
         }
 
         const auto& variable = lookupVariable.value();
-
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
         variable->start = start;
         variable->end = end;
 
@@ -49,16 +48,14 @@ namespace yogi::visitor {
                 auto* identLiteral = postfix->identifierLiteral();
                 memberName = identLiteral->getText();
 
-                // Lookahead: is next postfix a LPAREN for method call?
                 if (i + 1 < postfixes.size() && postfixes[i + 1]->LPAREN()) {
                     isMethod = true;
-                    auto* callPostfix = postfixes[i + 1];
-                    if (callPostfix->argumentList()) {
+                    if (auto* callPostfix = postfixes[i + 1]; callPostfix->argumentList()) {
                         for (auto* expr : callPostfix->argumentList()->expression()) {
                             arguments.push_back(visit(expr));
                         }
                     }
-                    i++; // Skip the LPAREN postfix, already processed
+                    i++;
                 }
             } else if (postfix->LPAREN()) {
                 isMethod = true;
@@ -68,18 +65,17 @@ namespace yogi::visitor {
                     }
                 }
 
-                memberName = ""; // empty means "call current object"
+                memberName = "";
             }
 
             auto member = nodes::StringLiteralNode(memberName, lastValue.start, lastValue.end);
             lastValue = processMembers(lastValue, member, isMethod, arguments, source, scope);
 
-
             if (!lastValue.value.has_value())
                 throw std::runtime_error("processMembers returned empty value");
         }
 
-        return lastValue;
+        return lastValue.value;
     }
 
     std::any MembersVisitor::visitValueAtom(Grammar::ValueAtomContext* ctx) {

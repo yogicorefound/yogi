@@ -6,7 +6,7 @@ options {
 
 import ExpressionsGrammar;
 
-dictionaryDeclaration: DICT_KEYWORD LESSTHAN dictionaryDeclarationType GREATERTHAN IDENTIFIER EQ LBRACE (dictionaryAssignmentBody (COMMA dictionaryAssignmentBody COMMA? )*)? RBRACE;
+dictionaryDeclaration: DICT_KEYWORD LT dictionaryDeclarationType GT IDENTIFIER EQ LBRACE (dictionaryAssignmentBody (COMMA dictionaryAssignmentBody COMMA? )*)? RBRACE;
 
 dictionaryAssignmentBody
     : literals COLON expression

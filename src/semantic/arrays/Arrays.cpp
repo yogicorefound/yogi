@@ -26,10 +26,13 @@ namespace yogi::semantic {
     }
 
     visitor::nodes::ArrayDeclarationNode Arrays::analyzeArrayDeclaration(visitor::nodes::ArrayDeclarationNode& node, const std::string& source) {
-        const auto items = node.elements;
+        const auto& items = node.elements;
 
-        if (const int length = items.size(); node.size != "auto" && length > std::stoi(node.size)) {
-            utils::Errors::throwRangeError("Expected array size of " + node.size + ", but received " + std::to_string(length) + " elements.", node, source);
+        if (!node.dimensions.empty()) {
+            const int length = static_cast<int>(items.size());
+            if (length > static_cast<int>(node.dimensions[0])) {
+                utils::Errors::throwRangeError("Expected array size of " + std::to_string(node.dimensions[0]) + ", but received " + std::to_string(length) + " elements.", node, source);
+            }
         }
 
         for (const auto& item : items) {

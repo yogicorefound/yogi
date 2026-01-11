@@ -14,3 +14,4 @@
 #include "visitors/nodes/StatementNode.h"
 #include "visitors/nodes/VariableNode.h"
 #include "visitors/nodes/MembersNode.h"
+#include "visitors/nodes/ConditionsNode.h"

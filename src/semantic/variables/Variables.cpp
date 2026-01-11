@@ -36,7 +36,7 @@ namespace yogi::semantic {
         }
     }
 
-    void Variables::analyzeVariableDeclaration(const VariableDeclarationNode& node, const std::string& source, bool fromExplicit) {
+    void Variables::analyzeVariableDeclaration(VariableDeclarationNode& node, const std::string& source) {
         const std::string& identifier = node.identifier;
         const std::string& dataType = node.varType;
 
@@ -55,7 +55,7 @@ namespace yogi::semantic {
                 rValue = val.value;
                 stringValue = val.value;
 
-                if (node.varType.starts_with("float") && !utils::Helpers::isInteger(std::stold(val.value)) && !fromExplicit) {
+                if (node.varType.starts_with("float") && !utils::Helpers::isInteger(std::stold(val.value))) {
                     returnType = "float";
                 } else {
                     returnType = "int";
@@ -66,7 +66,7 @@ namespace yogi::semantic {
                 rValue = val.value;
                 stringValue = val.value;
 
-                if (node.varType.starts_with("int") && utils::Helpers::isInteger(std::stold(val.value)) && !fromExplicit) {
+                if (node.varType.starts_with("int") && utils::Helpers::isInteger(std::stold(val.value))) {
                     returnType = "int";
                 } else {
                     returnType = "float";
@@ -143,14 +143,13 @@ namespace yogi::semantic {
         }
 
         // Create result node with normalized value
-        VariableDeclarationNode result = node;
         if (dataType.find("uint") != std::string::npos || dataType.find("int") != std::string::npos) {
-            result.value = std::any(IntegerLiteralNode(rValue, node.start, node.end));
+            node.value = std::any(IntegerLiteralNode(rValue, node.start, node.end));
         }
 
         // Normalize float values
         if (dataType.find("float") != std::string::npos) {
-            result.value = std::any(FloatLiteralNode(rValue, node.start, node.end));
+            node.value = std::any(FloatLiteralNode(rValue, node.start, node.end));
         }
     }
 

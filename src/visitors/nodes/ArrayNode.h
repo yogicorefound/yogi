@@ -4,27 +4,37 @@
 
 #pragma once
 
+#include <any>
+#include <string>
+#include <vector>
 #include "BaseNode.h"
-#include "StatementNode.h"
 
 namespace yogi::visitor::nodes {
     // Array Element (for array initialization)
-    struct ArrayElementNode : BaseNode {
+    struct ArrayElementNode {
+        std::any value; // Puede ser un valor simple o std::vector<ArrayElementNode>
         std::string type;
-        std::any value; // Can be any literal, expression, or nested array
+        Position start;
+        Position end;
 
-        explicit ArrayElementNode(std::any value, std::string type, const Position start, const Position end) : BaseNode(Kind::ARRAY_ELEMENT, start, end), type(std::move(type)), value(std::move(value)) {}
+        // Constructor para valor simple
+        ArrayElementNode(std::any val, const std::string& t, const Position& s, const Position& e) : value(std::move(val)), type(t), start(s), end(e) {}
+
+        // Constructor para sub-array
+        ArrayElementNode(std::vector<ArrayElementNode> val, const std::string& t, const Position& s, const Position& e) : value(std::move(val)), type(t), start(s), end(e) {}
     };
 
-    // Array Declaration Statement
-    struct ArrayDeclarationNode : BaseNode {
-        std::string identifier; // Array name
-        std::string type; // Type of elements: "int", "float", "str", etc.
-        std::string size; // Number of elements
+    struct ArrayDeclarationNode {
+        std::string identifier;
+        std::string type; // tipo del elemento
         bool isConstant;
-        std::vector<ArrayElementNode> elements; // Array elements
+        std::vector<size_t> dimensions; // vacío si es dinámico
+        std::vector<ArrayElementNode> elements;
+        Position start;
+        Position end;
 
-        explicit ArrayDeclarationNode(const std::string& identifier, const std::string& type, bool isConstant, std::string size, std::vector<ArrayElementNode> elements, const Position start, const Position end) : BaseNode(Kind::ARRAY_DECLARATION, start, end), identifier(identifier), type(type), isConstant(isConstant), size(size), elements(std::move(elements)) {}
+        ArrayDeclarationNode(const std::string& id, const std::string& t, const bool constant, std::vector<size_t> dims, std::vector<ArrayElementNode> elems, const Position& s, const Position& e)
+            : identifier(id), type(t), isConstant(constant), dimensions(std::move(dims)), elements(std::move(elems)), start(s), end(e) {}
     };
 
 } // namespace yogi::visitor::nodes

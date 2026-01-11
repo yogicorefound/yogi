@@ -51,6 +51,8 @@ namespace yogi::visitor::nodes {
         DICTIONARY_PAIR,
         DICTIONARY_TYPE,
 
+        IF_STATEMENT,
+
         BLOCK,
 
     };

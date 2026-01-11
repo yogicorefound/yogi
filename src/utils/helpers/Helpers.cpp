@@ -3,8 +3,8 @@
 //
 
 #include "Helpers.h"
-#include <visitors/nodes/nodes.h>
 #include <utils/errors/Errors.h>
+#include <visitors/nodes/nodes.h>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -371,6 +371,7 @@ namespace yogi::utils {
 
             json elements = json::array();
             for (const auto& el : n) {
+                auto rNode = resolveItem(node);
                 elements.push_back(nodeToJson(el));
             }
 
@@ -434,10 +435,20 @@ namespace yogi::utils {
             const auto& n = std::any_cast<const ArrayDeclarationNode&>(node);
 
             json elements = json::array();
-            for (const auto& el : n.elements)
+            for (const auto& el : n.elements) {
                 elements.push_back(nodeToJson(el));
+            }
 
-            return {{"kind", "ArrayDeclaration"}, {"identifier", n.identifier}, {"elementType", n.type}, {"size", n.size}, {"elements", elements}};
+            json dims = json::array();
+            for (const auto& d : n.dimensions)
+                dims.push_back(d);
+
+            return {
+                {"kind", "ArrayDeclaration"},
+                {"identifier", n.identifier},
+                {"elementType", n.type},
+                {"dimensions", dims}, // reemplazamos "size" por "dimensions"
+                {"elements", elements}};
         }
 
         if (node.type() == typeid(DictionaryDeclarationNode)) {
@@ -462,6 +473,33 @@ namespace yogi::utils {
         // -------------------------------------------------
         // Fallback
         // -------------------------------------------------
+        if (node.type() == typeid(IfStatementNode)) {
+            const auto& n = std::any_cast<const IfStatementNode&>(node);
+
+            json branchesJson = json::array();
+            for (const auto& [bCondition, bBody] : n.branches) {
+                json branchJson;
+
+                // condition is null for "else"
+                if (bCondition.has_value()) {
+                    branchJson["condition"] = nodeToJson(bCondition); // ✅ Added .value()
+                    branchJson["kind"] = "IF_STATEMENT";
+                } else {
+                    branchJson["condition"] = nullptr;
+                    branchJson["kind"] = "ELSE_STATEMENT";
+                }
+
+                // body
+                json body = json::array();
+                for (const auto& stmt : bBody) {
+                    body.push_back(nodeToJson(stmt));
+                }
+                branchJson["body"] = body;
+                branchesJson.push_back(branchJson);
+            }
+
+            return {{"kind", "IF_STATEMENT"}, {"branches", branchesJson}};
+        }
 
         return {{"kind", "Unknown"}, {"type", node.type().name()}};
     }

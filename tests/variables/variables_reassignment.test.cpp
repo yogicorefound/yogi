@@ -12,7 +12,6 @@ namespace yogi::visitor::nodes {
 
     TEST_CASE("Variables Re-Assignment evaluation", "[Re-Assignment]") {
         auto cases = GENERATE(
-            // string members
             std::make_tuple<std::string>("str x = \"" + testString + "\" x = \"brayhan\"", "brayhan", "str"),
             std::make_tuple<std::string>("int x = 10 x = x + 10", "20", "int"),
             std::make_tuple<std::string>("float x = 10.0 x = x + 10.0", "20.000000", "float"),

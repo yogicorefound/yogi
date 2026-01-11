@@ -4,7 +4,6 @@
 
 #include <utils/helpers/Helpers.h>
 #include <utils/wrapper/wrapper.h>
-#include <visitors/nodes/MembersNode.h>
 #include "libs/catch2/catch_amalgamated.hpp"
 
 namespace yogi::visitor::nodes {
@@ -16,9 +15,6 @@ namespace yogi::visitor::nodes {
 
     TEST_CASE("Variables evaluation", "[MEMBER]") {
         auto cases = GENERATE(
-            // TODO: "split", "match",  "unicode",
-
-            // Done
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.reverse()", utils::Helpers::reverse(testString), "str"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.slice(0, 5)", utils::Helpers::slice(testString, 0, 5), "str"),
             std::make_tuple<std::string>("str a = \"" + testString + "\" a.at(1).repeat(2)", utils::Helpers::repeat(utils::Helpers::at(testString, 1), 2), "str"),
@@ -37,8 +33,7 @@ namespace yogi::visitor::nodes {
 
         auto [text, expectedValue, expectedType] = cases;
         const auto ast = Yogi::testAST(text);
-        const auto memberNode = std::any_cast<MemberExpressionNode>(ast.body[1]);
-        const auto [type, value, node] = utils::Helpers::resolveItem(memberNode.value);
+        const auto [type, value, node] = utils::Helpers::resolveItem(ast.body[1]);
 
         REQUIRE(value == expectedValue);
         REQUIRE(type == expectedType);

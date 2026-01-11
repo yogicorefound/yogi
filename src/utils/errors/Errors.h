@@ -15,6 +15,7 @@ namespace yogi::utils {
 
     class Errors {
        public:
+        static void throwError(const std::string& message, const std::any& node, const std::string& source);
         static void throwError(const std::string& errorType, const std::string& message, const std::any& node, const std::string& source);
         static void throwRangeError(const std::string& message, const std::any& node, const std::string& source);
         static void throwScopeError(const std::string& message, const std::string& identifier, const std::any& node, const std::string& source);
@@ -28,4 +29,3 @@ namespace yogi::utils {
     };
 
 } // namespace yogi::utils
-

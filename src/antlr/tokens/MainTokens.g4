@@ -54,6 +54,9 @@ FLOAT_TYPES
     | 'float64'    // 64-bit
     ;
 
+IF: 'if';
+ELSE: 'else';
+
 NONE: 'none';
 BOOLEAN: 'true' | 'false';
 
@@ -65,7 +68,8 @@ MUL: '*';
 DIV: '/';
 MOD: '%';
 EQ: '=';
-
+EQEQ: '==';
+NOT: '!';
 LPAREN: '(';
 RPAREN: ')';
 LBRACE: '{';
@@ -74,14 +78,27 @@ LBRACKET: '[';
 RBRACKET: ']';
 DOT: '.';
 COMMA: ',';
+
 AMPERSAND: '&';
-LESSTHAN: '<';
-GREATERTHAN: '>';
+ANDAND: '&&';
+OROR: '||';
+LT: '<';
+LTE: '<=';
+GT: '>';
+GTE: '>=';
+NEQ: '!=';
 COLON: ':';
+QUESTION: '?';
+BIT_OR: '|';
+BIT_XOR: '^';
+BIT_NOT: '~';
+SHL: '<<';
+SHR: '>>';
 
 // --------------------------------------------------------------------
 // NEWLINE normal → skip
 // --------------------------------------------------------------------
+
 NEWLINE
     : [\r\n]+   { if (inSkipMode && *inSkipMode) emit(); else skip(); }
     ;

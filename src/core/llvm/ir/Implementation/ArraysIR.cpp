@@ -8,7 +8,7 @@ namespace yogi::core::ir {
 
     llvm::Value* IR::arrayDeclaration(const visitor::nodes::ArrayDeclarationNode& node) {
         llvm::Type* elementType = mapDataType(node.type);
-        const size_t arraySize = std::stoull(node.size);
+        const size_t arraySize = 10; // TODO
 
         llvm::ArrayType* arrType = llvm::ArrayType::get(elementType, arraySize);
         llvm::Function* currentFn = builder->GetInsertBlock()->getParent();

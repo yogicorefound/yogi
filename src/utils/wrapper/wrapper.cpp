@@ -21,7 +21,7 @@ namespace yogi {
     void Yogi::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
         printAST(ast);
-        processLLVM(ast);
+        // processLLVM(ast);
     }
 
     void Yogi::getContent(const int argc, const char* argv[]) {
@@ -115,6 +115,7 @@ namespace yogi {
         // Feed Grammar into Visitor and generate AST
         // ---------------------------------------------
         auto ast = visitor.visit(tree);
+
         auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
         return node;

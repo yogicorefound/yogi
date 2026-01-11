@@ -6,7 +6,7 @@
 
 namespace yogi::semantic {
     bool Scope::declareVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info) {
-        if (symbols.contains(name))
+        if (existsInCurrent(name))
             return false;
 
         // Store a shared_ptr of the node directly
@@ -49,16 +49,26 @@ namespace yogi::semantic {
     }
 
     void Scope::updateVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info) {
-        // Update in current scope if it exists
-        if (symbols.contains(name)) {
-            symbols[name] = ScopeNode{visitor::nodes::Kind::VARIABLE_DECLARATION, std::make_shared<std::any>(info)};
-            return;
+        Scope* current = this;
+
+        // Walk up the scope chain
+        while (current) {
+            if (current->symbols.contains(name)) {
+                auto& [kind, valuePtr] = current->symbols[name];
+                if (kind != visitor::nodes::Kind::VARIABLE_DECLARATION) {
+                    throw std::runtime_error("Symbol exists but is not a variable");
+                }
+
+                auto nodePtr = std::any_cast<std::shared_ptr<visitor::nodes::VariableDeclarationNode>>(*valuePtr);
+                nodePtr->value = info.value; // update the existing variable in place
+                return;
+            }
+
+            current = current->parent;
         }
 
-        // Otherwise try to update in parent scope
-        if (parent) {
-            parent->updateVariable(name, info);
-        }
+        // If we reach here, the variable truly doesn’t exist anywhere
+        throw std::runtime_error("Variable not found in any scope: " + name);
     }
 
     void Scope::updateArray(const std::string& name, const visitor::nodes::ArrayDeclarationNode& info) {

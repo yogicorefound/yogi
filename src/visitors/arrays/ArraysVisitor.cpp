@@ -1,5 +1,5 @@
 //
-// Created by Brayhan De Aza on 10/19/25.
+// ArraysVisitor.cpp
 //
 
 #include "ArraysVisitor.h"
@@ -7,168 +7,272 @@
 #include "semantic/semantic.h"
 
 namespace yogi::visitor {
+
+    // -----------------------
+    // Build array elements recursively for multidimensional arrays
+    // -----------------------
+    // -----------------------
+    // Build array elements recursively for multidimensional arrays with default values
+    // -----------------------
+    std::vector<nodes::ArrayElementNode>
+    ArraysVisitor::buildArrayElementsRecursively(Grammar::ArrayItemsWithBracketsContext* ctx, const std::string& elementType, const std::vector<size_t>& dimensions, const nodes::Position& start, const nodes::Position& end) {
+        std::vector<nodes::ArrayElementNode> elements;
+
+        auto getDefaultValue = [start, end](const std::string& type) -> std::any {
+            if (type == "int")
+                return nodes::IntegerLiteralNode{"0", start, end};
+            if (type == "float")
+                return nodes::FloatLiteralNode{"0.0", start, end};
+            if (type == "bool")
+                return nodes::BooleanLiteralNode{"0", start, end};
+            if (type == "str")
+                return nodes::StringLiteralNode{"", start, end};
+            if (type == "regex")
+                return nodes::RegexLiteralNode{"", start, end};
+            return nullptr;
+        };
+
+        // ---------------------
+        // Si ctx es nullptr, array vacío → llenar con valores by default
+        // ---------------------
+        if (!ctx) {
+            if (!dimensions.empty()) {
+                size_t expectedSize = dimensions[0];
+                std::vector<size_t> subDimensions(dimensions.begin() + 1, dimensions.end());
+
+                for (size_t i = 0; i < expectedSize; ++i) {
+                    if (subDimensions.empty()) {
+                        auto defaultNode = getDefaultValue(elementType);
+                        elements.push_back(nodes::ArrayElementNode(defaultNode, elementType, start, end));
+                    } else {
+                        auto subElements = buildArrayElementsRecursively(nullptr, elementType, subDimensions, start, end);
+                        elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
+                    }
+                }
+            }
+            return elements;
+        }
+
+        // ---------------------
+        // Caso normal: ctx tiene elementos
+        // ---------------------
+        for (auto* itemCtx : ctx->arrayItem()) {
+            if (itemCtx->arrayItemsWithBrackets()) {
+                std::vector<size_t> subDimensions;
+                if (!dimensions.empty()) {
+                    subDimensions.assign(dimensions.begin() + 1, dimensions.end());
+                }
+
+                const auto subElements = buildArrayElementsRecursively(itemCtx->arrayItemsWithBrackets(), elementType, subDimensions, start, end);
+                elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
+            } else {
+                const auto valueAny = visit(itemCtx);
+                const auto [valueType, value, node] = resolveItem(valueAny);
+
+                if (valueType != elementType) {
+                    throwTypeError("Array element type mismatch", elementType, itemCtx, source);
+                }
+
+                elements.push_back(nodes::ArrayElementNode(node, valueType, start, end));
+            }
+        }
+
+        // ---------------------
+        // Fill remaining elements con default values si es necesario
+        // ---------------------
+        if (!dimensions.empty()) {
+            size_t expectedSize = dimensions[0];
+            while (elements.size() < expectedSize) {
+                std::vector<size_t> subDimensions(dimensions.begin() + 1, dimensions.end());
+                if (subDimensions.empty()) {
+                    auto defaultNode = getDefaultValue(elementType);
+                    elements.push_back(nodes::ArrayElementNode(defaultNode, elementType, start, end));
+                } else {
+                    auto subElements = buildArrayElementsRecursively(nullptr, elementType, subDimensions, start, end);
+                    elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
+                }
+            }
+        }
+
+        return elements;
+    }
+
+    // -----------------------
+    // Visitor implementations
+    // -----------------------
     std::any ArraysVisitor::visitArrays(Grammar::ArraysContext* ctx) {
         return visitChildren(ctx);
+    }
+
+    std::any ArraysVisitor::visitArrayAccess(Grammar::ArrayAccessContext* ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        const std::string identifier = ctx->IDENTIFIER()->getText();
+        const auto arrayIndexList = visit(ctx->arrayIndexList());
+        const auto indexes = std::any_cast<std::vector<size_t>>(arrayIndexList);
+
+        const auto array = scope->lookupArray(identifier);
+        if (!array.has_value()) {
+            throwScopeError("Array '" + identifier + "' is not declared", identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+        }
+
+        std::any current = array.value()->elements;
+
+        std::cout << identifier << std::endl;
+
+        // Navigate through each dimension using the indices
+        for (size_t i = 0; i < indexes.size(); ++i) {
+            size_t index = indexes[i];
+
+            // Try to cast as vector of ArrayElementNode
+            try {
+                auto vec = std::any_cast<std::vector<nodes::ArrayElementNode>>(current);
+
+                if (index >= vec.size()) {
+                    throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+
+                // Get the value from the ArrayElementNode
+                current = vec[index].value;
+                continue;
+            } catch (const std::bad_any_cast&) {
+                // Not a vector<ArrayElementNode>, try vector<any>
+            }
+
+            // Try to cast as vector of std::any
+            try {
+                auto vec = std::any_cast<std::vector<std::any>>(current);
+
+                if (index >= vec.size()) {
+                    throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+
+                current = vec[index];
+                continue;
+            } catch (const std::bad_any_cast&) {
+                // Not a vector<any>, try vector<int>
+            }
+
+            // Try vector of int
+            try {
+                auto vec = std::any_cast<std::vector<int>>(current);
+
+                if (index >= vec.size()) {
+                    throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+
+                if (i == indexes.size() - 1) {
+                    return vec[index];
+                } else {
+                    throwScopeError("Cannot index further: reached atomic value at dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+            } catch (const std::bad_any_cast&) {
+                // Not a vector<int> either
+            }
+
+            // Current is an atomic value - if it's the last index, return it
+            if (i == indexes.size() - 1) {
+                throwScopeError("Too many indices: cannot index into atomic value", identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+            }
+
+            throwScopeError("Cannot index into atomic value at dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+        }
+
+        return current;
+    }
+
+    std::any ArraysVisitor::visitArrayIndexList(Grammar::ArrayIndexListContext* ctx) {
+        std::vector<size_t> indexes;
+        for (const auto expression : ctx->expression()) {
+            const auto index = visit(expression);
+            auto [type, value, node] = resolveItem(index);
+
+            indexes.push_back(std::stoul(value));
+        }
+
+        return indexes;
     }
 
     std::any ArraysVisitor::visitArrayDeclaration(Grammar::ArrayDeclarationContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        // Get array type information
-        const auto type = visit(ctx->arrayType());
-        const auto [arrayType, arraySize] = std::any_cast<std::pair<std::string, std::string>>(type); // {elementType, size}
+        // Get type and dimensions
+        const auto typeResult = visit(ctx->arrayType());
+        const auto [elementType, dimensions] = std::any_cast<std::pair<std::string, std::vector<size_t>>>(typeResult);
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
-        // Check if array already declared
         if (scope->existsInCurrent(identifier)) {
-            const auto message = "Array '" + identifier + "' is already declared";
-            throwScopeError(message, identifier, type, source);
+            throwScopeError("Array '" + identifier + "' is already declared", identifier, typeResult, source);
         }
 
-        // Value by passing array of elements
-        if (const auto arrayValues = visit(ctx->arrayValues()); arrayValues.has_value()) {
-            std::vector<nodes::ArrayElementNode> elements;
+        // Build elements recursively
+        std::vector<nodes::ArrayElementNode> elements;
 
-            if (arrayValues.type() == typeid(nodes::IdentifierLiteral)) {
-                const auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(arrayValues);
-
-                const auto& scopedArray = scope->lookupArray(identifierNode.value);
-                if (!scopedArray.has_value()) {
-                    throwScopeError("Array not found in current scope", identifierNode.value, identifierNode, source);
-                }
-
-                for (const auto itemsNode = scopedArray.value(); const auto item : itemsNode->elements) {
-                    const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item.value);
-
-                    const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                    elements.push_back(elementNode);
-                }
-            }
-
-            if (arrayValues.type() == typeid(std::vector<nodes::StringLiteralNode>)) {
-                for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(arrayValues); const auto& item : stringLiterals) {
-                    const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
-                    if (itemType != arrayType) {
-                        throwTypeError(identifier, arrayType, itemNode, source);
-                    }
-
-                    const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                    elements.push_back(elementNode);
-                }
-            }
-
-            if (arrayValues.type() == typeid(nodes::MemberExpressionNode)) {
-                const auto& memberNode = std::any_cast<nodes::MemberExpressionNode>(arrayValues);
-
-                if (memberNode.kind == nodes::Kind::ARRAY_STRING_ELEMENTS) {
-                    for (const auto& stringLiterals = std::any_cast<std::vector<nodes::StringLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
-                        const auto [itemType, itemValue, itemNode] = resolveItem(item);
-                        if (itemType != arrayType) {
-                            throwTypeError(identifier, arrayType, itemNode, source);
-                        }
-
-                        const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                        elements.push_back(elementNode);
-                    }
-                }
-
-                if (memberNode.kind == nodes::Kind::ARRAY_INTEGER_ELEMENTS) {
-                    if (arrayType != "int") {
-                        throwTypeError(identifier, arrayType, memberNode, source);
-                    }
-
-                    for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
-                        const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
-                        if (itemType != arrayType) {
-                            throwTypeError(identifier, arrayType, itemNode, source);
-                        }
-
-                        const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                        elements.push_back(elementNode);
-                    }
-                }
-
-                if (memberNode.kind == nodes::Kind::ARRAY_BOOLEAN_ELEMENTS) {
-                    if (arrayType != "bool") {
-                        throwTypeError(identifier, arrayType, memberNode, source);
-                    }
-                    for (const auto& stringLiterals = std::any_cast<std::vector<nodes::IntegerLiteralNode>>(memberNode.value); const auto& item : stringLiterals) {
-                        const auto [itemType, itemValue, itemNode] = Helpers::resolveItem(item);
-                        if (itemType != arrayType) {
-                            throwTypeError(identifier, arrayType, itemNode, source);
-                        }
-
-                        const auto elementNode = nodes::ArrayElementNode(itemNode, itemType, start, end);
-                        elements.push_back(elementNode);
-                    }
-                }
-            }
-
-            // Register ArrayDeclarationNode in scope
-            nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
-            analyzeArrayDeclaration(node, source);
-            scope->declareArray(identifier, node);
-
-            return node;
+        // ✨ Si se proporcionan valores explícitos
+        if (ctx->arrayValues() && ctx->arrayValues()->arrayItemsWithBrackets()) {
+            elements = buildArrayElementsRecursively(ctx->arrayValues()->arrayItemsWithBrackets(), elementType, dimensions, start, end);
+        }
+        // ✨ Si no hay valores, llenar con valores by default según dimensiones
+        else if (!dimensions.empty()) {
+            // Creamos un contexto ficticio vacío para la recursión
+            elements = buildArrayElementsRecursively(nullptr, elementType, dimensions, start, end);
         }
 
-        // Value by passing literal with brackets
-        if (const auto& arrayItemsWithBrackets = ctx->arrayValues()->arrayItemsWithBrackets()->expression(); !arrayItemsWithBrackets.empty()) {
-            std::vector<nodes::ArrayElementNode> elements;
-            // Create array declaration node
+        // Register array in scope
+        nodes::ArrayDeclarationNode node(identifier, elementType, toUpper(identifier) == identifier, dimensions, elements, start, end);
+        scope->declareArray(identifier, node);
 
-            parser->inVarMode = true;
-            for (auto itemCtx : arrayItemsWithBrackets) {
-                std::string itemType;
-                std::any itemValue;
-                std::string boolValue;
-                std::string rValue;
-
-                if (const auto item = visit(itemCtx); item.type() == typeid(nodes::IdentifierLiteral)) {
-                    auto node = std::any_cast<nodes::IdentifierLiteral>(item);
-                    const auto variable = scope->lookupVariable(node.value);
-                    if (!variable.has_value()) {
-                        throwScopeError("Error: '" + node.value + "' is not declared", node.value, node, source);
-                    }
-
-                    const auto& varNode = variable.value();
-                    itemValue = varNode->value;
-                    itemType = varNode->varType;
-
-                    processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, itemValue, source);
-                    checkArrayItemFloatRange(arrayType, varNode->value, item, source);
-
-                } else {
-                    processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, item, source);
-                    checkArrayItemFloatRange(arrayType, item, item, source);
-                }
-
-                // Add element to array
-                auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
-                elements.push_back(std::move(elementNode));
-            }
-            parser->inVarMode = false;
-
-            // Check if declared size matches actual elements
-            if (arraySize != "auto") {
-                if (elements.size() > std::stoull(arraySize)) {
-                    throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arraySize + ".", start, source);
-                }
-            }
-
-            nodes::ArrayDeclarationNode node(identifier, arrayType, toUpper(identifier) == identifier, arraySize, elements, start, end);
-            scope->declareArray(identifier, node);
-
-            return node;
-        }
-
-        throwTypeError(identifier, arrayType, type, source);
-        return "";
+        return node;
     }
 
-    std::any ArraysVisitor::visitArrayItems(Grammar::ArrayItemsContext* ctx) {
+    std::any ArraysVisitor::visitArrayReAssignment(Grammar::ArrayReAssignmentContext* ctx) {
         return visitChildren(ctx);
+    }
+
+    std::any ArraysVisitor::visitArrayType(Grammar::ArrayTypeContext* ctx) {
+        const std::string elementType = ctx->arrayDataType()->getText();
+        std::vector<size_t> dimensions;
+
+        if (ctx->arrayDeclarationTypeSizes()) {
+            for (auto* exprCtx : ctx->arrayDeclarationTypeSizes()->expression()) {
+                const auto exprAny = visit(exprCtx);
+                if (exprAny.type() == typeid(nodes::IntegerLiteralNode)) {
+                    auto node = std::any_cast<nodes::IntegerLiteralNode>(exprAny);
+                    dimensions.push_back(std::stoul(node.value));
+                } else {
+                    throwError("InvalidArrayDimension", "Array dimensions must be integer literals", ctx->start->getLine(), source);
+                }
+            }
+        }
+
+        return std::make_pair(elementType, dimensions);
+    }
+
+    std::any ArraysVisitor::visitArrayItem(Grammar::ArrayItemContext* ctx) {
+        return visitChildren(ctx);
+    }
+
+    std::any ArraysVisitor::visitArrayElement(Grammar::ArrayElementContext* ctx) {
+        return visitChildren(ctx);
+    }
+
+    std::any ArraysVisitor::visitArrayDeclarationTypeSizes(Grammar::ArrayDeclarationTypeSizesContext* ctx) {
+        std::vector<size_t> dimensions;
+        for (auto* exprCtx : ctx->expression()) {
+            const auto exprAny = visit(exprCtx);
+            if (exprAny.type() == typeid(nodes::IntegerLiteralNode)) {
+                dimensions.push_back(std::stoul(std::any_cast<nodes::IntegerLiteralNode>(exprAny).value));
+            } else {
+                throwError("InvalidArrayDimension", "Array dimensions must be integer literals", ctx->start->getLine(), source);
+            }
+        }
+        return dimensions;
+    }
+
+    std::any ArraysVisitor::visitArrayDataType(Grammar::ArrayDataTypeContext* ctx) {
+        return ctx->getText();
     }
 
     std::any ArraysVisitor::visitArrayItemsWithBrackets(Grammar::ArrayItemsWithBracketsContext* ctx) {
@@ -177,95 +281,6 @@ namespace yogi::visitor {
 
     std::any ArraysVisitor::visitArrayValues(Grammar::ArrayValuesContext* ctx) {
         return visitChildren(ctx);
-    }
-
-    std::any ArraysVisitor::visitArrayReAssignment(Grammar::ArrayReAssignmentContext* ctx) {
-        const auto identifier = ctx->IDENTIFIER()->getText();
-
-        const auto array = scope->lookupArray("array:" + identifier);
-        if (!array.has_value()) {
-            const auto message = "Error: '" + identifier + "' is not declared";
-            std::cout << message << std::endl;
-            std::exit(1);
-        }
-
-        const auto arrayNode = std::any_cast<nodes::ArrayDeclarationNode>(array.value());
-        if (arrayNode.isConstant) {
-            throwReassignmentError("'" + identifier + "' is constant and cannot be modified", arrayNode, source);
-        }
-
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        const std::string arrayType = arrayNode.type;
-
-        std::vector<nodes::ArrayElementNode> elements;
-
-        parser->inVarMode = true;
-        for (auto* exprCtx : ctx->expression()) {
-            const auto itemResult = visit(exprCtx);
-
-            std::string itemType;
-            std::any itemValue;
-            std::string boolValue;
-            std::string rValue;
-
-            processArrayItems(identifier, arrayType, itemType, itemValue, boolValue, rValue, itemResult, source);
-
-            // Add element to array
-            auto elementNode = nodes::ArrayElementNode(itemValue, itemType, start, end);
-            elements.push_back(std::move(elementNode));
-        }
-        parser->inVarMode = false;
-
-        // Check if declared size matches actual elements
-        if (arrayNode.size != "auto") {
-            if (elements.size() > std::stoull(arrayNode.size)) {
-                throwError("ArraySizeViolation", "attempted to assign " + std::to_string(elements.size()) + " elements, but the array was declared with a maximum size of " + arrayNode.size + ".", start, source);
-            }
-        }
-
-        nodes::ArrayDeclarationNode node(identifier, arrayNode.type, arrayNode.isConstant, arrayNode.size, elements, start, end);
-        scope->updateArray(identifier, node);
-
-        return node;
-    }
-
-    std::any ArraysVisitor::visitArrayDeclarationTypeSize(Grammar::ArrayDeclarationTypeSizeContext* ctx) {
-        // Return size as string: either "auto" or the actual size value
-        if (ctx->expression() == nullptr) {
-            return std::string("auto");
-        }
-
-        const auto expression = visit(ctx->expression());
-
-        // Extract numeric value from expression
-        if (expression.type() == typeid(nodes::IntegerLiteralNode)) {
-            auto node = std::any_cast<nodes::IntegerLiteralNode>(expression);
-            return node.value;
-        }
-        if (expression.type() == typeid(nodes::BinaryExpressionNode)) {
-            auto node = std::any_cast<nodes::BinaryExpressionNode>(expression);
-            return node.value;
-        }
-
-        return std::string("auto");
-    }
-
-    std::any ArraysVisitor::visitArrayType(Grammar::ArrayTypeContext* ctx) {
-        // Get element type
-        const std::string elementType = ctx->arrayDataType()->getText();
-
-        // Get array size
-        const auto arraySizeResult = visit(ctx->arrayDeclarationTypeSize());
-        const auto arraySize = std::any_cast<std::string>(arraySizeResult);
-
-        // Return as pair: {elementType, size}
-        return std::make_pair(elementType, arraySize);
-    }
-
-    std::any ArraysVisitor::visitArrayDataType(Grammar::ArrayDataTypeContext* ctx) {
-        // Return the data type as string
-        return ctx->getText();
     }
 
 } // namespace yogi::visitor

@@ -111,6 +111,7 @@ namespace yogi::visitor {
 
     std::any LiteralsVisitor::visitBooleanLiteral(Grammar::BooleanLiteralContext* ctx) {
         const std::string literal = parseString(ctx->getText());
+
         const std::string value = literal == "true" ? "1" : "0";
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -166,7 +167,7 @@ namespace yogi::visitor {
                         node.value += contentNode.value;
                     } else if (result.type() == typeid(nodes::BooleanLiteralNode)) {
                         auto contentNode = std::any_cast<nodes::BooleanLiteralNode>(result);
-                        node.value += contentNode.value;
+                        node.value += contentNode.value == "1" ? "true" : "false";
                     } else if (result.type() == typeid(nodes::IdentifierLiteral)) {
                         auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
                         const auto variable = scope->lookupVariable(contentNode.value);
@@ -179,7 +180,7 @@ namespace yogi::visitor {
                             throwTypeError("Variable is not a variable declaration", contentNode.value, node, source);
                         }
 
-                        const auto [type, value, _] = Helpers::resolveItem(varNode->value);
+                        const auto [type, value, _] = resolveItem(varNode->value);
                         node.value += value;
 
                     } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {

@@ -1,5 +1,7 @@
 parser grammar LiteralsGrammar;
 
+import ExpressionsGrammar;
+
 options {
     tokenVocab = Tokens;
 }
@@ -10,6 +12,7 @@ literals
     | booleanLiteral
     | identifierLiteral
     ;
+
 
 numberLiterals
     : integerLiteral
@@ -35,8 +38,6 @@ formattedStringContent
 stringLiteral
     : STRING
     ;
-
-//regexLiteral: REGEX_START REGEX_CONTENT REGEX_END;
 
 floatLiteral: FLOAT;
 integerLiteral: INTEGER;
