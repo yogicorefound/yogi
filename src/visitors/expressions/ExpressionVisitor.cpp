@@ -20,7 +20,7 @@ namespace yogi::visitor {
         std::string type; // "int", "float", "str", "bool"
     };
 
-    std::function<ExtractResult(const std::any&, semantic::Scope*)> extract = [](const std::any& value, semantic::Scope* scope) -> ExtractResult {
+    std::function<ExtractResult(const std::any&, const semantic::Scope*, const std::string&)> extract = [](const std::any& value, const semantic::Scope* scope, const std::string& source) -> ExtractResult {
         if (value.type() == typeid(IntegerLiteralNode)) {
             auto n = std::any_cast<IntegerLiteralNode>(value);
             return {n.value, "int"};
@@ -44,17 +44,20 @@ namespace yogi::visitor {
         if (value.type() == typeid(IdentifierLiteral)) {
             auto id = std::any_cast<IdentifierLiteral>(value);
             if (!scope)
-                throw std::runtime_error("No scope for identifier");
-            auto varOpt = scope->lookupVariable(id.value);
-            if (!varOpt.has_value())
-                throw std::runtime_error("Variable '" + id.value + "' not declared");
-            return extract(varOpt.value()->value, scope);
+                utils::Errors::throwError("Error", "No scope for identifier", value, source);
+
+            if (const auto varOpt = scope->lookupVariable(id.value); varOpt.has_value())
+                return extract(varOpt.value()->value, scope, source);
+
+            utils::Errors::throwError("Error", "Variable '" + id.value + "' not declared", value, source);
         }
-        throw std::runtime_error("Unsupported operand type in extract");
+
+        utils::Errors::throwError("Error", "Unsupported operand type in extract", value, source);
+        return {};
     };
 
-    bool isTruthy(const std::any& value, semantic::Scope* scope) {
-        const auto [v, t] = extract(value, scope);
+    bool isTruthy(const std::any& value, const semantic::Scope* scope, const std::string& source) {
+        const auto [v, t] = extract(value, scope, source);
 
         if (t == "bool")
             return v == "1";
@@ -81,7 +84,7 @@ namespace yogi::visitor {
     std::any ExpressionVisitor::visitConditionalExpression(Grammar::ConditionalExpressionContext* ctx) {
         std::any condition = visit(ctx->logicalOrExpression());
 
-        const bool cond = isTruthy(condition, scope);
+        const bool cond = isTruthy(condition, scope, source);
 
         if (ctx->expression().size() != 2) {
             return condition;
@@ -98,7 +101,7 @@ namespace yogi::visitor {
         std::any left = visit(ctx->logicalAndExpression(0));
 
         for (size_t i = 1; i < ctx->logicalAndExpression().size(); ++i) {
-            if (isTruthy(left, scope)) {
+            if (isTruthy(left, scope, source)) {
                 // short-circuit → devuelve el valor real, no solo true
                 return left;
             }
@@ -114,7 +117,7 @@ namespace yogi::visitor {
         std::any left = visit(ctx->bitwiseOrExpression(0));
 
         for (size_t i = 1; i < ctx->bitwiseOrExpression().size(); ++i) {
-            if (!isTruthy(left, scope)) {
+            if (!isTruthy(left, scope, source)) {
                 // short-circuit → devuelve el valor real
                 return left;
             }
@@ -136,12 +139,12 @@ namespace yogi::visitor {
             std::any right = visit(ctx->shiftExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
-            const auto [lValue, lType] = extract(left, scope);
-            const auto [rValue, rType] = extract(right, scope);
+            const auto [lValue, lType] = extract(left, scope, source);
+            const auto [rValue, rType] = extract(right, scope, source);
 
             // Allow string comparison if both operands are strings
             if (lType != rType && !(lType == "int" && rType == "float") && !(lType == "float" && rType == "int")) {
-                throw std::runtime_error("Cannot compare different types: " + lType + " " + op + " " + rType);
+                throwError("Cannot compare different types: " + lType + " " + op + " " + rType, left, source);
             }
 
             bool result = false;
@@ -177,10 +180,10 @@ namespace yogi::visitor {
                 else if (op == "<=")
                     result = lValue <= rValue;
                 else
-                    throw std::runtime_error("Invalid string comparison operator: " + op);
+                    throwError("Invalid string comparison operator: " + op, left, source);
 
             } else {
-                throw std::runtime_error("Unsupported operand type for relational operator: " + lType);
+                throwError("Unsupported operand type for relational operator: " + lType, left, source);
             }
 
             left = BooleanLiteralNode(result ? "1" : "0", {}, {});
@@ -196,8 +199,8 @@ namespace yogi::visitor {
             std::any right = visit(ctx->relationalExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
-            const auto [lValue, lType] = extract(left, scope);
-            const auto [rValue, rType] = extract(right, scope);
+            const auto [lValue, lType] = extract(left, scope, source);
+            const auto [rValue, rType] = extract(right, scope, source);
 
             bool result = false;
 
@@ -211,7 +214,7 @@ namespace yogi::visitor {
             } else if (lType == "str" && rType == "str") {
                 result = op == "==" ? lValue == rValue : lValue != rValue;
             } else {
-                throw std::runtime_error("Invalid operands for equality operator");
+                throwError("Invalid operands for equality operator", left, source);
             }
 
             left = BooleanLiteralNode(result ? "1" : "0", {}, {});
@@ -226,11 +229,11 @@ namespace yogi::visitor {
         for (size_t i = 1; i < ctx->equalityExpression().size(); ++i) {
             std::any rhs = visit(ctx->equalityExpression(i));
 
-            const auto [lValue, lType] = extract(result, scope);
-            const auto [rValue, rType] = extract(rhs, scope);
+            const auto [lValue, lType] = extract(result, scope, source);
+            const auto [rValue, rType] = extract(rhs, scope, source);
 
             if (lType != "int" || rType != "int")
-                throw std::runtime_error("Bitwise '&' requires integer operands");
+                throwError("Bitwise '&' requires integer operands", result, source);
 
             BigInt l(lValue);
             BigInt r(rValue);
@@ -248,17 +251,17 @@ namespace yogi::visitor {
             std::any rhs = visit(ctx->additiveExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
-            const auto [lValue, lType] = extract(result, scope);
-            const auto [rValue, rType] = extract(rhs, scope);
+            const auto [lValue, lType] = extract(result, scope, source);
+            const auto [rValue, rType] = extract(rhs, scope, source);
 
             if (lType != "int" || rType != "int")
-                throw std::runtime_error("Shift operators require integer operands");
+                throwError("Shift operators require integer operands", result, source);
 
             BigInt l(lValue);
             BigInt r(rValue);
 
             if (r < 0)
-                throw std::runtime_error("Negative shift count");
+                throwError("Negative shift count", result, source);
 
             if (op == "<<")
                 result = IntegerLiteralNode((l << r.convert_to<unsigned>()).str(), {}, {});
@@ -278,11 +281,11 @@ namespace yogi::visitor {
         for (size_t i = 1; i < ctx->bitwiseAndExpression().size(); ++i) {
             std::any rhs = visit(ctx->bitwiseAndExpression(i));
 
-            const auto [lValue, lType] = extract(result, scope);
-            const auto [rValue, rType] = extract(rhs, scope);
+            const auto [lValue, lType] = extract(result, scope, source);
+            const auto [rValue, rType] = extract(rhs, scope, source);
 
             if (lType != "int" || rType != "int")
-                throw std::runtime_error("Bitwise '^' requires integer operands");
+                throwError("Bitwise '^' requires integer operands", result, source);
 
             BigInt l(lValue);
             BigInt r(rValue);
@@ -302,11 +305,11 @@ namespace yogi::visitor {
         for (size_t i = 1; i < ctx->bitwiseXorExpression().size(); ++i) {
             std::any rhs = visit(ctx->bitwiseXorExpression(i));
 
-            const auto [lValue, lType] = extract(result, scope);
-            const auto [rValue, rType] = extract(rhs, scope);
+            const auto [lValue, lType] = extract(result, scope, source);
+            const auto [rValue, rType] = extract(rhs, scope, source);
 
             if (lType != "int" || rType != "int")
-                throw std::runtime_error("Bitwise '|' requires integer operands");
+                throwError("Bitwise '|' requires integer operands", result, source);
 
             BigInt l(lValue);
             BigInt r(rValue);
@@ -326,8 +329,8 @@ namespace yogi::visitor {
             std::any rhs = visit(ctx->multiplicativeExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
-            const auto [lValue, lType] = extract(result, scope);
-            const auto [rValue, rType] = extract(rhs, scope);
+            const auto [lValue, lType] = extract(result, scope, source);
+            const auto [rValue, rType] = extract(rhs, scope, source);
 
             // STRING CONCAT
             if (op == "+" && lType == "str" && rType == "str") {
@@ -353,7 +356,7 @@ namespace yogi::visitor {
                 continue;
             }
 
-            throw std::runtime_error("Invalid operands for operator '" + op + "'");
+            throwError("Invalid operands for operator '" + op + "'", result, source);
         }
 
         return result;
@@ -369,9 +372,9 @@ namespace yogi::visitor {
             std::any rhs = visit(ctx->powerExpression(i));
             std::string op = ctx->children[2 * i - 1]->getText();
 
-            const auto [lValue, lType] = extract(result, scope);
+            const auto [lValue, lType] = extract(result, scope, source);
 
-            if (const auto [rValue, rType] = extract(rhs, scope); lType == "int" && rType == "int" && op != "/") {
+            if (const auto [rValue, rType] = extract(rhs, scope, source); lType == "int" && rType == "int" && op != "/") {
                 BigInt l(lValue);
                 BigInt r(rValue);
                 BigInt out;
@@ -381,7 +384,7 @@ namespace yogi::visitor {
 
                 else if (op == "%") {
                     if (r == 0)
-                        throw std::runtime_error("Modulo by zero");
+                        throwError("Modulo by zero", result, source);
                     out = l % r;
                 }
                 result = IntegerLiteralNode(out.str(), {}, {});
@@ -396,13 +399,13 @@ namespace yogi::visitor {
 
                 else if (op == "/") {
                     if (r == 0)
-                        throw std::runtime_error("Division by zero");
+                        throwError("Division by zero", result, source);
 
                     out = l / r;
 
                 } else if (op == "%") {
                     if (r == 0) {
-                        throw std::runtime_error("Modulo by zero");
+                        throwError("Modulo by zero", result, source);
                     }
 
                     out = std::fmod(l, r);
@@ -424,8 +427,8 @@ namespace yogi::visitor {
             return left;
 
         const std::any right = visit(ctx->powerExpression());
-        const auto [lValue, lType] = extract(left, scope);
-        const auto [rValue, rType] = extract(right, scope);
+        const auto [lValue, lType] = extract(left, scope, source);
+        const auto [rValue, rType] = extract(right, scope, source);
 
         // INTEGER ** INTEGER using BigInt
         if (lType == "int" && rType == "int") {
@@ -466,7 +469,7 @@ namespace yogi::visitor {
 
         // ---------- Logical NOT (!) ----------
         if (ctx->NOT().size() > 0) {
-            const auto [vValue, vType] = extract(value, scope);
+            const auto [vValue, vType] = extract(value, scope, source);
             bool b;
 
             if (vType == "int") {
@@ -478,7 +481,7 @@ namespace yogi::visitor {
             } else if (vType == "bool") {
                 b = vValue == "1";
             } else {
-                throw std::runtime_error("Invalid operand for '!'");
+                throwError("Invalid operand for '!'", value, source);
             }
 
             if (ctx->NOT().size() % 2 == 0)
@@ -489,10 +492,10 @@ namespace yogi::visitor {
 
         // ---------- Bitwise NOT (~) ----------
         if (ctx->BIT_NOT()) {
-            const auto [vValue, vType] = extract(value, scope);
+            const auto [vValue, vType] = extract(value, scope, source);
 
             if (vType != "int")
-                throw std::runtime_error("Operator '~' requires integer operand");
+                throwError("Operator '~' requires integer operand", value, source);
 
             BigInt num(vValue);
             return IntegerLiteralNode((~num).str(), {}, {});
@@ -500,10 +503,10 @@ namespace yogi::visitor {
 
         // ---------- Unary + / - ----------
         if (ctx->PLUS() || ctx->MINUS()) {
-            const auto [vValue, vType] = extract(value, scope);
+            const auto [vValue, vType] = extract(value, scope, source);
 
             if (vType != "int" && vType != "float")
-                throw std::runtime_error("Unary +/- requires numeric operand");
+                throwError("Unary +/- requires numeric operand", value, source);
 
             if (vType == "int") {
                 BigInt num(vValue);
@@ -525,6 +528,9 @@ namespace yogi::visitor {
     // Primary: literals, identifiers, member, parentheses
     // --------------------------------------------------------
     std::any ExpressionVisitor::visitPrimaryExpression(Grammar::PrimaryExpressionContext* ctx) {
+        const Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
         if (ctx->literals()) {
             return visit(ctx->literals());
         }
@@ -533,7 +539,8 @@ namespace yogi::visitor {
         if (ctx->LPAREN())
             return visit(ctx->expression());
 
-        throw std::runtime_error("Unknown primary expression");
+        throwError("Unknown primary expression", NoneLiteralNode("", start, end), source);
+        return {};
     }
 
 } // namespace yogi::visitor

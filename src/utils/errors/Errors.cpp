@@ -131,6 +131,13 @@ namespace yogi::utils {
         std::cout << "\n";
     }
 
+    void Errors::throwError(const std::string& message, const std::any& node, const std::string& source) {
+        std::cerr << "\n\033[1;31m" << "Error" << ": " << message << "\033[0m\n";
+        const NodePosition pos = extractPosition(node);
+        printContext(pos, source, "");
+        std::exit(1);
+    }
+
     void Errors::throwError(const std::string& errorType, const std::string& message, const std::any& node, const std::string& source) {
         std::cerr << "\n\033[1;31m" << errorType << ": " << message << "\033[0m\n";
         const NodePosition pos = extractPosition(node);
