@@ -8,6 +8,17 @@ import LiteralsGrammar;
 arrays
     : arrayDeclaration
     | arrayReAssignment
+    | arrayAccess
+    ;
+
+// Rule for accessing a value: cube[0,2,3]
+arrayAccess
+    : IDENTIFIER LBRACKET arrayIndexList RBRACKET
+    ;
+
+// Helper to handle one or more comma-separated indices
+arrayIndexList
+    : expression (COMMA expression)*
     ;
 
 arrayDeclaration

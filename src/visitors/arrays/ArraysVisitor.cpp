@@ -104,6 +104,96 @@ namespace yogi::visitor {
         return visitChildren(ctx);
     }
 
+    std::any ArraysVisitor::visitArrayAccess(Grammar::ArrayAccessContext* ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        const std::string identifier = ctx->IDENTIFIER()->getText();
+        const auto arrayIndexList = visit(ctx->arrayIndexList());
+        const auto indexes = std::any_cast<std::vector<size_t>>(arrayIndexList);
+
+        const auto array = scope->lookupArray(identifier);
+        if (!array.has_value()) {
+            throwScopeError("Array '" + identifier + "' is not declared", identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+        }
+
+        std::any current = array.value()->elements;
+
+        std::cout << identifier << std::endl;
+
+        // Navigate through each dimension using the indices
+        for (size_t i = 0; i < indexes.size(); ++i) {
+            size_t index = indexes[i];
+
+            // Try to cast as vector of ArrayElementNode
+            try {
+                auto vec = std::any_cast<std::vector<nodes::ArrayElementNode>>(current);
+
+                if (index >= vec.size()) {
+                    throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+
+                // Get the value from the ArrayElementNode
+                current = vec[index].value;
+                continue;
+            } catch (const std::bad_any_cast&) {
+                // Not a vector<ArrayElementNode>, try vector<any>
+            }
+
+            // Try to cast as vector of std::any
+            try {
+                auto vec = std::any_cast<std::vector<std::any>>(current);
+
+                if (index >= vec.size()) {
+                    throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+
+                current = vec[index];
+                continue;
+            } catch (const std::bad_any_cast&) {
+                // Not a vector<any>, try vector<int>
+            }
+
+            // Try vector of int
+            try {
+                auto vec = std::any_cast<std::vector<int>>(current);
+
+                if (index >= vec.size()) {
+                    throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+
+                if (i == indexes.size() - 1) {
+                    return vec[index];
+                } else {
+                    throwScopeError("Cannot index further: reached atomic value at dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+                }
+            } catch (const std::bad_any_cast&) {
+                // Not a vector<int> either
+            }
+
+            // Current is an atomic value - if it's the last index, return it
+            if (i == indexes.size() - 1) {
+                throwScopeError("Too many indices: cannot index into atomic value", identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+            }
+
+            throwScopeError("Cannot index into atomic value at dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
+        }
+
+        return current;
+    }
+
+    std::any ArraysVisitor::visitArrayIndexList(Grammar::ArrayIndexListContext* ctx) {
+        std::vector<size_t> indexes;
+        for (const auto expression : ctx->expression()) {
+            const auto index = visit(expression);
+            auto [type, value, node] = resolveItem(index);
+
+            indexes.push_back(std::stoul(value));
+        }
+
+        return indexes;
+    }
+
     std::any ArraysVisitor::visitArrayDeclaration(Grammar::ArrayDeclarationContext* ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};

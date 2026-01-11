@@ -22,5 +22,8 @@ namespace yogi::visitor {
         std::any visitArrayDataType(Grammar::ArrayDataTypeContext* ctx) override;
         std::any visitArrayItemsWithBrackets(Grammar::ArrayItemsWithBracketsContext* ctx) override;
         std::any visitArrayValues(Grammar::ArrayValuesContext* ctx) override;
+
+        std::any visitArrayIndexList(Grammar::ArrayIndexListContext* ctx) override;
+        std::any visitArrayAccess(Grammar::ArrayAccessContext* ctx) override;
     };
 } // namespace yogi::visitor
