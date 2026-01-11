@@ -5,19 +5,31 @@ options {
 }
 
 import LiteralsGrammar;
-
 arrays
     : arrayDeclaration
     | arrayReAssignment
     ;
 
-arrayDeclaration: {inSkipMode = true;} arrayType {inSkipMode = false;} IDENTIFIER EQ arrayValues;
+arrayDeclaration
+    : arrayType IDENTIFIER EQ arrayValues
+    ;
 
-arrayValues: arrayItemsWithBrackets | expression* | memberExpression;
+arrayValues
+    : arrayItemsWithBrackets
+    | expression*          // Para inicialización plana
+    | memberExpression
+    ;
 
-arrayItemsWithBrackets: LBRACKET (expression (COMMA expression)*)? RBRACKET;
+arrayItemsWithBrackets
+    : LBRACKET (arrayItem (COMMA arrayItem)*)? RBRACKET
+    ;
 
-arrayItems
+arrayItem
+    : arrayItemsWithBrackets   // Permite arrays anidados
+    | arrayElement
+    ;
+
+arrayElement
     : stringLiteral
     | formattedString
     | identifierLiteral
@@ -28,10 +40,25 @@ arrayItems
     | expression
     ;
 
-arrayReAssignment: IDENTIFIER EQ LBRACKET (expression (COMMA expression)*)? RBRACKET;
+arrayReAssignment
+    : IDENTIFIER EQ arrayItemsWithBrackets
+    ;
 
-arrayType: arrayDataType LBRACKET arrayDeclarationTypeSize RBRACKET;
+// ---------------------
+// Array type con dimensión opcional
+// ---------------------
+arrayType
+    : arrayDataType (LBRACKET arrayDeclarationTypeSizes? RBRACKET)?
+    ;
 
-arrayDeclarationTypeSize: {inSkipMode = false;} expression? {inSkipMode = true;};
+arrayDeclarationTypeSizes
+    : expression (COMMA expression)*  // ✨ múltiples dimensiones
+    ;
 
-arrayDataType: INTEGER_TYPES | UNSIGNED_INTEGER_TYPES | FLOAT_TYPES | BOOLEAN_TYPES | STRING_TYPES;
+arrayDataType
+    : INTEGER_TYPES
+    | UNSIGNED_INTEGER_TYPES
+    | FLOAT_TYPES
+    | BOOLEAN_TYPES
+    | STRING_TYPES
+    ;

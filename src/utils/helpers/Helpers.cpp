@@ -371,6 +371,7 @@ namespace yogi::utils {
 
             json elements = json::array();
             for (const auto& el : n) {
+                auto rNode = resolveItem(node);
                 elements.push_back(nodeToJson(el));
             }
 
@@ -434,10 +435,20 @@ namespace yogi::utils {
             const auto& n = std::any_cast<const ArrayDeclarationNode&>(node);
 
             json elements = json::array();
-            for (const auto& el : n.elements)
+            for (const auto& el : n.elements) {
                 elements.push_back(nodeToJson(el));
+            }
 
-            return {{"kind", "ArrayDeclaration"}, {"identifier", n.identifier}, {"elementType", n.type}, {"size", n.size}, {"elements", elements}};
+            json dims = json::array();
+            for (const auto& d : n.dimensions)
+                dims.push_back(d);
+
+            return {
+                {"kind", "ArrayDeclaration"},
+                {"identifier", n.identifier},
+                {"elementType", n.type},
+                {"dimensions", dims}, // reemplazamos "size" por "dimensions"
+                {"elements", elements}};
         }
 
         if (node.type() == typeid(DictionaryDeclarationNode)) {
