@@ -36,4 +36,32 @@ namespace yogi::visitor::nodes {
         explicit ConcatenationExpressionNode(StringLiteralNode value, std::vector<StringLiteralNode> literals, const Position start, const Position end) : BaseNode(Kind::CONCATENATION_EXPRESSION, start, end), value(std::move(value)), literals(std::move(literals)) {}
     };
 
+    struct UnaryExpressionNode {
+        std::string op;
+        std::any value;
+
+        Position start{};
+        Position end{};
+
+        UnaryExpressionNode() = default;
+        UnaryExpressionNode(std::string op, std::any value, const Position start, const Position end): op(std::move(op)),value(std::move(value)),start(start),end(end) {}
+    };
+
+    struct TernaryExpressionNode {
+        std::any condition;
+        std::any trueExpr;
+        std::any falseExpr;
+
+        std::string value;      // optional (kept for consistency with your current design)
+        std::string resultType; // optional placeholder
+
+        Position start{};
+        Position end{};
+
+        TernaryExpressionNode() = default;
+        TernaryExpressionNode(std::any condition,std::any trueExpr,std::any falseExpr,std::string value,std::string resultType,Position start,Position end): condition(std::move(condition)), trueExpr(std::move(trueExpr)), falseExpr(std::move(falseExpr)), value(std::move(value)), resultType(std::move(resultType)), start(start), end(end) {}
+    };
+
+
+
 } // namespace yogi::visitor::nodes
