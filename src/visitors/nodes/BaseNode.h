@@ -29,6 +29,8 @@ namespace yogi::visitor::nodes {
         // Expression
         BINARY_EXPRESSION,
         CONCATENATION_EXPRESSION,
+        UNARY_EXPRESSION,
+        TERNARY_EXPRESSION,
 
         // Members
         MEMBER_NODE,

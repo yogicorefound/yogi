@@ -1,67 +1,95 @@
 //
 // Created by Brayhan De Aza on 12/10/25.
+// CLEAN AST VERSION (NO EVALUATION)
 //
 
 #pragma once
 
 #include <utility>
+#include <any>
+#include <vector>
 
 #include "BaseNode.h"
 #include "LiteralNode.h"
-#include <any>
-
 
 namespace yogi::visitor::nodes {
+
+    // --------------------------------------------------------
+    // Binary Expression (PURE AST)
+    // --------------------------------------------------------
     struct BinaryExpressionNode : BaseNode {
-        std::any left; // Can be any literal or expression node
-        std::any right; // Can be any literal or expression node
-        std::string op; // Operator: +, -, *, /, %
-        std::string value; // Computed result as string
-        std::string resultType; // Result type: "int", "float", "error"
+        std::any left;     // expression or literal
+        std::any right;    // expression or literal
+        std::string op;    // + - * / % etc.
 
-        explicit BinaryExpressionNode(std::any l, std::any r, std::string  operation, std::string  v, std::string  resType, const Position start, const Position end) : BaseNode(Kind::BINARY_EXPRESSION, start, end), left(std::move(l)), right(std::move(r)), op(std::move(operation)), value(std::move(v)), resultType(std::move(resType)) {}
+        explicit BinaryExpressionNode(
+            std::any l,
+            std::any r,
+            std::string operation,
+            const Position start,
+            const Position end
+        )
+        : BaseNode(Kind::BINARY_EXPRESSION, start, end),
+          left(std::move(l)),
+          right(std::move(r)),
+          op(std::move(operation)) {}
     };
 
-    struct BinaryExpressionLiteralNode : BaseNode {
-        std::string value;
-
-        explicit BinaryExpressionLiteralNode(std::string  value, const Position start, const Position end) : BaseNode(Kind::BINARY_EXPRESSION, start, end), value(std::move(value)) {}
-    };
-
+    // --------------------------------------------------------
+    // Concatenation Expression (PURE AST)
+    // --------------------------------------------------------
     struct ConcatenationExpressionNode : BaseNode {
         StringLiteralNode value;
-        std::vector<StringLiteralNode> literals; // Computed result as string
-        std::string resultType = "str";
+        std::vector<StringLiteralNode> literals;
 
-        explicit ConcatenationExpressionNode(StringLiteralNode value, std::vector<StringLiteralNode> literals, const Position start, const Position end) : BaseNode(Kind::CONCATENATION_EXPRESSION, start, end), value(std::move(value)), literals(std::move(literals)) {}
+        explicit ConcatenationExpressionNode(
+            StringLiteralNode value,
+            std::vector<StringLiteralNode> literals,
+            const Position start,
+            const Position end
+        )
+        : BaseNode(Kind::CONCATENATION_EXPRESSION, start, end),
+          value(std::move(value)),
+          literals(std::move(literals)) {}
     };
 
-    struct UnaryExpressionNode {
+    // --------------------------------------------------------
+    // Unary Expression (PURE AST)
+    // --------------------------------------------------------
+    struct UnaryExpressionNode : BaseNode {
         std::string op;
         std::any value;
 
-        Position start{};
-        Position end{};
-
-        UnaryExpressionNode() = default;
-        UnaryExpressionNode(std::string op, std::any value, const Position start, const Position end): op(std::move(op)),value(std::move(value)),start(start),end(end) {}
+        UnaryExpressionNode(
+            std::string op,
+            std::any value,
+            const Position start,
+            const Position end
+        )
+        : BaseNode(Kind::UNARY_EXPRESSION, start, end),
+          op(std::move(op)),
+          value(std::move(value)) {}
     };
 
-    struct TernaryExpressionNode {
+    // --------------------------------------------------------
+    // Ternary Expression (PURE AST)
+    // --------------------------------------------------------
+    struct TernaryExpressionNode : BaseNode {
         std::any condition;
         std::any trueExpr;
         std::any falseExpr;
 
-        std::string value;      // optional (kept for consistency with your current design)
-        std::string resultType; // optional placeholder
-
-        Position start{};
-        Position end{};
-
-        TernaryExpressionNode() = default;
-        TernaryExpressionNode(std::any condition,std::any trueExpr,std::any falseExpr,std::string value,std::string resultType,Position start,Position end): condition(std::move(condition)), trueExpr(std::move(trueExpr)), falseExpr(std::move(falseExpr)), value(std::move(value)), resultType(std::move(resultType)), start(start), end(end) {}
+        TernaryExpressionNode(
+            std::any condition,
+            std::any trueExpr,
+            std::any falseExpr,
+            const Position start,
+            const Position end
+        )
+        : BaseNode(Kind::TERNARY_EXPRESSION, start, end),
+          condition(std::move(condition)),
+          trueExpr(std::move(trueExpr)),
+          falseExpr(std::move(falseExpr)) {}
     };
-
-
 
 } // namespace yogi::visitor::nodes

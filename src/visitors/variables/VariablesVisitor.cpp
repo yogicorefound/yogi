@@ -1,5 +1,6 @@
 //
 // Created by Brayhan De Aza on 10/19/25.
+// CLEAN AST VISITOR VERSION
 //
 
 #include "VariablesVisitor.h"
@@ -7,198 +8,138 @@
 #include "semantic/semantic.h"
 
 namespace yogi::visitor {
+
+    using namespace nodes;
+
+    // --------------------------------------------------------
     std::any VariablesVisitor::visitVariables(Grammar::VariablesContext* ctx) {
-        if (ctx->variableDeclaration()) {
+        if (ctx->variableDeclaration())
             return visit(ctx->variableDeclaration());
-        }
 
-        if (ctx->variableDeclarationWithoutAssignment()) {
+        if (ctx->variableDeclarationWithoutAssignment())
             return visit(ctx->variableDeclarationWithoutAssignment());
-        }
 
-        if (ctx->variableReAssignment()) {
+        if (ctx->variableReAssignment())
             return visit(ctx->variableReAssignment());
-        }
 
-        // Return empty node
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        return nodes::NoneLiteralNode("None", start, end);
+        const Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        return NoneLiteralNode("None", start, end);
     }
 
-    std::any VariablesVisitor::visitVariableDeclarationWithoutAssignment(Grammar::VariableDeclarationWithoutAssignmentContext* ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+    // --------------------------------------------------------
+    std::any VariablesVisitor::visitVariableDeclarationWithoutAssignment(
+        Grammar::VariableDeclarationWithoutAssignmentContext* ctx) {
 
-        // Get data type
-        const auto visitDataType = visit(ctx->variableDataType());
-        const auto dataType = std::any_cast<std::string>(visitDataType);
+        const Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        // Get identifier
-        const std::string identifier = ctx->IDENTIFIER()->getText();
+        std::string type = std::any_cast<std::string>(visit(ctx->variableDataType()));
+        std::string identifier = ctx->IDENTIFIER()->getText();
 
-        // Check if variable already exists in current scope
         if (scope->existsInCurrent(identifier)) {
-            const auto message = "variable '" + identifier + "' is already declared";
-            throwScopeError(message, identifier, visitDataType, source);
+            throwScopeError("variable already declared", identifier, type, source);
         }
 
-        // Create variable declaration node with no initial value
-        auto node = nodes::VariableDeclarationNode(identifier, dataType, std::any(), false, start, end);
-
-        // Register variable in scope
+        auto node = VariableDeclarationNode(identifier, type, std::any(), false, start, end);
         scope->declareVariable(identifier, node);
 
         return node;
     }
 
-    std::any VariablesVisitor::visitVariableDeclaration(Grammar::VariableDeclarationContext* ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        const std::string identifier = ctx->IDENTIFIER()->getText();
+    // --------------------------------------------------------
+    std::any VariablesVisitor::visitVariableDeclaration(
+        Grammar::VariableDeclarationContext* ctx) {
 
-        parser->inVarMode = true;
-        const auto visitDataType = visit(ctx->variableDataType());
-        const auto arrayTypeKind = resolveKind(visitDataType);
-        const auto [_, typeValue, dataTypeNode] = resolveItem(visitDataType);
+        const Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        std::string identifier = ctx->IDENTIFIER()->getText();
+
+        auto typeAny = visit(ctx->variableDataType());
+        std::string typeValue = std::any_cast<std::string>(typeAny);
+
         if (scope->existsInCurrent(identifier)) {
-            throwScopeError("variable '" + identifier + "' is already declared", identifier, visitDataType, source);
+            throwScopeError("variable already declared", identifier, typeValue, source);
         }
 
-        // Visit the expression instead of variableValue
+        // IMPORTANT: PURE AST ONLY
         std::any value = visit(ctx->expression());
 
-        parser->inVarMode = false;
-        if (value.type() == typeid(nodes::MemberExpressionNode)) {
-            const auto memberExpression = std::any_cast<nodes::MemberExpressionNode>(value);
+        bool isConstant = toUpper(identifier) == identifier;
 
-            if (arrayTypeKind != memberExpression.kind) {
-                throwTypeError(identifier, typeValue, memberExpression.value, source);
-            }
+        auto node = VariableDeclarationNode(
+            identifier,
+            typeValue,
+            value,          // ❗ PURE AST (no transformation)
+            isConstant,
+            start,
+            end
+        );
 
-            // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
-            const bool isConstant = toUpper(identifier) == identifier;
-            const auto [memberType, memberValue, memberNode] = resolveItem(memberExpression.value);
-            auto node = nodes::VariableDeclarationNode(identifier, typeValue, memberNode, isConstant, start, end);
-
-            analyzeVariableDeclaration(node, source);
-            scope->declareVariable(identifier, node);
-
-            return node;
-        }
-
-        const bool isConstant = toUpper(identifier) == identifier;
-        if (value.type() == typeid(nodes::IdentifierLiteral)) {
-            if (auto identifierNode = std::any_cast<nodes::IdentifierLiteral>(value); !scope->lookupVariable(identifierNode.value).has_value()) {
-                throwScopeError("variable '" + identifierNode.value + "' is not declared", identifierNode.value, value, source);
-            }
-        }
-
-        if (value.type() == typeid(nodes::BinaryExpressionNode)) {
-            auto node = std::any_cast<nodes::BinaryExpressionNode>(value);
-
-            if (typeValue.starts_with("float")) {
-                auto floatLiteralNode = nodes::FloatLiteralNode(node.value, node.start, node.end);
-                auto varNode = nodes::VariableDeclarationNode(identifier, typeValue, floatLiteralNode, isConstant, start, end);
-                analyzeVariableDeclaration(varNode, source);
-                scope->declareVariable(identifier, varNode);
-
-                return varNode;
-            }
-
-            auto integerLiteralNode = nodes::IntegerLiteralNode(std::to_string(parseInteger(node.value)), node.start, node.end);
-            auto varNode = nodes::VariableDeclarationNode(identifier, typeValue, integerLiteralNode, isConstant, start, end);
-
-            analyzeVariableDeclaration(varNode, source);
-            scope->declareVariable(identifier, varNode);
-
-            return varNode;
-        }
-
-        const auto [type, resolveValue, __] = resolveItem(value);
-        if (value.type() == typeid(nodes::RegexLiteralNode)) {
-            std::string rValue = resolveValue;
-            if (rValue.size() >= 2) {
-                rValue.erase(0, 1); // remove first character
-                rValue.erase(rValue.size() - 1, 1); // remove last character
-            }
-
-            const auto regexNode = nodes::RegexLiteralNode(rValue, start, end);
-            auto node = nodes::VariableDeclarationNode(identifier, type, regexNode, isConstant, start, end);
-
-            analyzeVariableDeclaration(node, source);
-            scope->declareVariable(identifier, node);
-
-            return node;
-        }
-
-        // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
-        auto node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);
         analyzeVariableDeclaration(node, source);
         scope->declareVariable(identifier, node);
 
         return node;
     }
 
-    std::any VariablesVisitor::visitVariableReAssignment(Grammar::VariableReAssignmentContext* ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
-        const std::string identifier = ctx->IDENTIFIER()->getText();
+    // --------------------------------------------------------
+    std::any VariablesVisitor::visitVariableReAssignment(
+        Grammar::VariableReAssignmentContext* ctx) {
 
-        parser->inVarMode = true;
-        const std::any newValue = visit(ctx->expression());
-        parser->inVarMode = false;
+        const Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        std::string identifier = ctx->IDENTIFIER()->getText();
 
-        // Get identifier
+        std::any newValue = visit(ctx->expression());
 
-        // Check if variable exists
-        // Get variable info from scope
-        const auto variable = scope->lookupVariable(identifier);
+        auto variable = scope->lookupVariable(identifier);
         if (!variable.has_value()) {
-            throwScopeError("variable '" + identifier + "' is not declared", identifier, newValue, source);
+            throwScopeError("variable not declared", identifier, newValue, source);
         }
 
         const auto& varNode = variable.value();
-        auto node = nodes::VariableDeclarationNode(identifier, "", newValue, false, start, end);
 
         if (varNode->isConstant) {
-            throwReassignmentError("'" + identifier + "' is constant and cannot be modified", newValue, source);
+            throwReassignmentError("constant cannot be modified", newValue, source);
         }
 
-        if (varNode->value.type() == typeid(nodes::BinaryExpressionNode)) {
-            node.value = varNode->value;
-        }
-
-        node.varType = varNode->varType;
+        auto node = VariableDeclarationNode(
+            identifier,
+            varNode->varType,
+            newValue,   // ❗ PURE AST ONLY
+            false,
+            start,
+            end
+        );
 
         analyzeVariableReassignment(node, source);
         scope->updateVariable(identifier, node);
+
         return node;
     }
 
-    std::any VariablesVisitor::visitVariableDataType(Grammar::VariableDataTypeContext* ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+    // --------------------------------------------------------
+    std::any VariablesVisitor::visitVariableDataType(
+        Grammar::VariableDataTypeContext* ctx) {
 
-        const auto dataType = ctx->getText();
+        std::string type = ctx->getText();
 
-        if (dataType == "str") {
-            return nodes::StringLiteralNode(dataType, start, end);
-        }
+        const Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        if (dataType.starts_with("int") || dataType.starts_with("uint")) {
-            return nodes::IntegerLiteralNode(dataType, start, end);
-        }
+        if (type == "str")
+            return "str";
 
-        if (dataType.starts_with("float")) {
-            return nodes::FloatLiteralNode(dataType, start, end);
-        }
+        if (type.starts_with("int") || type.starts_with("uint"))
+            return "int";
 
-        if (dataType == "bool") {
-            return nodes::BooleanLiteralNode(dataType, start, end);
-        }
+        if (type.starts_with("float"))
+            return "float";
 
-        return nodes::NoneLiteralNode("", start, end);
+        if (type == "bool")
+            return "bool";
+
+        return "unknown";
     }
 
 } // namespace yogi::visitor
