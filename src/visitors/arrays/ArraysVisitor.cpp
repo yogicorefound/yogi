@@ -4,7 +4,7 @@
 
 #include "ArraysVisitor.h"
 #include "semantic/BaseSemantic.h"
-#include "semantic/semantic.h"
+// #include "semantic/semantic.h"
 
 namespace yogi::visitor {
 

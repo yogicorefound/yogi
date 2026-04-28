@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "BaseNode.h"
 
 namespace yogi::visitor::nodes {
@@ -15,7 +17,12 @@ namespace yogi::visitor::nodes {
 
         bool isConstant; // true for 'const', false for 'var'
 
-        explicit VariableDeclarationNode(const std::string& identifier, const std::string& type, std::any value, const bool isConstant, const Position start, const Position end) : BaseNode(Kind::VARIABLE_DECLARATION, start, end), identifier(identifier), varType(type), value(std::move(value)), isConstant(isConstant) {
+        explicit VariableDeclarationNode(std::string  identifier, std::string  type, std::any value, const bool isConstant, const Position start, const Position end)
+        : BaseNode(Kind::VARIABLE_DECLARATION, start, end),
+            identifier(std::move(identifier)),
+            varType(std::move(type)),
+            value(std::move(value)),
+            isConstant(isConstant) {
             ///
         }
     };
