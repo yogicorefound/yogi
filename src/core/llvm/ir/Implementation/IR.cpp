@@ -10,6 +10,7 @@
 #include <string>
 #include "llvm/IR/Verifier.h"
 #include "llvm/Linker/Linker.h"
+#include "semantic/variables/helpers.h"
 
 namespace yogi::core::ir {
     using namespace yogi::visitor::nodes;
@@ -109,8 +110,10 @@ namespace yogi::core::ir {
             }
             if (node.type() == typeid(VariableDeclarationNode)) {
                 auto n = std::any_cast<VariableDeclarationNode>(node);
-                return mapDataType(n.varType);
+
+                return mapDataType(semantic::convertTypeToString(n.varType));
             }
+
             if (node.type() == typeid(BinaryExpressionNode)) {
                 auto n = std::any_cast<BinaryExpressionNode>(node);
                 llvm::Type* LT = inferType(n.left);

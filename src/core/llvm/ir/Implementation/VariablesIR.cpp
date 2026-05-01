@@ -4,10 +4,13 @@
 
 #include <core/llvm/ir/IR.h>
 
+#include "semantic/semantic.h"
+#include "semantic/variables/helpers.h"
+
 namespace yogi::core::ir {
 
     llvm::Value* IR::variableDeclaration(const visitor::nodes::VariableDeclarationNode& node) {
-        llvm::Type* varType = mapDataType(node.varType);
+        llvm::Type* varType = mapDataType(semantic::convertTypeToString(node.varType));
 
 
         if (const llvm::Function* currentFn = builder->GetInsertBlock()->getParent(); !currentFn)
@@ -28,15 +31,16 @@ namespace yogi::core::ir {
                     initVal = builder->CreateFPToSI(initVal, varType, "init_fp_to_int");
                 } else if (initVal->getType()->isIntegerTy() && varType->isIntegerTy()) {
                     const auto* initType = llvm::cast<llvm::IntegerType>(initVal->getType());
-                    const auto* targetType = llvm::cast<llvm::IntegerType>(varType);
 
-                    if (initType->getBitWidth() < targetType->getBitWidth()) {
+                    if (const auto* targetType = llvm::cast<llvm::IntegerType>(varType);initType->getBitWidth() < targetType->getBitWidth()) {
                         initVal = initType->getBitWidth() == 1 ? builder->CreateZExt(initVal, varType, "init_zext") : builder->CreateSExt(initVal, varType, "init_sext");
                     } else if (initType->getBitWidth() > targetType->getBitWidth()) {
                         initVal = builder->CreateTrunc(initVal, varType, "init_trunc");
                     }
+
                 } else if (initVal->getType()->isPointerTy() && varType->isPointerTy()) {
                     initVal = builder->CreateBitCast(initVal, varType, "init_bitcast");
+
                 } else {
                     throw std::runtime_error("Cannot convert initializer to variable type for: " + node.identifier);
                 }
@@ -64,7 +68,7 @@ namespace yogi::core::ir {
         if (it == symbols.end())
             throw std::runtime_error("Assign to undefined variable: " + node.identifier);
 
-        llvm::Value* currentVal = it->second;
+        const llvm::Value* currentVal = it->second;
         llvm::Type* varType = currentVal->getType();
 
         llvm::Value* rhs = expression(node.value);
@@ -79,9 +83,8 @@ namespace yogi::core::ir {
                 rhs = builder->CreateFPToSI(rhs, varType, "assign_fp_to_int");
             } else if (rhs->getType()->isIntegerTy() && varType->isIntegerTy()) {
                 const auto* Rit = llvm::cast<llvm::IntegerType>(rhs->getType());
-                auto* Vt = llvm::cast<llvm::IntegerType>(varType);
 
-                if (Rit->getBitWidth() < Vt->getBitWidth()) {
+                if (auto* Vt = llvm::cast<llvm::IntegerType>(varType);Rit->getBitWidth() < Vt->getBitWidth()) {
                     rhs = Rit->getBitWidth() == 1 ? builder->CreateZExt(rhs, Vt, "assign_zext") : builder->CreateSExt(rhs, Vt, "assign_sext");
                 } else if (Rit->getBitWidth() > Vt->getBitWidth()) {
                     rhs = builder->CreateTrunc(rhs, Vt, "assign_trunc");

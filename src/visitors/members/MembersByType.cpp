@@ -3,8 +3,8 @@
 //
 
 #include "MembersByType.h"
-
 #include <string>
+#include "semantic/variables/helpers.h"
 
 namespace yogi::visitor {
     using namespace yogi::visitor::nodes;
@@ -60,7 +60,7 @@ namespace yogi::visitor {
         const std::vector<std::string> members =
             {"size", "lower", "upper", "title", "includes", "startWith", "endsWith", "find", "trim", "trimStart", "trimEnd", "replace", "split", "at", "repeat", "match", "slice", "unicode", "reverse"
 
-            }; //
+            };
 
         return members;
     }
@@ -68,6 +68,7 @@ namespace yogi::visitor {
     MemberExpressionNode MembersByType::processStringMembers(const std::any& parentNode, const StringLiteralNode& mNode, const bool& isMethod, std::vector<std::any> arguments, const std::string& source, semantic::Scope* scope) {
         const auto [pType, pValue, resolveNode] = utils::Helpers::resolveItem(parentNode);
         auto member = mNode.value;
+
 
         // Check if member is available for strings
         if (const auto availableMembers = strAvailableMembers(); std::ranges::find(availableMembers, member) == availableMembers.end()) {
@@ -164,7 +165,7 @@ namespace yogi::visitor {
                 const auto varNode = variableScoped.value();
                 const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
 
-                if (varNode->varType != "str") {
+                if (semantic::convertTypeToString(varNode->varType) != "str") {
                     utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
                 }
                 std::string isIncluded = pValue.contains(value) ? "1" : "0";
@@ -215,7 +216,7 @@ namespace yogi::visitor {
                 const auto varNode = variableScoped.value();
                 const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
 
-                if (varNode->varType != "str") {
+                if (semantic::convertTypeToString(varNode->varType) != "str") {
                     utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
                 }
 
@@ -267,8 +268,9 @@ namespace yogi::visitor {
 
                 const auto varNode = variableScoped.value();
                 const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                const  auto varType = semantic::convertTypeToString(varNode->varType);
 
-                if (varNode->varType != "str") {
+                if (varType != "str") {
                     utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
                 }
                 std::string isIncluded = pValue.ends_with(value) ? "1" : "0";
@@ -319,8 +321,10 @@ namespace yogi::visitor {
 
                 const auto varNode = variableScoped.value();
                 const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                const  auto varType = semantic::convertTypeToString(varNode->varType);
 
-                if (varNode->varType != "str") {
+
+                if (varType != "str") {
                     utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
                 }
 
@@ -391,9 +395,11 @@ namespace yogi::visitor {
                     }
 
                     const auto varNode = variableScoped.value();
-                    if (varNode->varType == "str" || varNode->varType == "regex") {
+                    const  auto varType = semantic::convertTypeToString(varNode->varType);
+
+                    if (varType == "str" || varType == "regex") {
                         const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
-                        return {value, varNode->varType};
+                        return {value, varType};
                     }
 
                     utils::Errors::throwError("Error", "Argument must be a string", varNode, source);
@@ -472,8 +478,10 @@ namespace yogi::visitor {
 
                 const auto varNode = variableScoped.value();
                 const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                const  auto varType = semantic::convertTypeToString(varNode->varType);
 
-                if (varNode->varType != "int") {
+
+                if (varType != "int") {
                     utils::Errors::throwError("Error", "Argument must be a integer", varNode, source);
                 }
 
@@ -508,8 +516,10 @@ namespace yogi::visitor {
 
                 const auto varNode = variableScoped.value();
                 const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                const  auto varType = semantic::convertTypeToString(varNode->varType);
 
-                if (varNode->varType != "int") {
+
+                if (varType != "int") {
                     utils::Errors::throwError("Error", "Argument must be a integer", varNode, source);
                 }
 
@@ -544,8 +554,9 @@ namespace yogi::visitor {
 
                     const auto varNode = variableScoped.value();
                     const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                    const  auto varType = semantic::convertTypeToString(varNode->varType);
 
-                    if (varNode->varType != "int") {
+                    if (varType != "int") {
                         utils::Errors::throwError("Error", "Argument must be an integer", varNode, source);
                     }
 
@@ -609,8 +620,10 @@ namespace yogi::visitor {
 
                 const auto varNode = variableScoped.value();
                 const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                const  auto varType = semantic::convertTypeToString(varNode->varType);
 
-                if (varNode->varType != "regex") {
+
+                if (varType != "regex") {
                     utils::Errors::throwError("Error", "Argument must be regex data type", varNode, source);
                 }
                 const auto pattern = std::regex(value);
@@ -657,8 +670,9 @@ namespace yogi::visitor {
 
                     const auto varNode = variableScoped.value();
                     const auto [type, value, _] = utils::Helpers::resolveItem(varNode->value);
+                    const  auto varType = semantic::convertTypeToString(varNode->varType);
 
-                    if (varNode->varType != "str") {
+                    if (varType != "str") {
                         utils::Errors::throwError("Error", "Argument must be string data type", varNode, source);
                     }
 
@@ -699,7 +713,6 @@ namespace yogi::visitor {
         return MemberExpressionNode("", Kind::NONE_LITERAL, mNode.start, mNode.end);
     }
 
-    // COMPREHENSIVE FIX for processMembers
     MemberExpressionNode MembersByType::processMembers(const MemberExpressionNode& node, const StringLiteralNode& mNode, const bool& isMethod, const std::vector<std::any>& arguments, const std::string& source, semantic::Scope* scope) {
         std::any result;
 
@@ -714,4 +727,4 @@ namespace yogi::visitor {
         utils::Errors::throwScopeError("member '" + mNode.value + "' not available for type '" + type + "'", mNode.value, mNode, source);
         return MemberExpressionNode("", Kind::NONE_LITERAL, node.start, node.end);
     }
-} // namespace yogi::visitor
+}

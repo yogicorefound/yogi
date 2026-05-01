@@ -605,5 +605,5 @@ namespace yogi::utils {
         auto n = std::any_cast<visitor::nodes::NoneLiteralNode>(itemResult);
         return n.value;
     }
-
+    
 } // namespace yogi::utils

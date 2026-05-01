@@ -11,15 +11,36 @@
 namespace yogi::semantic {
     class Variables : public virtual BaseSemantic {
        public:
+        struct EvalExpressionResult {
+            utils::Types type;
+            std::string value;
+            bool error;
+            std::string message;
+        };
+
+        enum class Type {
+            Int8,
+            Int16,
+            Int32,
+            Int64,
+            Float,
+            Double,
+            Bool,
+            String,
+            Void
+        };
+
+        static EvalExpressionResult evaluateExpression(const std::any &node);
+
         // Analyze variable declaration without initial assignment
         static void analyzeVariableWithoutAssignment(const visitor::nodes::VariableDeclarationNode& node, const visitor::nodes::Position& start, const visitor::nodes::Position& end);
-
-        // Analyze variable declaration with value
-        static void analyzeVariableDeclaration(visitor::nodes::VariableDeclarationNode& node, const std::string& source);
-
+        static void analyzeVariableDeclaration(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
         static void analyzeVariableReassignment(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
-        // Check if data type matches return type
-        static bool checkDataType(const std::string& dataType, const std::string& returnType, std::string& rValue);
+
+        // Helpers
+        static bool isImplicitlyAssignable( utils::Types from,  utils::Types to, long long value) ;
+        static bool checkDataType(const std::string& dataType, const std::string& returnType);
+
     };
 
 } // namespace yogi::semantic

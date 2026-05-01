@@ -26,8 +26,8 @@ std::any ExpressionVisitor::visitConditionalExpression(Grammar::ConditionalExpre
     if (ctx->expression().size() != 2)
         return condition;
 
-    std::any left = visit(ctx->expression(0));
-    std::any right = visit(ctx->expression(1));
+    const std::any left = visit(ctx->expression(0));
+    const std::any right = visit(ctx->expression(1));
 
     return TernaryExpressionNode(condition, left, right, "", "", {}, {});
 }
