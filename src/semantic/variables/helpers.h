@@ -17,31 +17,39 @@ namespace yogi::semantic {
         unsigned long long max;
     };
 
+
+    inline bool isFloat(utils::Types t) {
+        using T = utils::Types;
+        return t == T::Float || t == T::Double;
+    }
+
     inline bool isNumeric(const utils::Types t) {
         return t >= utils::Types::Integer8 && t <= utils::Types::Double;
     }
 
-    inline  bool isUnsigned(const utils::Types t) {
-        return t == utils::Types::UnsignedInteger8 ||t == utils::Types::UnsignedInteger16 || t == utils::Types::UnsignedInteger32 || t == utils::Types::UnsignedInteger64;
+    inline bool isUnsigned(const utils::Types t) {
+        return t == utils::Types::UnsignedInteger8 || t == utils::Types::UnsignedInteger16 || t == utils::Types::UnsignedInteger32 || t == utils::Types::UnsignedInteger64;
     }
 
-    inline  bool isSigned(const utils::Types t) {
-        return !isUnsigned(t) && t != utils::Types::Float && t != utils::Types::Double && t != utils::Types::Boolean && t != utils::Types::String && t != utils::Types::Void;
+    inline bool isSigned(const utils::Types t) {
+        return !isUnsigned(t) && t != utils::Types::Float && t != utils::Types::Double && t != utils::Types::Boolean &&
+               t != utils::Types::String && t != utils::Types::Void;
     }
 
     inline bool isInteger(const utils::Types t) {
-        return t == utils::Types::Integer8 || t == utils::Types::Integer16 || t == utils::Types::Integer32 || t == utils::Types::Integer64;
+        return t == utils::Types::Integer8 || t == utils::Types::Integer16 || t == utils::Types::Integer32 || t ==
+               utils::Types::Integer64;
     }
 
-    inline IntegerRange getSignedIntegerRange(const utils::Types& type) {
+    inline IntegerRange getSignedIntegerRange(const utils::Types &type) {
         switch (type) {
-            case utils::Types::Integer8:  return {-128, 127};
+            case utils::Types::Integer8: return {-128, 127};
             case utils::Types::Integer16: return {-32768, 32767};
             case utils::Types::Integer32: return {-2147483648LL, 2147483647LL};
             case utils::Types::Integer64: return {
-                -9223372036854775807LL - 1,
-                 9223372036854775807LL
-            };
+                    -9223372036854775807LL - 1,
+                    9223372036854775807LL
+                };
 
             default: return {0, 0};
         }
@@ -49,7 +57,7 @@ namespace yogi::semantic {
 
     inline UnsignedIntegerRange getUnsignedRange(utils::Types t) {
         switch (t) {
-            case utils::Types::UnsignedInteger8:  return {0, 255};
+            case utils::Types::UnsignedInteger8: return {0, 255};
             case utils::Types::UnsignedInteger16: return {0, 65535};
             case utils::Types::UnsignedInteger32: return {0, 4294967295ULL};
             case utils::Types::UnsignedInteger64: return {0, 18446744073709551615ULL};
@@ -58,14 +66,14 @@ namespace yogi::semantic {
         }
     }
 
-    inline void validateIntegerLiteral(const long long value, const utils::Types& targetType, const std::any& node, const std::string& source) {
+    inline void validateIntegerLiteral(const long long value, const utils::Types &targetType, const std::any &node,
+                                       const std::string &source) {
         if (const auto [min, max] = getSignedIntegerRange(targetType); value < min || value > max) {
             utils::Errors::throwRangeError("Integer literal out of range", node, source);
-
         }
     }
 
-    inline  utils::Types inferIntegerType(const long long value) {
+    inline utils::Types inferIntegerType(const long long value) {
         if (value >= -128 && value <= 127) return utils::Types::Integer8;
         if (value >= -32768 && value <= 32767) return utils::Types::Integer16;
         if (value >= -2147483648LL && value <= 2147483647LL) return utils::Types::Integer32;
@@ -73,7 +81,7 @@ namespace yogi::semantic {
         return utils::Types::Integer64;
     }
 
-    inline  utils::Types promoteInteger(utils::Types a, utils::Types b) {
+    inline utils::Types promoteInteger(utils::Types a, utils::Types b) {
         auto rank = [](utils::Types t) -> int {
             switch (t) {
                 case utils::Types::Integer8: return 1;
@@ -102,7 +110,7 @@ namespace yogi::semantic {
         return utils::Types::Integer64; // safe fallback (you can refine later)
     }
 
-    inline  bool fitsInRange(const long long value, const utils::Types type) {
+    inline bool fitsInRange(const long long value, const utils::Types type) {
         if (isUnsigned(type)) {
             auto r = getUnsignedRange(type);
             return value >= 0 && static_cast<unsigned long long>(value) <= r.max;
@@ -145,7 +153,7 @@ namespace yogi::semantic {
         return rank(a) >= rank(b) ? a : b;
     }
 
-    inline utils::Types getVariableDeclarationType(const std::string& type) {
+    inline utils::Types getVariableDeclarationType(const std::string &type) {
         if (type == "int8") return utils::Types::Integer8;
         if (type == "int16") return utils::Types::Integer16;
         if (type == "int32") return utils::Types::Integer32;
@@ -183,5 +191,54 @@ namespace yogi::semantic {
         if (type == utils::Types::String) return "string";
 
         return "";
+    }
+
+
+    inline bool isImplicitlyAssignable(const utils::Types from, const utils::Types to, const long long value) {
+        if (from == to) return true;
+
+        using T = utils::Types;
+
+        // =========================
+        // INTEGER WIDENING ONLY (INT → INT)
+        // =========================
+        if (from == T::Integer8 && to == T::Integer16) return true;
+        if (from == T::Integer16 && to == T::Integer32) return true;
+        if (from == T::Integer32 && to == T::Integer64) return true;
+
+        // =========================
+        // FLOAT RULE (STRICT)
+        // =========================
+        // ONLY float literal → float allowed
+        if (to == T::Float) {
+            return from == T::Float;
+        }
+
+        // DOUBLE RULE (you can decide similarly strict or not)
+        if (to == T::Double) {
+            return from == T::Double || from == T::Float;
+        }
+
+        // =========================
+        // INTEGER → DOUBLE (optional strict rule)
+        // =========================
+        if (from == T::Integer8 && to == T::Double) return false;
+        if (from == T::Integer16 && to == T::Double) return false;
+        if (from == T::Integer32 && to == T::Double) return false;
+        if (from == T::Integer64 && to == T::Double) return false;
+
+        // =========================
+        // FLOAT → INT (never allowed)
+        // =========================
+        if (from == T::Float || from == T::Double) {
+            if (to == T::Integer8 ||
+                to == T::Integer16 ||
+                to == T::Integer32 ||
+                to == T::Integer64) {
+                return false;
+            }
+        }
+
+        return false;
     }
 }

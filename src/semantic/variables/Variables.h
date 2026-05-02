@@ -30,7 +30,6 @@ namespace yogi::semantic {
             Void
         };
 
-        static EvalExpressionResult evaluateExpression(const std::any &node);
 
         // Analyze variable declaration without initial assignment
         static void analyzeVariableWithoutAssignment(const visitor::nodes::VariableDeclarationNode& node, const visitor::nodes::Position& start, const visitor::nodes::Position& end);
