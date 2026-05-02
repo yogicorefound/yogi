@@ -1,1 +1,1 @@
-int16 a = 100 + 200
+bool a = false

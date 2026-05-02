@@ -169,7 +169,7 @@ namespace yogi::semantic {
         if (type == "float") return utils::Types::Float;
         if (type == "double") return utils::Types::Double;
         if (type == "bool") return utils::Types::Boolean;
-        if (type == "string") return utils::Types::String;
+        if (type == "str") return utils::Types::String;
 
         return utils::Types::None;
     }

@@ -36,7 +36,7 @@ namespace yogi::utils::helpers {
 
         // BOOLEAN → ERROR (for now strict)
         if (auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(&node)) {
-            return {Types::Void, "", true, "Boolean not allowed"};
+            return {Types::Boolean, n->value, false, ""};
         }
 
         // BINARY

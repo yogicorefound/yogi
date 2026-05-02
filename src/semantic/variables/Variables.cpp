@@ -30,14 +30,16 @@ namespace yogi::semantic {
     void Variables::analyzeVariableDeclaration(const VariableDeclarationNode &node, const std::string &source) {
         auto [exprType, value, error, message] = utils::Helpers::evaluateExpression(node.value);
 
+        const utils::Types from = exprType;
+        const utils::Types to = node.varType;
+
+
         if (error) {
             utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);;
         }
 
-        using T = utils::Types;
-
-        T from = exprType;
-        T to = node.varType;
+        std::cout << "From: " << convertTypeToString(from) << std::endl;
+        std::cout << "To: " << convertTypeToString(to) << std::endl;
 
         // =========================
         // ❌ FLOAT ↔ INT MIX (BLOCK)
@@ -51,10 +53,8 @@ namespace yogi::semantic {
         // =========================
         if (isInteger(from) && isInteger(to)) {
 
-            long long v = std::stoll(value);
-
             // check range
-            if (!fitsInRange(v, to)) {
+            if (const long long v = std::stoll(value); !fitsInRange(v, to)) {
                 utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);
             }
 
@@ -70,7 +70,6 @@ namespace yogi::semantic {
         // ✔ FLOAT → FLOAT ONLY
         // =========================
         if (isFloat(from) && isFloat(to)) {
-
             if (from != to) {
                 // node.value = createCastNode(to, std::move(node.value));
             }
@@ -96,14 +95,4 @@ namespace yogi::semantic {
         // TODO: implement proper type system later
     }
 
-
-    // --------------------------------------------------------
-    // KEEP FUNCTION (no-op fallback, safe default)
-    // --------------------------------------------------------
-    bool Variables::checkDataType(const std::string &dataType, const std::string &returnType) {
-        // TODO: implement proper type system later
-
-        // Temporary permissive behavior to avoid breaking compiler
-        return true;
-    }
 } // namespace yogi::semantic

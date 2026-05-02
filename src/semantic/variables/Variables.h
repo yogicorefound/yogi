@@ -35,11 +35,6 @@ namespace yogi::semantic {
         static void analyzeVariableWithoutAssignment(const visitor::nodes::VariableDeclarationNode& node, const visitor::nodes::Position& start, const visitor::nodes::Position& end);
         static void analyzeVariableDeclaration(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
         static void analyzeVariableReassignment(const visitor::nodes::VariableDeclarationNode& node, const std::string& source);
-
-        // Helpers
-        static bool isImplicitlyAssignable( utils::Types from,  utils::Types to, long long value) ;
-        static bool checkDataType(const std::string& dataType, const std::string& returnType);
-
     };
 
 } // namespace yogi::semantic
