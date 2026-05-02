@@ -184,7 +184,7 @@ namespace yogi::visitor {
                         node.value += value;
 
                     } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
-                        auto expr = Helpers::evaluateExpression(result);
+                        auto expr = evaluateExpression(result);
                         node.value += expr.value;
                     }
 
@@ -197,6 +197,42 @@ namespace yogi::visitor {
         }
 
         return node;
+    }
+
+
+    LiteralsVisitor::EvalExpressionResult LiteralsVisitor::evaluateExpressionWithScope(const std::any &node) const {
+        std::unordered_set<std::string> visited;
+        return evaluateExpressionWithScopeImplementation(node, visited);
+    }
+
+    LiteralsVisitor::EvalExpressionResult LiteralsVisitor::evaluateExpressionWithScopeImplementation(const std::any &node, std::unordered_set<std::string> &visited) const {
+        // Check if node is an identifier
+        if (const auto n = std::any_cast<nodes::IdentifierLiteral>(&node)) {
+
+            // Detect circular reference
+            if (visited.contains(n->value)) {
+                throw std::runtime_error("Circular reference detected: " + n->value);
+            }
+
+            visited.insert(n->value);
+
+            // Look up in scope
+            if (const auto variable = scope->lookupVariable(n->value); variable.has_value()) {
+                return std::any_cast<EvalExpressionResult>(
+                    evaluateExpressionWithScopeImplementation(variable.value(), visited)
+                );
+            }
+
+            // Not found → evaluate as normal expression
+            return std::any_cast<EvalExpressionResult>(
+                evaluateExpression(node)
+            );
+        }
+
+        // Not an identifier → evaluate normally
+        return std::any_cast<EvalExpressionResult>(
+            evaluateExpression(node)
+        );
     }
 
     std::any LiteralsVisitor::visitFormattedStringContent(Grammar::FormattedStringContentContext *ctx) {

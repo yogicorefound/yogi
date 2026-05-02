@@ -3,6 +3,7 @@
 //
 
 #include "nodes.h"
+#include "semantic/scopes/Scope.h"
 #include "semantic/variables/helpers.h"
 #include "utils/types/Types.h"
 
@@ -15,6 +16,20 @@ namespace yogi::utils::helpers {
         if (op == "/") return l / r;
         return 0;
     }
+
+
+    // Nodes::EvalExpressionResult Nodes::evaluateExpressionWithScope(const std::any &node, const semantic::Scope &scope) {
+    //     // IDENTIFIER
+    //     // if (const auto n = std::any_cast<visitor::nodes::IdentifierLiteral>(&node)) {
+    //     //     EvalExpressionResult result;
+    //     //     if (const auto variable = scope.lookupVariable(n->value); !variable.has_value()) {
+    //     //         return evaluateExpression(n->value);
+    //     //     }
+    //     //
+    //     // }
+    //     //
+    //     // return evaluateExpressionWithScope(node, scope);
+    // }
 
 
     Nodes::EvalExpressionResult Nodes::evaluateExpression(const std::any &node) {
