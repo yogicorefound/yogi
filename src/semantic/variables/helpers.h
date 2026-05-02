@@ -6,8 +6,6 @@
 
 #include "utils/utils.h"
 
-
-
 namespace yogi::semantic {
     struct IntegerRange {
         long long min;

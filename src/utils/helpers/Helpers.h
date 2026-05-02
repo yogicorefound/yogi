@@ -10,11 +10,12 @@
 #include "libs/json.hpp"
 #include "math/math.h"
 #include "members/members.h"
+#include "nodes/nodes.h"
 
 using json = nlohmann::ordered_json;
 
 namespace yogi::utils {
-    class Helpers : public helpers::Math, public helpers::Members {
+    class Helpers : public helpers::Math, public helpers::Members , public helpers::Nodes{
         static json getPosition(const antlr4::Token* token);
 
        public:

@@ -8,7 +8,7 @@
 #include <visitors/nodes/nodes.h>
 
 namespace yogi::visitor {
-    std::any LiteralsVisitor::visitLiterals(Grammar::LiteralsContext* ctx) {
+    std::any LiteralsVisitor::visitLiterals(Grammar::LiteralsContext *ctx) {
         if (ctx->numberLiterals()) {
             return visit(ctx->numberLiterals());
         }
@@ -30,7 +30,7 @@ namespace yogi::visitor {
         return nodes::NoneLiteralNode("Unknown", start, end);
     }
 
-    std::any LiteralsVisitor::visitNumberLiterals(Grammar::NumberLiteralsContext* ctx) {
+    std::any LiteralsVisitor::visitNumberLiterals(Grammar::NumberLiteralsContext *ctx) {
         if (ctx->integerLiteral()) {
             return visit(ctx->integerLiteral());
         }
@@ -44,7 +44,7 @@ namespace yogi::visitor {
         return nodes::NoneLiteralNode("None", start, end);
     }
 
-    std::any LiteralsVisitor::visitStringLiterals(Grammar::StringLiteralsContext* ctx) {
+    std::any LiteralsVisitor::visitStringLiterals(Grammar::StringLiteralsContext *ctx) {
         if (ctx->stringLiteral()) {
             return visit(ctx->stringLiteral());
         }
@@ -62,7 +62,7 @@ namespace yogi::visitor {
         return nodes::NoneLiteralNode("None", start, end);
     }
 
-    std::any LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerLiteralContext* ctx) {
+    std::any LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerLiteralContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
@@ -82,7 +82,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any LiteralsVisitor::visitFloatLiteral(Grammar::FloatLiteralContext* ctx) {
+    std::any LiteralsVisitor::visitFloatLiteral(Grammar::FloatLiteralContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
@@ -100,7 +100,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any LiteralsVisitor::visitStringLiteral(Grammar::StringLiteralContext* ctx) {
+    std::any LiteralsVisitor::visitStringLiteral(Grammar::StringLiteralContext *ctx) {
         const std::string value = parseString(ctx->getText());
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -109,7 +109,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any LiteralsVisitor::visitBooleanLiteral(Grammar::BooleanLiteralContext* ctx) {
+    std::any LiteralsVisitor::visitBooleanLiteral(Grammar::BooleanLiteralContext *ctx) {
         const std::string literal = parseString(ctx->getText());
 
         const std::string value = literal == "true" ? "1" : "0";
@@ -120,7 +120,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any LiteralsVisitor::visitNoneLiteral(Grammar::NoneLiteralContext* ctx) {
+    std::any LiteralsVisitor::visitNoneLiteral(Grammar::NoneLiteralContext *ctx) {
         const std::string value = ctx->getText();
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -129,7 +129,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any LiteralsVisitor::visitIdentifierLiteral(Grammar::IdentifierLiteralContext* ctx) {
+    std::any LiteralsVisitor::visitIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) {
         const std::string identifier = ctx->getText();
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
@@ -137,13 +137,13 @@ namespace yogi::visitor {
         return nodes::IdentifierLiteral(identifier, start, end);
     }
 
-    std::any LiteralsVisitor::visitFormattedString(Grammar::FormattedStringContext* ctx) {
+    std::any LiteralsVisitor::visitFormattedString(Grammar::FormattedStringContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         if (const auto fStringPrefix = ctx->FORMATTED_STRING_START()->getText(); fStringPrefix == "r\"") {
             std::string value;
-            for (const auto child : ctx->formattedStringContent()) {
+            for (const auto child: ctx->formattedStringContent()) {
                 value += child->getText();
             }
 
@@ -152,7 +152,7 @@ namespace yogi::visitor {
         }
 
         auto node = nodes::StringLiteralNode("", start, end);
-        for (const auto child : ctx->formattedStringContent()) {
+        for (const auto child: ctx->formattedStringContent()) {
             if (auto result = visit(child); result.has_value()) {
                 try {
                     // Try to cast to different node types and add to params
@@ -175,7 +175,7 @@ namespace yogi::visitor {
                             throwScopeError("Variable not found", contentNode.value, node, source);
                         }
 
-                        const auto& varNode = variable.value();
+                        const auto &varNode = variable.value();
                         if (varNode->kind != nodes::Kind::VARIABLE_DECLARATION) {
                             throwTypeError("Variable is not a variable declaration", contentNode.value, node, source);
                         }
@@ -184,16 +184,12 @@ namespace yogi::visitor {
                         node.value += value;
 
                     } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
-                        if (const auto contentNode = std::any_cast<nodes::BinaryExpressionNode>(result); contentNode.resultType == "int") {
-                            node.value += contentNode.value;
-
-                        } else {
-                            node.value += contentNode.value;
-                        }
+                        auto expr = Helpers::evaluateExpression(result);
+                        node.value += expr.value;
                     }
 
                     // Add more types as needed (expressions, etc.)
-                } catch (const std::bad_any_cast& _) {
+                } catch (const std::bad_any_cast &_) {
                     // ReSharper disable once CppRedundantControlFlowJump
                     continue;
                 }
@@ -203,7 +199,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any LiteralsVisitor::visitFormattedStringContent(Grammar::FormattedStringContentContext* ctx) {
+    std::any LiteralsVisitor::visitFormattedStringContent(Grammar::FormattedStringContentContext *ctx) {
         // CASE 1: { expression }
         if (ctx->expression()) {
             return visit(ctx->expression());

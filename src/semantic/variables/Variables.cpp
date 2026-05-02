@@ -20,60 +20,29 @@ namespace yogi::semantic {
         const Position& start,
         const Position& end
     ) {
-        // TODO: semantic analysis disabled (placeholder)
-        // This function will later assign default values based on type
-        (void)node;
-        (void)start;
-        (void)end;
+
     }
 
     // --------------------------------------------------------
     // TODO: Implement full variable declaration type checking
     // --------------------------------------------------------
-    void Variables::analyzeVariableDeclaration(
-        VariableDeclarationNode& node,
-        const std::string& source
-    ) {
-        // TODO: semantic analysis disabled (placeholder)
-        // This will later:
-        // - validate types
-        // - validate BinaryExpressionNode structure
-        // - ensure type compatibility
-
-        (void)node;
-        (void)source;
+    void Variables::analyzeVariableDeclaration(const VariableDeclarationNode&node,const std::string&source) {
+        // TODO: implement proper type system later
     }
 
     // --------------------------------------------------------
     // TODO: Implement reassignment type checking
     // --------------------------------------------------------
-    void Variables::analyzeVariableReassignment(
-        const VariableDeclarationNode& node,
-        const std::string& source
-    ) {
-        // TODO: semantic analysis disabled (placeholder)
-        // This will later:
-        // - ensure variable exists
-        // - ensure const rules
-        // - validate type compatibility
-
-        (void)node;
-        (void)source;
+    void Variables::analyzeVariableReassignment(const VariableDeclarationNode& node,const std::string& source) {
+        // TODO: implement proper type system later
     }
+
 
     // --------------------------------------------------------
     // KEEP FUNCTION (no-op fallback, safe default)
     // --------------------------------------------------------
-    bool Variables::checkDataType(
-        const std::string& dataType,
-        const std::string& returnType,
-        std::string& rValue
-    ) {
+    bool Variables::checkDataType( const std::string&dataType, const std::string&returnType) {
         // TODO: implement proper type system later
-
-        (void)dataType;
-        (void)returnType;
-        (void)rValue;
 
         // Temporary permissive behavior to avoid breaking compiler
         return true;

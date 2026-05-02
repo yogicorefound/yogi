@@ -1,25 +1,14 @@
 //
-// Created by Brayhan De Aza on 5/1/26.
+// Created by Brayhan De Aza on 5/2/26.
 //
 
-
-#include <any>
-#include <string>
+#include "nodes.h"
 #include "semantic/variables/helpers.h"
-#include "utils/helpers/Helpers.h"
 #include "utils/types/Types.h"
 
+
 namespace yogi::utils::helpers {
-
-    struct EvalExpressionResult {
-        Types type;
-        std::string value;
-        bool error;
-        std::string message;
-    };
-
-
-    inline double applyOperator(const double l, const double r, std::string op) {
+    double Nodes::applyOperator(const double l, const double r, std::string op) {
         if (op == "+") return l + r;
         if (op == "-") return l - r;
         if (op == "*") return l * r;
@@ -28,7 +17,7 @@ namespace yogi::utils::helpers {
     }
 
 
-    inline  EvalExpressionResult evaluateExpression(const std::any &node) {
+    Nodes::EvalExpressionResult Nodes::evaluateExpression(const std::any &node) {
         // INTEGER
         if (const auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(&node)) {
             const Types type = semantic::inferIntegerType(Helpers::parseInteger(n->value));
@@ -37,17 +26,17 @@ namespace yogi::utils::helpers {
 
         // FLOAT
         if (const auto n = std::any_cast<visitor::nodes::FloatLiteralNode>(&node)) {
-            return { Types::Float, n->value, false, ""};
+            return {Types::Float, n->value, false, ""};
         }
 
         // STRING
         if (auto n = std::any_cast<visitor::nodes::StringLiteralNode>(&node)) {
-            return { Types::String, n->value, false, ""};
+            return {Types::String, n->value, false, ""};
         }
 
         // BOOLEAN → ERROR (for now strict)
         if (auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(&node)) {
-            return { Types::Void, "", true, "Boolean not allowed"};
+            return {Types::Void, "", true, "Boolean not allowed"};
         }
 
         // BINARY
@@ -58,18 +47,18 @@ namespace yogi::utils::helpers {
             auto right = evaluateExpression(n->right);
             if (right.error) return right;
 
-            Types ltype = left.type;
-            Types rtype = right.type;
+            const Types ltype = left.type;
+            const Types rtype = right.type;
 
             // ❌ BOOLEAN BLOCK
             if (ltype == Types::Boolean || rtype == Types::Boolean) {
-                return { Types::Void, "", true, "Boolean cannot be used"};
+                return {Types::Void, "", true, "Boolean cannot be used"};
             }
 
             // STRING RULE (STRICT)
             if (ltype == Types::String || rtype == Types::String) {
                 if (ltype != Types::String || rtype != Types::String) {
-                    return { Types::Void, "", true, "Cannot mix string with other types"};
+                    return {Types::Void, "", true, "Cannot mix string with other types"};
                 }
 
                 return {
@@ -97,10 +86,9 @@ namespace yogi::utils::helpers {
                 };
             }
 
-            return { Types::Void, "", true, "Invalid binary operation"};
+            return {Types::Void, "", true, "Invalid binary operation"};
         }
 
-        return { Types::Void, "", true, "Unknown node"};
+        return {Types::Void, "", true, "Unknown node"};
     }
-    
 }

@@ -29,7 +29,7 @@ std::any ExpressionVisitor::visitConditionalExpression(Grammar::ConditionalExpre
     const std::any left = visit(ctx->expression(0));
     const std::any right = visit(ctx->expression(1));
 
-    return TernaryExpressionNode(condition, left, right, "", "", {}, {});
+    return TernaryExpressionNode(condition, left, right, {}, {});
 }
 
 // --------------------------------------------------------
@@ -41,7 +41,7 @@ std::any ExpressionVisitor::visitLogicalOrExpression(Grammar::LogicalOrExpressio
     for (size_t i = 1; i < ctx->logicalAndExpression().size(); ++i) {
         std::any rhs = visit(ctx->logicalAndExpression(i));
 
-        result = BinaryExpressionNode(result, rhs, "||", "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, "||", {}, {});
     }
 
     return result;
@@ -56,7 +56,7 @@ std::any ExpressionVisitor::visitLogicalAndExpression(Grammar::LogicalAndExpress
     for (size_t i = 1; i < ctx->bitwiseOrExpression().size(); ++i) {
         std::any rhs = visit(ctx->bitwiseOrExpression(i));
 
-        result = BinaryExpressionNode(result, rhs, "&&", "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, "&&",  {}, {});
     }
 
     return result;
@@ -72,7 +72,7 @@ std::any ExpressionVisitor::visitRelationalExpression(Grammar::RelationalExpress
         std::any right = visit(ctx->shiftExpression(i));
         std::string op = ctx->children[2 * i - 1]->getText();
 
-        left = BinaryExpressionNode(left, right, op, "", "", {}, {});
+        left = BinaryExpressionNode(left, right, op, {}, {});
     }
 
     return left;
@@ -88,7 +88,7 @@ std::any ExpressionVisitor::visitEqualityExpression(Grammar::EqualityExpressionC
         std::any right = visit(ctx->relationalExpression(i));
         std::string op = ctx->children[2 * i - 1]->getText();
 
-        left = BinaryExpressionNode(left, right, op, "", "", {}, {});
+        left = BinaryExpressionNode(left, right, op, {}, {});
     }
 
     return left;
@@ -103,7 +103,7 @@ std::any ExpressionVisitor::visitBitwiseAndExpression(Grammar::BitwiseAndExpress
     for (size_t i = 1; i < ctx->equalityExpression().size(); ++i) {
         std::any rhs = visit(ctx->equalityExpression(i));
 
-        result = BinaryExpressionNode(result, rhs, "&", "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, "&", {}, {});
     }
 
     return result;
@@ -118,7 +118,7 @@ std::any ExpressionVisitor::visitBitwiseXorExpression(Grammar::BitwiseXorExpress
     for (size_t i = 1; i < ctx->bitwiseAndExpression().size(); ++i) {
         std::any rhs = visit(ctx->bitwiseAndExpression(i));
 
-        result = BinaryExpressionNode(result, rhs, "^", "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, "^", {}, {});
     }
 
     return result;
@@ -133,7 +133,7 @@ std::any ExpressionVisitor::visitBitwiseOrExpression(Grammar::BitwiseOrExpressio
     for (size_t i = 1; i < ctx->bitwiseXorExpression().size(); ++i) {
         std::any rhs = visit(ctx->bitwiseXorExpression(i));
 
-        result = BinaryExpressionNode(result, rhs, "|", "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, "|",  {}, {});
     }
 
     return result;
@@ -149,7 +149,7 @@ std::any ExpressionVisitor::visitShiftExpression(Grammar::ShiftExpressionContext
         std::any rhs = visit(ctx->additiveExpression(i));
         std::string op = ctx->children[2 * i - 1]->getText();
 
-        result = BinaryExpressionNode(result, rhs, op, "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, op,  {}, {});
     }
 
     return result;
@@ -165,7 +165,7 @@ std::any ExpressionVisitor::visitAdditiveExpression(Grammar::AdditiveExpressionC
         std::any rhs = visit(ctx->multiplicativeExpression(i));
         std::string op = ctx->children[2 * i - 1]->getText();
 
-        result = BinaryExpressionNode(result, rhs, op, "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, op, {}, {});
     }
 
     return result;
@@ -181,7 +181,7 @@ std::any ExpressionVisitor::visitMultiplicativeExpression(Grammar::Multiplicativ
         std::any rhs = visit(ctx->powerExpression(i));
         std::string op = ctx->children[2 * i - 1]->getText();
 
-        result = BinaryExpressionNode(result, rhs, op, "", "", {}, {});
+        result = BinaryExpressionNode(result, rhs, op, {}, {});
     }
 
     return result;
@@ -198,7 +198,7 @@ std::any ExpressionVisitor::visitPowerExpression(Grammar::PowerExpressionContext
 
     std::any right = visit(ctx->powerExpression());
 
-    return BinaryExpressionNode(left, right, "**", "", "", {}, {});
+    return BinaryExpressionNode(left, right, "**", {}, {});
 }
 
 // --------------------------------------------------------

@@ -12,6 +12,7 @@
 #include <vector>
 #include "antlr4-runtime.h"
 #include "libs/uni-algo/include/uni_algo/norm.h"
+#include "semantic/variables/helpers.h"
 
 namespace yogi::utils {
 
@@ -336,7 +337,7 @@ namespace yogi::utils {
             const auto& strLiteral = std::any_cast<const std::vector<StringLiteralNode>&>(node);
 
             json elements = json::array();
-            for (auto s : strLiteral) {
+            for (const auto& s : strLiteral) {
                 elements.push_back(nodeToJson(s));
             }
             return elements;
@@ -396,7 +397,9 @@ namespace yogi::utils {
 
         if (node.type() == typeid(BinaryExpressionNode)) {
             const auto& n = std::any_cast<const BinaryExpressionNode&>(node);
-            return {{"kind", "BinaryExpression"}, {"operator", n.op}, {"resultType", n.resultType}, {"value", n.value}, {"left", nodeToJson(n.left)}, {"right", nodeToJson(n.right)}};
+            auto expr = evaluateExpression(node);
+
+            return {{"kind", "BinaryExpression"}, {"operator", n.op}, {"resultType", expr.type}, {"value", expr.value}, {"left", nodeToJson(n.left)}, {"right", nodeToJson(n.right)}};
         }
 
         // -------------------------------------------------
@@ -537,7 +540,9 @@ namespace yogi::utils {
 
         if (itemResult.type() == typeid(visitor::nodes::BinaryExpressionNode)) {
             auto n = std::any_cast<visitor::nodes::BinaryExpressionNode>(itemResult);
-            return {n.resultType, n.value, itemResult};
+            auto expr = evaluateExpression(&n);
+
+            return {semantic::convertTypeToString(expr.type), expr.value, itemResult};
         }
 
         return {}; // unreachable
@@ -599,7 +604,8 @@ namespace yogi::utils {
 
         if (itemResult.type() == typeid(visitor::nodes::BinaryExpressionNode)) {
             auto n = std::any_cast<visitor::nodes::BinaryExpressionNode>(itemResult);
-            return n.value;
+            auto expr = evaluateExpression(n);
+            return expr.value;
         }
 
         auto n = std::any_cast<visitor::nodes::NoneLiteralNode>(itemResult);
