@@ -23,6 +23,9 @@ namespace yogi::utils {
             UnsignedInteger64,
 
             Float,
+            Float32,
+            Float64,
+
             Double
         };
 

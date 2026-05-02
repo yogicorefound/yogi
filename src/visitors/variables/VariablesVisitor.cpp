@@ -72,8 +72,6 @@ namespace yogi::visitor {
         std::any value = visit(ctx->expression());
         const auto typeValue = semantic::getVariableDeclarationType(tValue);
 
-        std::cout << "Type: " << semantic::convertTypeToString(typeValue) << std::endl;
-
         parser->inVarMode = false;
         if (value.type() == typeid(nodes::MemberExpressionNode)) {
             const auto memberExpression = std::any_cast<nodes::MemberExpressionNode>(value);

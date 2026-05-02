@@ -61,9 +61,10 @@ llvm_map_components_to_libnames(llvm_libs
 add_definitions(${LLVM_DEFINITIONS})
 
 # ============================================================
-#                PRODUCTION SOURCES & EXECUTABLE
+#                PRODUCTION EXECUTABLE
 # ============================================================
 if (NOT ENABLE_TESTING)
+
     IF (ENABLE_TESTING_FOR_TYPES_HINTS)
         file(GLOB_RECURSE PROD_SOURCES
                 "${SOURCES_DIR}/*.cpp"
@@ -81,7 +82,6 @@ if (NOT ENABLE_TESTING)
         add_executable(yogi ${PROD_SOURCES})
     ENDIF ()
 
-
     target_include_directories(yogi PRIVATE
             ${CMAKE_SOURCE_DIR}
             ${SOURCES_DIR}
@@ -98,7 +98,7 @@ if (NOT ENABLE_TESTING)
             ${LLVM_ROOT}/lib
     )
 
-    target_link_options(yogi PRIVATE "LINKER:-no_warn_duplicate_libraries")
+    target_link_options(yogi PRIVATE "-Wl,-w")
 
     target_link_libraries(yogi
             antlr4-runtime
@@ -107,28 +107,26 @@ if (NOT ENABLE_TESTING)
             ${llvm_libs}
     )
 
-    # ============================================================
-    #                       RUN TARGET
-    # ============================================================
     add_custom_target(run
             DEPENDS yogi
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
+
 endif ()
 
 # ============================================================
 #                     TEST EXECUTABLE
 # ============================================================
 if (ENABLE_TESTING)
+
     file(GLOB TEST_SOURCES "${TESTS_DIR}/*.cpp")
 
-    # Get all production sources except the file with main()
     file(GLOB_RECURSE PROD_SOURCES_NO_MAIN
             "${SOURCES_DIR}/*.cpp"
             "${GENERATED_DIR}/*.cpp"
             "${TESTS_DIR}/*.cpp"
     )
-    # Exclude both main.cpp and yogi.cpp (whichever contains main)
+
     list(FILTER PROD_SOURCES_NO_MAIN EXCLUDE REGEX ".*(main|yogi)\\.cpp$")
 
     add_executable(yogi_tests
@@ -155,7 +153,7 @@ if (ENABLE_TESTING)
             ${LLVM_ROOT}/lib
     )
 
-    target_link_options(yogi_tests PRIVATE "LINKER:-no_warn_duplicate_libraries")
+    target_link_options(yogi_tests PRIVATE "-Wl,-w")
 
     target_link_libraries(yogi_tests
             antlr4-runtime
@@ -169,4 +167,5 @@ if (ENABLE_TESTING)
             DEPENDS yogi_tests
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
+
 endif ()

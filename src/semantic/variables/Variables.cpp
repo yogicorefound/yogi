@@ -38,9 +38,6 @@ namespace yogi::semantic {
             utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);;
         }
 
-        std::cout << "From: " << convertTypeToString(from) << std::endl;
-        std::cout << "To: " << convertTypeToString(to) << std::endl;
-
         // =========================
         // ❌ FLOAT ↔ INT MIX (BLOCK)
         // =========================

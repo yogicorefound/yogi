@@ -15,13 +15,13 @@
 namespace yogi::core::ir {
     using namespace yogi::visitor::nodes;
 
-    IR::IR(const std::string& moduleName) {
+    IR::IR(const std::string &moduleName) {
         context = std::make_unique<llvm::LLVMContext>();
         module = std::make_unique<llvm::Module>(moduleName, *context);
-        builder = std::make_unique<llvm::IRBuilder<>>(*context);
+        builder = std::make_unique<llvm::IRBuilder<> >(*context);
     }
 
-    llvm::Value* IR::convertType(llvm::Value* val, llvm::Type* targetType, const std::string& name, const std::string& phase) const {
+    llvm::Value *IR::convertType(llvm::Value *val, llvm::Type *targetType, const std::string &name, const std::string &phase) const {
         if (val->getType() == targetType)
             return val;
 
@@ -32,8 +32,8 @@ namespace yogi::core::ir {
             return builder->CreateFPToSI(val, targetType, name + "_" + phase + "_fp_to_int");
         }
         if (val->getType()->isIntegerTy() && targetType->isIntegerTy()) {
-            const auto* src = llvm::cast<llvm::IntegerType>(val->getType());
-            auto* tgt = llvm::cast<llvm::IntegerType>(targetType);
+            const auto *src = llvm::cast<llvm::IntegerType>(val->getType());
+            auto *tgt = llvm::cast<llvm::IntegerType>(targetType);
 
             if (src->getBitWidth() < tgt->getBitWidth())
                 return src->getBitWidth() == 1 ? builder->CreateZExt(val, tgt, name + "_" + phase + "_zext") : builder->CreateSExt(val, tgt, name + "_" + phase + "_sext");
@@ -54,33 +54,59 @@ namespace yogi::core::ir {
         return true;
     }
 
-    llvm::Type* IR::mapDataType(const std::string& typeName) const {
-        if (typeName == "int")
-            return builder->getInt32Ty();
-        if (typeName == "int8")
+    llvm::Type *IR::mapDataType(const utils::Types &typeName) const {
+
+        // =====================
+        // INTEGER TYPES
+        // =====================
+        if (typeName == utils::Types::Integer8)
             return builder->getInt8Ty();
-        if (typeName == "int16")
+
+        if (typeName == utils::Types::Integer16)
             return builder->getInt16Ty();
-        if (typeName == "int32")
-            return builder->getInt32Ty();
-        if (typeName == "int64")
+
+        if (typeName == utils::Types::Integer32)
+            return builder->getInt32Ty(); // default int
+
+        if (typeName == utils::Types::Integer64)
             return builder->getInt64Ty();
-        if (typeName == "float")
-            return builder->getDoubleTy();
-        if (typeName == "float32")
+
+        // =====================
+        // FLOATING TYPES
+        // =====================
+        if (typeName == utils::Types::Float32)
             return builder->getFloatTy();
-        if (typeName == "float64")
-            return builder->getDoubleTy();
-        if (typeName == "bool")
+
+        if (typeName == utils::Types::Float64 ||
+            typeName == utils::Types::Float)
+            return builder->getDoubleTy(); // default float = double
+
+        // =====================
+        // BOOLEAN
+        // =====================
+        if (typeName == utils::Types::Boolean)
             return builder->getInt1Ty();
-        if (typeName == "none")
-            return builder->getInt8Ty();
-        if (typeName == "str")
-            return llvm::PointerType::get(*context, 0);
-        return builder->getInt64Ty();
+
+        // =====================
+        // VOID / NONE
+        // =====================
+        if (typeName == utils::Types::Void ||
+            typeName == utils::Types::None)
+            return builder->getVoidTy();
+
+        // =====================
+        // STRING
+        // =====================
+        if (typeName == utils::Types::String)
+            return llvm::PointerType::get(*context, 0); // opaque pointer
+
+        // =====================
+        // FALLBACK (SHOULD NEVER HAPPEN)
+        // =====================
+        throw std::runtime_error("Unknown type in mapDataType");
     }
 
-    llvm::Value* IR::promoteToDouble(llvm::Value* v) const {
+    llvm::Value *IR::promoteToDouble(llvm::Value *v) const {
         if (v->getType()->isDoubleTy())
             return v;
         if (v->getType()->isIntegerTy())
@@ -88,7 +114,7 @@ namespace yogi::core::ir {
         throw std::runtime_error("Cannot promote value to double");
     }
 
-    llvm::Type* IR::inferType(const std::any& node) const {
+    llvm::Type *IR::inferType(const std::any &node) const {
         if (!node.has_value())
             throw std::runtime_error("Cannot infer type from empty node");
 
@@ -111,13 +137,13 @@ namespace yogi::core::ir {
             if (node.type() == typeid(VariableDeclarationNode)) {
                 auto n = std::any_cast<VariableDeclarationNode>(node);
 
-                return mapDataType(semantic::convertTypeToString(n.varType));
+                return mapDataType(n.varType);
             }
 
             if (node.type() == typeid(BinaryExpressionNode)) {
                 auto n = std::any_cast<BinaryExpressionNode>(node);
-                llvm::Type* LT = inferType(n.left);
-                llvm::Type* RT = inferType(n.right);
+                llvm::Type *LT = inferType(n.left);
+                llvm::Type *RT = inferType(n.right);
 
                 if (LT->isDoubleTy() || RT->isDoubleTy())
                     return builder->getDoubleTy();
@@ -125,8 +151,8 @@ namespace yogi::core::ir {
                     return builder->getFloatTy();
 
                 if (LT->isIntegerTy() && RT->isIntegerTy()) {
-                    auto* LIT = llvm::cast<llvm::IntegerType>(LT);
-                    auto* RIT = llvm::cast<llvm::IntegerType>(RT);
+                    auto *LIT = llvm::cast<llvm::IntegerType>(LT);
+                    auto *RIT = llvm::cast<llvm::IntegerType>(RT);
                     unsigned maxBits = std::max(LIT->getBitWidth(), RIT->getBitWidth());
                     return builder->getIntNTy(maxBits);
                 }
@@ -138,24 +164,24 @@ namespace yogi::core::ir {
                     throw std::runtime_error("Undefined identifier in inferType: " + n.value);
                 return it->second->getType();
             }
-        } catch (const std::bad_any_cast& e) {
+        } catch (const std::bad_any_cast &e) {
             throw std::runtime_error("Type inference failed: " + std::string(e.what()));
         }
 
         throw std::runtime_error("Unknown node type in inferType");
     }
 
-    llvm::AllocaInst* IR::createEntryBlockAlloca(llvm::Function* function, llvm::Type* type, const std::string& name) {
+    llvm::AllocaInst *IR::createEntryBlockAlloca(llvm::Function *function, llvm::Type *type, const std::string &name) {
         llvm::IRBuilder tmpBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
         return tmpBuilder.CreateAlloca(type, nullptr, name);
     }
 
-    std::unique_ptr<llvm::Module> IR::loadBitcode(const std::string& path, llvm::LLVMContext& context) {
-        llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> mb = llvm::MemoryBuffer::getFile(path);
+    std::unique_ptr<llvm::Module> IR::loadBitcode(const std::string &path, llvm::LLVMContext &context) {
+        llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer> > mb = llvm::MemoryBuffer::getFile(path);
         if (!mb)
             return nullptr;
 
-        llvm::Expected<std::unique_ptr<llvm::Module>> modOrErr = llvm::parseBitcodeFile(mb.get()->getMemBufferRef(), context);
+        llvm::Expected<std::unique_ptr<llvm::Module> > modOrErr = llvm::parseBitcodeFile(mb.get()->getMemBufferRef(), context);
 
         if (!modOrErr)
             return nullptr;
@@ -169,7 +195,7 @@ namespace yogi::core::ir {
         if (!std::filesystem::exists(folderPath))
             return;
 
-        for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
+        for (const auto &entry: std::filesystem::directory_iterator(folderPath)) {
             if (!entry.is_regular_file())
                 continue;
 
@@ -186,26 +212,26 @@ namespace yogi::core::ir {
         }
     }
 
-    llvm::Module* IR::generate(const ProgramNode& node) {
+    llvm::Module *IR::generate(const ProgramNode &node) {
         loadAndLinkModulesFromFolder();
         program(node);
         return module.get();
     }
 
-    llvm::Value* IR::program(const ProgramNode& node) {
+    llvm::Value *IR::program(const ProgramNode &node) {
         // Create main function
-        llvm::Type* retType = builder->getInt32Ty();
-        auto* fnType = llvm::FunctionType::get(retType, false);
-        auto* fn = llvm::Function::Create(fnType, llvm::Function::ExternalLinkage, "main", module.get());
+        llvm::Type *retType = builder->getInt32Ty();
+        auto *fnType = llvm::FunctionType::get(retType, false);
+        auto *fn = llvm::Function::Create(fnType, llvm::Function::ExternalLinkage, "main", module.get());
 
-        auto* entry = llvm::BasicBlock::Create(*context, "entry", fn);
+        auto *entry = llvm::BasicBlock::Create(*context, "entry", fn);
         builder->SetInsertPoint(entry);
 
         // Process all statements in the program
-        for (const auto& stmt : node.body) {
+        for (const auto &stmt: node.body) {
             try {
                 statement(stmt);
-            } catch (const std::exception& e) {
+            } catch (const std::exception &e) {
                 throw std::runtime_error("Program generation failed: " + std::string(e.what()));
             }
         }

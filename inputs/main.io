@@ -1,1 +1,1 @@
-bool a = false
+str nombre = "Hello World"

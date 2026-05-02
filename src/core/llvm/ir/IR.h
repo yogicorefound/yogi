@@ -31,7 +31,8 @@ namespace yogi::core::ir {
         std::unordered_map<std::string, llvm::Value*> symbols;
 
         // Helpers
-        llvm::Type* mapDataType(const std::string& typeName) const;
+        static uint64_t getStringLength(const std::any &node);
+        llvm::Type* mapDataType(const utils::Types &typeName) const;
         llvm::Value* promoteToDouble(llvm::Value* v) const;
         llvm::Type* inferType(const std::any& node) const;
         llvm::Value* convertType(llvm::Value* val, llvm::Type* targetType, const std::string& name, const std::string& phase) const;

@@ -38,9 +38,9 @@ namespace yogi::semantic {
         for (const auto& item : items) {
             const auto [itemType, itemValue, itemNode] = utils::Helpers::resolveItem(item.value);
 
-            analyzeUnOrSingedInteger(node.type, itemValue, node.identifier, itemType, node, source);
-            checkNumberRange(node.type, itemValue, node, source);
-            analyzeArrayItems(node.identifier, node.type, itemValue, item.type, itemNode, source);
+            // analyzeUnOrSingedInteger(node.type, itemValue, node.identifier, itemType, node, source);
+            // checkNumberRange(node.type, itemValue, node, source);
+            // analyzeArrayItems(node.identifier, node.type, itemValue, item.type, itemNode, source);
         }
 
         return node;

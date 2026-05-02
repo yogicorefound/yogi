@@ -62,7 +62,7 @@ namespace yogi::visitor {
     std::vector<std::string> MembersByType::strAvailableMembers() {
         const std::vector<std::string> members =
         {
-            "size", "lower", "upper", "title", "includes", "startWith", "endsWith", "find", "trim", "trimStart",
+            "size", "lower", "upper", "title", "string", "startWith", "endsWith", "find", "trim", "trimStart",
             "trimEnd", "replace", "split", "at", "repeat", "match", "slice", "unicode", "reverse"
 
         };
@@ -158,10 +158,10 @@ namespace yogi::visitor {
             return memberNode;
         }
 
-        if (member == "includes" && isMethod) {
+        if (member == "string" && isMethod) {
             if (arguments.size() != 1) {
                 utils::Errors::throwError(
-                    "Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()),
+                    "Error", "'string' requires exactly 1 argument, but received " + std::to_string(arguments.size()),
                     mNode, source);
             }
 
@@ -520,7 +520,7 @@ namespace yogi::visitor {
         if (member == "at" && isMethod) {
             if (arguments.size() != 1) {
                 utils::Errors::throwError(
-                    "Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()),
+                    "Error", "'string' requires exactly 1 argument, but received " + std::to_string(arguments.size()),
                     mNode, source);
             }
 
@@ -561,7 +561,7 @@ namespace yogi::visitor {
         if (member == "repeat" && isMethod) {
             if (arguments.size() != 1) {
                 utils::Errors::throwError(
-                    "Error", "'includes' requires exactly 1 argument, but received " + std::to_string(arguments.size()),
+                    "Error", "'string' requires exactly 1 argument, but received " + std::to_string(arguments.size()),
                     mNode, source);
             }
 

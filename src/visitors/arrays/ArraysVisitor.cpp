@@ -4,6 +4,7 @@
 
 #include "ArraysVisitor.h"
 #include "semantic/BaseSemantic.h"
+#include "semantic/variables/helpers.h"
 // #include "semantic/semantic.h"
 
 namespace yogi::visitor {
@@ -14,23 +15,22 @@ namespace yogi::visitor {
     // -----------------------
     // Build array elements recursively for multidimensional arrays with default values
     // -----------------------
-    std::vector<nodes::ArrayElementNode>
-    ArraysVisitor::buildArrayElementsRecursively(Grammar::ArrayItemsWithBracketsContext* ctx, const std::string& elementType, const std::vector<size_t>& dimensions, const nodes::Position& start, const nodes::Position& end) {
+    std::vector<nodes::ArrayElementNode> ArraysVisitor::buildArrayElementsRecursively(Grammar::ArrayItemsWithBracketsContext *ctx, const utils::Types &elementType, const std::vector<size_t> &dimensions, const nodes::Position &start, const nodes::Position &end) {
         std::vector<nodes::ArrayElementNode> elements;
 
-        auto getDefaultValue = [start, end](const std::string& type) -> std::any {
-            if (type == "int")
-                return nodes::IntegerLiteralNode{"0", start, end};
-            if (type == "float")
-                return nodes::FloatLiteralNode{"0.0", start, end};
-            if (type == "bool")
-                return nodes::BooleanLiteralNode{"0", start, end};
-            if (type == "str")
-                return nodes::StringLiteralNode{"", start, end};
-            if (type == "regex")
-                return nodes::RegexLiteralNode{"", start, end};
-            return nullptr;
-        };
+        // auto getDefaultValue = [start, end](const utils::Types &type) -> std::any {
+        //     if (type == "int")
+        //         return nodes::IntegerLiteralNode{"0", start, end};
+        //     if (type == "float")
+        //         return nodes::FloatLiteralNode{"0.0", start, end};
+        //     if (type == "bool")
+        //         return nodes::BooleanLiteralNode{"0", start, end};
+        //     if (type == "str")
+        //         return nodes::StringLiteralNode{"", start, end};
+        //     if (type == "regex")
+        //         return nodes::RegexLiteralNode{"", start, end};
+        //     return nullptr;
+        // };
 
         // ---------------------
         // Si ctx es nullptr, array vacío → llenar con valores by default
@@ -42,8 +42,8 @@ namespace yogi::visitor {
 
                 for (size_t i = 0; i < expectedSize; ++i) {
                     if (subDimensions.empty()) {
-                        auto defaultNode = getDefaultValue(elementType);
-                        elements.push_back(nodes::ArrayElementNode(defaultNode, elementType, start, end));
+                        // auto defaultNode = getDefaultValue(elementType);
+                        // elements.push_back(nodes::ArrayElementNode(defaultNode, elementType, start, end));
                     } else {
                         auto subElements = buildArrayElementsRecursively(nullptr, elementType, subDimensions, start, end);
                         elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
@@ -56,7 +56,7 @@ namespace yogi::visitor {
         // ---------------------
         // Caso normal: ctx tiene elementos
         // ---------------------
-        for (auto* itemCtx : ctx->arrayItem()) {
+        for (auto *itemCtx: ctx->arrayItem()) {
             if (itemCtx->arrayItemsWithBrackets()) {
                 std::vector<size_t> subDimensions;
                 if (!dimensions.empty()) {
@@ -69,11 +69,11 @@ namespace yogi::visitor {
                 const auto valueAny = visit(itemCtx);
                 const auto [valueType, value, node] = resolveItem(valueAny);
 
-                if (valueType != elementType) {
-                    throwTypeError("Array element type mismatch", elementType, itemCtx, source);
-                }
+                // if (valueType != elementType) {
+                //     throwTypeError("Array element type mismatch", elementType, itemCtx, source);
+                // }
 
-                elements.push_back(nodes::ArrayElementNode(node, valueType, start, end));
+                // elements.push_back(nodes::ArrayElementNode(node, valueType, start, end));
             }
         }
 
@@ -85,8 +85,8 @@ namespace yogi::visitor {
             while (elements.size() < expectedSize) {
                 std::vector<size_t> subDimensions(dimensions.begin() + 1, dimensions.end());
                 if (subDimensions.empty()) {
-                    auto defaultNode = getDefaultValue(elementType);
-                    elements.push_back(nodes::ArrayElementNode(defaultNode, elementType, start, end));
+                    throwTypeError("Array element type mismatch", semantic::convertTypeToString(elementType), elements, source);
+
                 } else {
                     auto subElements = buildArrayElementsRecursively(nullptr, elementType, subDimensions, start, end);
                     elements.push_back(nodes::ArrayElementNode(subElements, elementType, start, end));
@@ -100,17 +100,17 @@ namespace yogi::visitor {
     // -----------------------
     // Visitor implementations
     // -----------------------
-    std::any ArraysVisitor::visitArrays(Grammar::ArraysContext* ctx) {
+    std::any ArraysVisitor::visitArrays(Grammar::ArraysContext *ctx) {
         return visitChildren(ctx);
     }
 
-    std::any ArraysVisitor::visitArrayAccess(Grammar::ArrayAccessContext* ctx) {
+    std::any ArraysVisitor::visitArrayAccess(Grammar::ArrayAccessContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         const std::string identifier = ctx->IDENTIFIER()->getText();
         const auto arrayIndexList = visit(ctx->arrayIndexList());
-        const auto indexes = std::any_cast<std::vector<size_t>>(arrayIndexList);
+        const auto indexes = std::any_cast<std::vector<size_t> >(arrayIndexList);
 
         const auto array = scope->lookupArray(identifier);
         if (!array.has_value()) {
@@ -127,7 +127,7 @@ namespace yogi::visitor {
 
             // Try to cast as vector of ArrayElementNode
             try {
-                auto vec = std::any_cast<std::vector<nodes::ArrayElementNode>>(current);
+                auto vec = std::any_cast<std::vector<nodes::ArrayElementNode> >(current);
 
                 if (index >= vec.size()) {
                     throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
@@ -136,13 +136,13 @@ namespace yogi::visitor {
                 // Get the value from the ArrayElementNode
                 current = vec[index].value;
                 continue;
-            } catch (const std::bad_any_cast&) {
+            } catch (const std::bad_any_cast &) {
                 // Not a vector<ArrayElementNode>, try vector<any>
             }
 
             // Try to cast as vector of std::any
             try {
-                auto vec = std::any_cast<std::vector<std::any>>(current);
+                auto vec = std::any_cast<std::vector<std::any> >(current);
 
                 if (index >= vec.size()) {
                     throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
@@ -150,13 +150,13 @@ namespace yogi::visitor {
 
                 current = vec[index];
                 continue;
-            } catch (const std::bad_any_cast&) {
+            } catch (const std::bad_any_cast &) {
                 // Not a vector<any>, try vector<int>
             }
 
             // Try vector of int
             try {
-                auto vec = std::any_cast<std::vector<int>>(current);
+                auto vec = std::any_cast<std::vector<int> >(current);
 
                 if (index >= vec.size()) {
                     throwScopeError("Array index " + std::to_string(index) + " out of bounds (size: " + std::to_string(vec.size()) + ") for dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
@@ -167,7 +167,7 @@ namespace yogi::visitor {
                 } else {
                     throwScopeError("Cannot index further: reached atomic value at dimension " + std::to_string(i), identifier, nodes::IdentifierLiteral(identifier, start, end), source);
                 }
-            } catch (const std::bad_any_cast&) {
+            } catch (const std::bad_any_cast &) {
                 // Not a vector<int> either
             }
 
@@ -182,9 +182,9 @@ namespace yogi::visitor {
         return current;
     }
 
-    std::any ArraysVisitor::visitArrayIndexList(Grammar::ArrayIndexListContext* ctx) {
+    std::any ArraysVisitor::visitArrayIndexList(Grammar::ArrayIndexListContext *ctx) {
         std::vector<size_t> indexes;
-        for (const auto expression : ctx->expression()) {
+        for (const auto expression: ctx->expression()) {
             const auto index = visit(expression);
             auto [type, value, node] = resolveItem(index);
 
@@ -194,13 +194,13 @@ namespace yogi::visitor {
         return indexes;
     }
 
-    std::any ArraysVisitor::visitArrayDeclaration(Grammar::ArrayDeclarationContext* ctx) {
+    std::any ArraysVisitor::visitArrayDeclaration(Grammar::ArrayDeclarationContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         // Get type and dimensions
         const auto typeResult = visit(ctx->arrayType());
-        const auto [elementType, dimensions] = std::any_cast<std::pair<std::string, std::vector<size_t>>>(typeResult);
+        const auto [elementType, dimensions] = std::any_cast<std::pair<std::string, std::vector<size_t> > >(typeResult);
         const std::string identifier = ctx->IDENTIFIER()->getText();
 
         if (scope->existsInCurrent(identifier)) {
@@ -212,31 +212,31 @@ namespace yogi::visitor {
 
         // ✨ Si se proporcionan valores explícitos
         if (ctx->arrayValues() && ctx->arrayValues()->arrayItemsWithBrackets()) {
-            elements = buildArrayElementsRecursively(ctx->arrayValues()->arrayItemsWithBrackets(), elementType, dimensions, start, end);
+            // elements = buildArrayElementsRecursively(ctx->arrayValues()->arrayItemsWithBrackets(), elementType, dimensions, start, end);
         }
         // ✨ Si no hay valores, llenar con valores by default según dimensiones
         else if (!dimensions.empty()) {
             // Creamos un contexto ficticio vacío para la recursión
-            elements = buildArrayElementsRecursively(nullptr, elementType, dimensions, start, end);
+            // elements = buildArrayElementsRecursively(nullptr, elementType, dimensions, start, end);
         }
 
         // Register array in scope
-        nodes::ArrayDeclarationNode node(identifier, elementType, toUpper(identifier) == identifier, dimensions, elements, start, end);
-        scope->declareArray(identifier, node);
+        // nodes::ArrayDeclarationNode node(identifier, elementType, toUpper(identifier) == identifier, dimensions, elements, start, end);
+        // scope->declareArray(identifier, node);
 
-        return node;
+        return {};
     }
 
-    std::any ArraysVisitor::visitArrayReAssignment(Grammar::ArrayReAssignmentContext* ctx) {
+    std::any ArraysVisitor::visitArrayReAssignment(Grammar::ArrayReAssignmentContext *ctx) {
         return visitChildren(ctx);
     }
 
-    std::any ArraysVisitor::visitArrayType(Grammar::ArrayTypeContext* ctx) {
+    std::any ArraysVisitor::visitArrayType(Grammar::ArrayTypeContext *ctx) {
         const std::string elementType = ctx->arrayDataType()->getText();
         std::vector<size_t> dimensions;
 
         if (ctx->arrayDeclarationTypeSizes()) {
-            for (auto* exprCtx : ctx->arrayDeclarationTypeSizes()->expression()) {
+            for (auto *exprCtx: ctx->arrayDeclarationTypeSizes()->expression()) {
                 const auto exprAny = visit(exprCtx);
                 if (exprAny.type() == typeid(nodes::IntegerLiteralNode)) {
                     auto node = std::any_cast<nodes::IntegerLiteralNode>(exprAny);
@@ -250,17 +250,17 @@ namespace yogi::visitor {
         return std::make_pair(elementType, dimensions);
     }
 
-    std::any ArraysVisitor::visitArrayItem(Grammar::ArrayItemContext* ctx) {
+    std::any ArraysVisitor::visitArrayItem(Grammar::ArrayItemContext *ctx) {
         return visitChildren(ctx);
     }
 
-    std::any ArraysVisitor::visitArrayElement(Grammar::ArrayElementContext* ctx) {
+    std::any ArraysVisitor::visitArrayElement(Grammar::ArrayElementContext *ctx) {
         return visitChildren(ctx);
     }
 
-    std::any ArraysVisitor::visitArrayDeclarationTypeSizes(Grammar::ArrayDeclarationTypeSizesContext* ctx) {
+    std::any ArraysVisitor::visitArrayDeclarationTypeSizes(Grammar::ArrayDeclarationTypeSizesContext *ctx) {
         std::vector<size_t> dimensions;
-        for (auto* exprCtx : ctx->expression()) {
+        for (auto *exprCtx: ctx->expression()) {
             const auto exprAny = visit(exprCtx);
             if (exprAny.type() == typeid(nodes::IntegerLiteralNode)) {
                 dimensions.push_back(std::stoul(std::any_cast<nodes::IntegerLiteralNode>(exprAny).value));
@@ -271,15 +271,15 @@ namespace yogi::visitor {
         return dimensions;
     }
 
-    std::any ArraysVisitor::visitArrayDataType(Grammar::ArrayDataTypeContext* ctx) {
+    std::any ArraysVisitor::visitArrayDataType(Grammar::ArrayDataTypeContext *ctx) {
         return ctx->getText();
     }
 
-    std::any ArraysVisitor::visitArrayItemsWithBrackets(Grammar::ArrayItemsWithBracketsContext* ctx) {
+    std::any ArraysVisitor::visitArrayItemsWithBrackets(Grammar::ArrayItemsWithBracketsContext *ctx) {
         return visitChildren(ctx);
     }
 
-    std::any ArraysVisitor::visitArrayValues(Grammar::ArrayValuesContext* ctx) {
+    std::any ArraysVisitor::visitArrayValues(Grammar::ArrayValuesContext *ctx) {
         return visitChildren(ctx);
     }
 

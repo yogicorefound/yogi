@@ -17,21 +17,6 @@ namespace yogi::utils::helpers {
         return 0;
     }
 
-
-    // Nodes::EvalExpressionResult Nodes::evaluateExpressionWithScope(const std::any &node, const semantic::Scope &scope) {
-    //     // IDENTIFIER
-    //     // if (const auto n = std::any_cast<visitor::nodes::IdentifierLiteral>(&node)) {
-    //     //     EvalExpressionResult result;
-    //     //     if (const auto variable = scope.lookupVariable(n->value); !variable.has_value()) {
-    //     //         return evaluateExpression(n->value);
-    //     //     }
-    //     //
-    //     // }
-    //     //
-    //     // return evaluateExpressionWithScope(node, scope);
-    // }
-
-
     Nodes::EvalExpressionResult Nodes::evaluateExpression(const std::any &node) {
         // INTEGER
         if (const auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(&node)) {

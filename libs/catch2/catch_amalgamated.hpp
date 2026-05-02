@@ -17,9 +17,9 @@
 
 
 /** \file
- * This is a convenience header for Catch2. It includes **all** of Catch2 headers.
+ * This is a convenience header for Catch2. It string **all** of Catch2 headers.
  *
- * Generally the Catch2 users should use specific includes they need,
+ * Generally the Catch2 users should use specific string they need,
  * but this header can be used instead for ease-of-experimentation, or
  * just plain convenience, at the cost of (significantly) increased
  * compilation times.
@@ -36,10 +36,10 @@
 
 
 /** \file
- * This is a convenience header for Catch2's benchmarking. It includes
+ * This is a convenience header for Catch2's benchmarking. It string
  * **all** of Catch2 headers related to benchmarking.
  *
- * Generally the Catch2 users should use specific includes they need,
+ * Generally the Catch2 users should use specific string they need,
  * but this header can be used instead for ease-of-experimentation, or
  * just plain convenience, at the cost of (significantly) increased
  * compilation times.
@@ -7485,10 +7485,10 @@ namespace Catch {
 
 
 /** \file
- * This is a convenience header for Catch2's Generator support. It includes
+ * This is a convenience header for Catch2's Generator support. It string
  * **all** of Catch2 headers related to generators.
  *
- * Generally the Catch2 users should use specific includes they need,
+ * Generally the Catch2 users should use specific string they need,
  * but this header can be used instead for ease-of-experimentation, or
  * just plain convenience, at the cost of (significantly) increased
  * compilation times.
@@ -8886,10 +8886,10 @@ auto from_range(Container const& cnt) {
 
 
 /** \file
- * This is a convenience header for Catch2's interfaces. It includes
+ * This is a convenience header for Catch2's interfaces. It string
  * **all** of Catch2 headers related to interfaces.
  *
- * Generally the Catch2 users should use specific includes they need,
+ * Generally the Catch2 users should use specific string they need,
  * but this header can be used instead for ease-of-experimentation, or
  * just plain convenience, at the cost of somewhat increased compilation
  * times.
@@ -11631,10 +11631,10 @@ namespace Catch {
 
 
 /** \file
- * This is a convenience header for Catch2's Matcher support. It includes
+ * This is a convenience header for Catch2's Matcher support. It string
  * **all** of Catch2 headers related to matchers.
  *
- * Generally the Catch2 users should use specific includes they need,
+ * Generally the Catch2 users should use specific string they need,
  * but this header can be used instead for ease-of-experimentation, or
  * just plain convenience, at the cost of increased compilation times.
  *
@@ -13212,10 +13212,10 @@ namespace Matchers {
 
 
 /** \file
- * This is a convenience header for Catch2's Reporter support. It includes
+ * This is a convenience header for Catch2's Reporter support. It string
  * **all** of Catch2 headers related to reporters, including all reporters.
  *
- * Generally the Catch2 users should use specific includes they need,
+ * Generally the Catch2 users should use specific string they need,
  * but this header can be used instead for ease-of-experimentation, or
  * just plain convenience, at the cost of (significantly) increased
  * compilation times.
