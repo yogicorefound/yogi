@@ -15,30 +15,10 @@
 namespace yogi::core::ir {
     using namespace yogi::visitor::nodes;
 
-    void IR::declareRuntimeFunctions() const {
-        // struct String* create_string(const char* data, int64_t len)
-        //
-        // In LLVM's type system, since String* is an opaque pointer in modern LLVM,
-        // we represent it as ptr (i8* in older LLVM)
-
-        llvm::Type *ptrTy = llvm::PointerType::get(builder->getContext(), 0);
-        llvm::Type *int64Ty = builder->getInt64Ty();
-
-        llvm::FunctionType *createStringTy = llvm::FunctionType::get(
-            ptrTy, // return type: String*
-            {ptrTy, int64Ty}, // args: const char*, int64_t
-            false // not variadic
-        );
-
-        module->getOrInsertFunction("create_string", createStringTy);
-    }
-
     IR::IR(const std::string &moduleName) {
         context = std::make_unique<llvm::LLVMContext>();
         module = std::make_unique<llvm::Module>(moduleName, *context);
         builder = std::make_unique<llvm::IRBuilder<> >(*context);
-
-        declareRuntimeFunctions();
     }
 
     llvm::Value *IR::convertType(llvm::Value *val, llvm::Type *targetType, const std::string &name, const std::string &phase) const {

@@ -1,1 +1,1 @@
-str nombre = "Hello World"
+str a = "10"

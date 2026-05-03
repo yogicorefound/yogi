@@ -21,7 +21,7 @@ namespace yogi {
     void Yogi::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
         printAST(ast);
-        processLLVM(ast);
+        // processLLVM(ast);
     }
 
     void Yogi::getContent(const int argc, const char* argv[]) {
@@ -137,8 +137,8 @@ namespace yogi {
         core::ir::IR ir(fileName);
         llvm::Module* module = ir.generate(node);
 
-        std::cout << "=== LLVM IR ===" << std::endl;
-        module->print(llvm::outs(), nullptr);
+        // std::cout << "=== LLVM IR ===" << std::endl;
+        // module->print(llvm::outs(), nullptr);
 
         // ---------------------------------------------
         // Generate executable

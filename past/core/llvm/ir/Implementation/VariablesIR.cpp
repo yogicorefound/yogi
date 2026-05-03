@@ -16,8 +16,11 @@ namespace yogi::core::ir {
         throw std::runtime_error("Expected string literal for length extraction");
     }
 
-    llvm::Value *IR::variableDeclaration(const visitor::nodes::VariableDeclarationNode &node) {
-        llvm::Function *currentFn = builder->GetInsertBlock()->getParent();
+    llvm::Value *IR::variableDeclaration(
+        const visitor::nodes::VariableDeclarationNode &node
+    ) {
+        llvm::Function *currentFn =
+                builder->GetInsertBlock()->getParent();
 
         if (!currentFn)
             throw std::runtime_error("Must be inside a function");
@@ -27,7 +30,8 @@ namespace yogi::core::ir {
         // =========================
         // 1. ALLOCATE VARIABLE
         // =========================
-        llvm::AllocaInst *alloca = builder->CreateAlloca(varType, nullptr, node.identifier);
+        llvm::AllocaInst *alloca =
+                builder->CreateAlloca(varType, nullptr, node.identifier);
 
         llvm::Value *initVal = nullptr;
 
@@ -35,6 +39,7 @@ namespace yogi::core::ir {
         // 2. INITIAL VALUE
         // =========================
         if (node.value.has_value()) {
+
             initVal = expression(node.value);
 
             if (!initVal)
@@ -57,10 +62,11 @@ namespace yogi::core::ir {
                         );
 
                 // call runtime:
-                llvm::Function *createStringFn = module->getFunction("create_string");
+                llvm::Function *createStringFn =
+                        module->getFunction("create_string");
 
                 if (!createStringFn)
-                    throw std::runtime_error("");
+                    throw std::runtime_error("Missing runtime: create_string");
 
                 initVal = builder->CreateCall(
                     createStringFn,
@@ -96,7 +102,6 @@ namespace yogi::core::ir {
                         + node.identifier
                     );
                 }
-
             }
 
         } else {

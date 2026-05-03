@@ -15,3 +15,5 @@ libs/antlr4
 /src/antlr/generated/
 /libs/uni-algo/
 /src/antlr/tokens/*.tokens
+*.zip
+libs/*.a

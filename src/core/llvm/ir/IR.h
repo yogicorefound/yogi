@@ -15,42 +15,56 @@
 
 namespace yogi::core::ir {
     class IR {
-       public:
-        explicit IR(const std::string& moduleName);
+        public:
+            explicit IR(const std::string &moduleName);
 
-        // Generate module from AST
-        llvm::Module* generate(const visitor::nodes::ProgramNode& node);
+            // Generate module from AST
+            llvm::Module *generate(const visitor::nodes::ProgramNode &node);
 
-       private:
-        // Core LLVM pieces
-        std::unique_ptr<llvm::LLVMContext> context;
-        std::unique_ptr<llvm::Module> module;
-        std::unique_ptr<llvm::IRBuilder<>> builder;
+        private:
+            // Core LLVM pieces
+            std::unique_ptr<llvm::LLVMContext> context;
+            std::unique_ptr<llvm::Module> module;
+            std::unique_ptr<llvm::IRBuilder<> > builder;
 
-        // Symbol table: variable name -> alloca
-        std::unordered_map<std::string, llvm::Value*> symbols;
+            // Symbol table: variable name -> alloca
+            std::unordered_map<std::string, llvm::Value *> symbols;
 
-        // Helpers
-        static uint64_t getStringLength(const std::any &node);
-        llvm::Type* mapDataType(const utils::Types &typeName) const;
-        llvm::Value* promoteToDouble(llvm::Value* v) const;
-        llvm::Type* inferType(const std::any& node) const;
-        llvm::Value* convertType(llvm::Value* val, llvm::Type* targetType, const std::string& name, const std::string& phase) const;
+            // Helpers
+            static uint64_t getStringLength(const std::any &node);
 
-        // Codegen utilities
-        static llvm::AllocaInst* createEntryBlockAlloca(llvm::Function* function, llvm::Type* type, const std::string& name);
-        static std::unique_ptr<llvm::Module> loadBitcode(const std::string& path, llvm::LLVMContext& context);
+            llvm::Type *mapDataType(const utils::Types &typeName) const;
 
-        // Codegen for different node types
-        llvm::Value* literal(const std::any& node);
-        llvm::Value* expression(const std::any& node);
-        llvm::Value* variableDeclaration(const visitor::nodes::VariableDeclarationNode& node);
-        llvm::Value* variableAssignment(const visitor::nodes::VariableDeclarationNode& node);
-        llvm::Value* arrayDeclaration(const visitor::nodes::ArrayDeclarationNode& node);
-        llvm::Value* program(const visitor::nodes::ProgramNode& node);
-        llvm::Value* statement(const std::any& node);
+            llvm::Value *promoteToDouble(llvm::Value *v) const;
 
-        void loadAndLinkModulesFromFolder() const;
-        bool linkModule(std::unique_ptr<llvm::Module> other) const;
+            llvm::Type *inferType(const std::any &node) const;
+
+            llvm::Value *convertType(llvm::Value *val, llvm::Type *targetType, const std::string &name, const std::string &phase) const;
+
+            // Codegen utilities
+            static llvm::AllocaInst *createEntryBlockAlloca(llvm::Function *function, llvm::Type *type, const std::string &name);
+
+            static std::unique_ptr<llvm::Module> loadBitcode(const std::string &path, llvm::LLVMContext &context);
+
+            // Codegen for different node types
+            llvm::Value *literal(const std::any &node);
+
+            llvm::Value *expression(const std::any &node);
+
+            llvm::Value *variableDeclaration(const visitor::nodes::VariableDeclarationNode &node);
+
+            llvm::Value *variableAssignment(const visitor::nodes::VariableDeclarationNode &node);
+
+            llvm::Value *arrayDeclaration(const visitor::nodes::ArrayDeclarationNode &node);
+
+            llvm::Value *program(const visitor::nodes::ProgramNode &node);
+
+            llvm::Value *statement(const std::any &node);
+
+            void loadAndLinkModulesFromFolder() const;
+
+            bool linkModule(std::unique_ptr<llvm::Module> other) const;
+
+            void declareRuntimeFunctions() const;
     };
 } // namespace yogi::core::ir
