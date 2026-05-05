@@ -1,0 +1,25 @@
+//
+// Created by Brayhan De Aza on 12/10/25.
+//
+
+#pragma once
+
+#include "BaseNode.h"
+#include "StatementNode.h"
+
+namespace yogi::visitor::nodes {
+    // Program Node (root of AST - holds all top-level statements)
+    struct ProgramNode : BaseNode {
+        std::vector<std::any> body;  // All top-level statements
+
+        explicit ProgramNode(
+            const Position start,
+            const Position end
+        ) : BaseNode(Kind::PROGRAM, start, end) {}
+
+        void addStatement(std::any statement) {
+            body.push_back(std::move(statement));
+        }
+    };
+
+} // namespace yogi::visitor::nodes

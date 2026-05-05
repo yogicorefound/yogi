@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10)
-
 project(yogi VERSION 0.0.1 LANGUAGES C CXX)
 
 # ============================================================
@@ -37,13 +36,6 @@ set(ANTLR4_RUNTIME_LIB "${CMAKE_SOURCE_DIR}/libs/antlr4/runtime/Cpp/build/runtim
 
 
 # ============================================================
-#                       RUNTIME
-# ============================================================
-add_subdirectory(runtime)
-
-
-
-# ============================================================
 #                       LLVM
 # ============================================================
 cmake_policy(SET CMP0075 NEW)
@@ -69,15 +61,29 @@ llvm_map_components_to_libnames(llvm_libs
 )
 
 add_definitions(${LLVM_DEFINITIONS})
-
 file(GLOB_RECURSE PROD_SOURCES
     "${SOURCES_DIR}/*.cpp"
     "${GENERATED_DIR}/*.cpp"
 )
 
+# ============================================================
+#                       RUNTIME
+# ============================================================
+add_subdirectory(runtime)
+include_directories(yogi_runtime)
 
-add_executable(yogi ${PROD_SOURCES})
+add_executable(${PROJECT_NAME}
+        ${PROD_SOURCES}
+)
 
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        -Wl,-force_load,$<TARGET_FILE:yogi_runtime>
+        yogi_runtime
+        antlr4-runtime
+        "${ANTLR4_RUNTIME_LIB}/libantlr4-runtime.4.13.2.dylib"
+        "${LIBS_DIR}/uni-algo/build/libuni-algo.a"
+        ${llvm_libs}
+)
 target_include_directories(yogi PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/runtime/includes
@@ -91,27 +97,14 @@ target_include_directories(yogi PRIVATE
     ${LLVM_INCLUDE_DIRS}
     ${LLVM_ROOT}/include
     ${LIBS_DIR}/uni-algo/include
-    ${LIBS_DIR}/uni-algo/include
 )
 
-target_link_directories(yogi PRIVATE
+target_link_directories(${PROJECT_NAME} PRIVATE
     ${ANTLR4_RUNTIME_LIB}
     ${LLVM_ROOT}/lib
 )
 
-target_link_options(yogi PRIVATE
-"-Wl,-w"
-)
-
-target_link_libraries(yogi PRIVATE
-    yogi_runtime
-    antlr4-runtime
-    "${ANTLR4_RUNTIME_LIB}/libantlr4-runtime.4.13.2.dylib"
-    "${LIBS_DIR}/uni-algo/build/libuni-algo.a"
-    ${llvm_libs}
-)
-
 add_custom_target(run
-    DEPENDS yogi
+    DEPENDS ${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )

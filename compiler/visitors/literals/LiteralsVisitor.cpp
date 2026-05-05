@@ -1,0 +1,256 @@
+//
+// Created by Brayhan De Aza on 10/19/25.
+//
+
+#include "LiteralsVisitor.h"
+
+#include <catch2/catch_amalgamated.hpp>
+#include <visitors/nodes/nodes.h>
+
+namespace yogi::visitor {
+    std::any LiteralsVisitor::visitLiterals(Grammar::LiteralsContext *ctx) {
+        if (ctx->numberLiterals()) {
+            return visit(ctx->numberLiterals());
+        }
+        if (ctx->stringLiterals()) {
+            return visit(ctx->stringLiterals());
+        }
+
+        if (ctx->booleanLiteral()) {
+            return visit(ctx->booleanLiteral());
+        }
+
+        if (ctx->identifierLiteral()) {
+            return visit(ctx->identifierLiteral());
+        }
+
+        // Return a NoneLiteralNode as default
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        return nodes::NoneLiteralNode("Unknown", start, end);
+    }
+
+    std::any LiteralsVisitor::visitNumberLiterals(Grammar::NumberLiteralsContext *ctx) {
+        if (ctx->integerLiteral()) {
+            return visit(ctx->integerLiteral());
+        }
+        if (ctx->floatLiteral()) {
+            return visit(ctx->floatLiteral());
+        }
+
+        // Return a NoneLiteralNode as default
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        return nodes::NoneLiteralNode("None", start, end);
+    }
+
+    std::any LiteralsVisitor::visitStringLiterals(Grammar::StringLiteralsContext *ctx) {
+        if (ctx->stringLiteral()) {
+            return visit(ctx->stringLiteral());
+        }
+        if (ctx->formattedString()) {
+            return visit(ctx->formattedString());
+        }
+
+        if (ctx->identifierLiteral()) {
+            return visit(ctx->identifierLiteral());
+        }
+
+        // Return a NoneLiteralNode as default
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+        return nodes::NoneLiteralNode("None", start, end);
+    }
+
+    std::any LiteralsVisitor::visitIntegerLiteral(Grammar::IntegerLiteralContext *ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        const auto rValue = ctx->getText();
+
+        if (rValue.starts_with("0b") || rValue.starts_with("0x") || rValue.starts_with("0o") || rValue.contains("_")) {
+            auto node = nodes::IntegerLiteralNode(std::to_string(parseInteger(rValue)), start, end);
+            return node;
+        }
+
+        if (rValue.contains("e") || rValue.contains("E")) {
+            auto node = nodes::FloatLiteralNode(rValue, start, end);
+            return node;
+        }
+
+        auto node = nodes::IntegerLiteralNode(rValue, start, end);
+        return node;
+    }
+
+    std::any LiteralsVisitor::visitFloatLiteral(Grammar::FloatLiteralContext *ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        if (ctx->getText().contains("_")) {
+            // ctx->getText()
+            auto node = nodes::IntegerLiteralNode(ctx->getText(), start, end);
+            return node;
+        }
+
+        auto node = nodes::FloatLiteralNode(ctx->getText(), start, end);
+        if (!fitsInFloat64(ctx->getText())) {
+            throwScopeError("<float> type is not in 64-bit range", ctx->getText(), node, source);
+        }
+
+        return node;
+    }
+
+    std::any LiteralsVisitor::visitStringLiteral(Grammar::StringLiteralContext *ctx) {
+        const std::string value = parseString(ctx->getText());
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        auto node = nodes::StringLiteralNode(value, start, end);
+        return node;
+    }
+
+    std::any LiteralsVisitor::visitBooleanLiteral(Grammar::BooleanLiteralContext *ctx) {
+        const std::string literal = parseString(ctx->getText());
+
+        const std::string value = literal == "true" ? "1" : "0";
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        auto node = nodes::BooleanLiteralNode(value, start, end);
+        return node;
+    }
+
+    std::any LiteralsVisitor::visitNoneLiteral(Grammar::NoneLiteralContext *ctx) {
+        const std::string value = ctx->getText();
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        auto node = nodes::NoneLiteralNode(value, start, end);
+        return node;
+    }
+
+    std::any LiteralsVisitor::visitIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) {
+        const std::string identifier = ctx->getText();
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        return nodes::IdentifierLiteral(identifier, start, end);
+    }
+
+    std::any LiteralsVisitor::visitFormattedString(Grammar::FormattedStringContext *ctx) {
+        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+        if (const auto fStringPrefix = ctx->FORMATTED_STRING_START()->getText(); fStringPrefix == "r\"") {
+            std::string value;
+            for (const auto child: ctx->formattedStringContent()) {
+                value += child->getText();
+            }
+
+            auto node = nodes::RegexLiteralNode(value, start, end);
+            return node;
+        }
+
+        auto node = nodes::StringLiteralNode("", start, end);
+        for (const auto child: ctx->formattedStringContent()) {
+            if (auto result = visit(child); result.has_value()) {
+                try {
+                    // Try to cast to different node types and add to params
+                    if (result.type() == typeid(nodes::StringLiteralNode)) {
+                        auto contentNode = std::any_cast<nodes::StringLiteralNode>(result);
+                        node.value += contentNode.value;
+                    } else if (result.type() == typeid(nodes::IntegerLiteralNode)) {
+                        auto contentNode = std::any_cast<nodes::IntegerLiteralNode>(result);
+                        node.value += contentNode.value;
+                    } else if (result.type() == typeid(nodes::FloatLiteralNode)) {
+                        auto contentNode = std::any_cast<nodes::FloatLiteralNode>(result);
+                        node.value += contentNode.value;
+                    } else if (result.type() == typeid(nodes::BooleanLiteralNode)) {
+                        auto contentNode = std::any_cast<nodes::BooleanLiteralNode>(result);
+                        node.value += contentNode.value == "1" ? "true" : "false";
+                    } else if (result.type() == typeid(nodes::IdentifierLiteral)) {
+                        auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
+                        const auto variable = scope->lookupVariable(contentNode.value);
+                        if (!variable.has_value()) {
+                            throwScopeError("Variable not found", contentNode.value, node, source);
+                        }
+
+                        const auto &varNode = variable.value();
+                        if (varNode->kind != nodes::Kind::VARIABLE_DECLARATION) {
+                            throwTypeError("Variable is not a variable declaration", contentNode.value, node, source);
+                        }
+
+                        const auto [type, value, _] = resolveItem(varNode->value);
+                        node.value += value;
+
+                    } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
+                        auto expr = evaluateExpression(result);
+                        node.value += expr.value;
+                    }
+
+                    // Add more types as needed (expressions, etc.)
+                } catch (const std::bad_any_cast &_) {
+                    // ReSharper disable once CppRedundantControlFlowJump
+                    continue;
+                }
+            }
+        }
+
+        return node;
+    }
+
+
+    LiteralsVisitor::EvalExpressionResult LiteralsVisitor::evaluateExpressionWithScope(const std::any &node) const {
+        std::unordered_set<std::string> visited;
+        return evaluateExpressionWithScopeImplementation(node, visited);
+    }
+
+    LiteralsVisitor::EvalExpressionResult LiteralsVisitor::evaluateExpressionWithScopeImplementation(const std::any &node, std::unordered_set<std::string> &visited) const {
+        // Check if node is an identifier
+        if (const auto n = std::any_cast<nodes::IdentifierLiteral>(&node)) {
+
+            // Detect circular reference
+            if (visited.contains(n->value)) {
+                throw std::runtime_error("Circular reference detected: " + n->value);
+            }
+
+            visited.insert(n->value);
+
+            // Look up in scope
+            if (const auto variable = scope->lookupVariable(n->value); variable.has_value()) {
+                return std::any_cast<EvalExpressionResult>(
+                    evaluateExpressionWithScopeImplementation(variable.value(), visited)
+                );
+            }
+
+            // Not found → evaluate as normal expression
+            return std::any_cast<EvalExpressionResult>(
+                evaluateExpression(node)
+            );
+        }
+
+        // Not an identifier → evaluate normally
+        return std::any_cast<EvalExpressionResult>(
+            evaluateExpression(node)
+        );
+    }
+
+    std::any LiteralsVisitor::visitFormattedStringContent(Grammar::FormattedStringContentContext *ctx) {
+        // CASE 1: { expression }
+        if (ctx->expression()) {
+            return visit(ctx->expression());
+        }
+
+        // CASE 2: TEXT inside formatted string
+        if (ctx->FORMATTED_STRING_TEXT() || ctx->REGEX_LITERAL()) {
+            const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
+            const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+
+            auto node = nodes::StringLiteralNode(ctx->getText(), start, end);
+            return node;
+        }
+
+        // Return empty if nothing matches
+        return {};
+    }
+} // namespace yogi::visitor

@@ -2,7 +2,7 @@
 // Created by Brayhan De Aza on 12/12/25.
 //
 
-#include "wrapper.h"
+#include "compiler.h"
 
 #include <Grammar.h>
 #include <Tokens.h>
@@ -10,21 +10,21 @@
 #include <core/llvm/ir/IR.h>
 #include <utils/errors/AntlrErrorListener.h>
 #include <visitors/program/ProgramVisitor.h>
-
 #include "antlr4-runtime.h"
 
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "../src/visitors/nodes/ArrayNode.h"
 
 namespace yogi {
-    void Yogi::compile() {
+    void Compiler::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
         printAST(ast);
-        processLLVM(ast);
+        // processLLVM(ast);
     }
 
-    void Yogi::getContent(const int argc, const char* argv[]) {
+    void Compiler::getContent(const int argc, const char *argv[]) {
         if (argc < 2) {
             std::cerr << "Usage: " << argv[0] << " <input-file>" << std::endl;
             std::exit(1);
@@ -44,7 +44,7 @@ namespace yogi {
         this->content = buffer.str();
     }
 
-    visitor::nodes::ProgramNode Yogi::testAST(std::string& text) {
+    visitor::nodes::ProgramNode Yogi::testAST(std::string &text) {
         // ---------------------------------------------
         // Feed file content into ANTLR
         // ---------------------------------------------
@@ -70,7 +70,7 @@ namespace yogi {
         // ---------------------------------------------
         // Feed Tokens into Grammar
         // ---------------------------------------------
-        auto* tree = grammar.program();
+        auto *tree = grammar.program();
         visitor::Visitor visitor(text, &grammar);
 
         // ---------------------------------------------
@@ -108,7 +108,7 @@ namespace yogi {
         // ---------------------------------------------
         // Feed Tokens into Grammar
         // ---------------------------------------------
-        auto* tree = grammar.program();
+        auto *tree = grammar.program();
         visitor::Visitor visitor(content, &grammar);
 
         // ---------------------------------------------
@@ -121,7 +121,7 @@ namespace yogi {
         return node;
     }
 
-    void Yogi::printAST(const std::any& ast) {
+    void Compiler::printAST(const std::any &ast) {
         if (ast.type() == typeid(visitor::nodes::ProgramNode)) {
             std::cout << "=== AST ===" << std::endl;
             utils::Helpers::printNode(ast, 1);
@@ -131,11 +131,11 @@ namespace yogi {
         }
     }
 
-    void Yogi::processLLVM(const std::any& ast) const {
+    void Compiler::processLLVM(const std::any &ast) const {
         const auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
         core::ir::IR ir(fileName);
-        llvm::Module* module = ir.generate(node);
+        llvm::Module *module = ir.generate(node);
 
         // std::cout << "=== LLVM IR ===" << std::endl;
         // module->print(llvm::outs(), nullptr);
