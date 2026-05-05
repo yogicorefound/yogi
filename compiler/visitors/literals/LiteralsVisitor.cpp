@@ -3,7 +3,6 @@
 //
 
 #include "LiteralsVisitor.h"
-
 #include <catch2/catch_amalgamated.hpp>
 #include <visitors/nodes/nodes.h>
 

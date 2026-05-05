@@ -4824,7 +4824,7 @@ namespace Catch {
                 m_ref = std::make_shared<Detail::BoundLambda<LambdaT>>(lambda);
             }
 
-            // The exe name is not parsed out of the normal tokens, but is
+            // The includes name is not parsed out of the normal tokens, but is
             // handled specially
             Detail::InternalParseResult
                 parse(std::string const&,
