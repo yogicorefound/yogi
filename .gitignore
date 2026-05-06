@@ -17,3 +17,5 @@ libs/antlr4
 /src/antlr/tokens/*.tokens
 *.zip
 libs/*.a
+/app
+/main.o

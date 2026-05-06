@@ -21,7 +21,7 @@
 namespace yogi {
     void Yogi::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
-        // printAST(ast);
+        printAST(ast);
         processLLVM(ast);
     }
 
@@ -139,7 +139,7 @@ namespace yogi {
         core::ir::IR ir(fileName);
         llvm::Module *module = ir.generate(node);
 
-        // module->print(llvm::outs(), nullptr);
+        module->print(llvm::outs(), nullptr);
 
         namespace fs = std::filesystem;
         const fs::path buildDir = fs::current_path();

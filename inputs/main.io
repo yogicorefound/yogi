@@ -1,1 +1,1 @@
-str a = "10"
+bool a = false

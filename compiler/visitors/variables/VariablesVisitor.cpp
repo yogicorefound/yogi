@@ -4,11 +4,10 @@
 
 #include "VariablesVisitor.h"
 #include <visitors/nodes/nodes.h>
-#include "semantic/semantic.h"
-#include "semantic/variables/helpers.h"
+#include "compiler/utils/helpers/visitor/variables.h"
 
 namespace yogi::visitor {
-    std::any VariablesVisitor::visitVariables(Grammar::VariablesContext* ctx) {
+    std::any VariablesVisitor::visitVariables(Grammar::VariablesContext *ctx) {
         if (ctx->variableDeclaration()) {
             return visit(ctx->variableDeclaration());
         }
@@ -27,7 +26,7 @@ namespace yogi::visitor {
         return nodes::NoneLiteralNode("None", start, end);
     }
 
-    std::any VariablesVisitor::visitVariableDeclarationWithoutAssignment(Grammar::VariableDeclarationWithoutAssignmentContext* ctx) {
+    std::any VariablesVisitor::visitVariableDeclarationWithoutAssignment(Grammar::VariableDeclarationWithoutAssignmentContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
@@ -45,7 +44,7 @@ namespace yogi::visitor {
         }
 
         // Create variable declaration node with no initial value
-        const auto varType = semantic::getVariableDeclarationType(dataType);
+        const auto varType = utils::VisitorHelpers::getVariableDeclarationType(dataType);
         auto node = nodes::VariableDeclarationNode(identifier, varType, std::any(), false, start, end);
 
         // Register variable in scope
@@ -54,7 +53,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any VariablesVisitor::visitVariableDeclaration(Grammar::VariableDeclarationContext* ctx) {
+    std::any VariablesVisitor::visitVariableDeclaration(Grammar::VariableDeclarationContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
         const std::string identifier = ctx->IDENTIFIER()->getText();
@@ -70,7 +69,7 @@ namespace yogi::visitor {
 
         // Visit the expression instead of variableValue
         std::any value = visit(ctx->expression());
-        const auto typeValue = semantic::getVariableDeclarationType(tValue);
+        const auto typeValue = utils::VisitorHelpers::getVariableDeclarationType(tValue);
 
         parser->inVarMode = false;
         if (value.type() == typeid(nodes::MemberExpressionNode)) {
@@ -85,9 +84,7 @@ namespace yogi::visitor {
             const auto [memberType, memberValue, memberNode] = resolveItem(memberExpression.value);
             auto node = nodes::VariableDeclarationNode(identifier, typeValue, memberNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(node, source);
             scope->declareVariable(identifier, node);
-
             return node;
         }
 
@@ -107,24 +104,21 @@ namespace yogi::visitor {
             }
 
             const auto regexNode = nodes::RegexLiteralNode(rValue, start, end);
-            const auto varType = semantic::getVariableDeclarationType(type);
-            auto node = nodes::VariableDeclarationNode(identifier, varType, regexNode, isConstant, start, end);
+            const auto varType = utils::VisitorHelpers::getVariableDeclarationType(type);
+            const auto node = nodes::VariableDeclarationNode(identifier, varType, regexNode, isConstant, start, end);
 
-            analyzeVariableDeclaration(node, source);
             scope->declareVariable(identifier, node);
-
             return node;
         }
 
         // Store value AS-IS (BinaryExpressionNode, IdentifierLiteral, LiteralNode)
-        auto node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);
-        analyzeVariableDeclaration(node, source);
+        const auto node = nodes::VariableDeclarationNode(identifier, typeValue, value, isConstant, start, end);
         scope->declareVariable(identifier, node);
 
         return node;
     }
 
-    std::any VariablesVisitor::visitVariableReAssignment(Grammar::VariableReAssignmentContext* ctx) {
+    std::any VariablesVisitor::visitVariableReAssignment(Grammar::VariableReAssignmentContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
         const std::string identifier = ctx->IDENTIFIER()->getText();
@@ -142,7 +136,7 @@ namespace yogi::visitor {
             throwScopeError("variable '" + identifier + "' is not declared", identifier, newValue, source);
         }
 
-        const auto& varNode = variable.value();
+        const auto &varNode = variable.value();
         auto node = nodes::VariableDeclarationNode(identifier, varNode->varType, newValue, false, start, end);
 
         if (varNode->isConstant) {
@@ -154,13 +148,12 @@ namespace yogi::visitor {
         }
 
         node.varType = varNode->varType;
-
-        analyzeVariableReassignment(node, source);
         scope->updateVariable(identifier, node);
+
         return node;
     }
 
-    std::any VariablesVisitor::visitVariableDataType(Grammar::VariableDataTypeContext* ctx) {
+    std::any VariablesVisitor::visitVariableDataType(Grammar::VariableDataTypeContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
