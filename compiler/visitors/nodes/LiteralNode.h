@@ -58,10 +58,10 @@ namespace yogi::visitor::nodes {
 
     // Formatted String Literal
     struct FormattedStringNode : BaseNode {
-        std::string value;
+        std::vector<std::any> value;
         std::vector<BaseNode> params;
 
-        explicit FormattedStringNode(const std::string& v, const Position start, const Position end) : BaseNode(Kind::FORMATTED_STRING, start, end), value(v) {}
+        explicit FormattedStringNode(const std::vector<std::any> &value, const Position start, const Position end) : BaseNode(Kind::FORMATTED_STRING, start, end), value(value) {}
     };
 
 } // namespace yogi::visitor::nodes

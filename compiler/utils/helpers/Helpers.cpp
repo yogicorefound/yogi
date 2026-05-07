@@ -16,14 +16,14 @@
 
 namespace yogi::utils {
 
-    bool Helpers::areCanonicallyEqual(const std::string& str1, const std::string& str2) {
+    bool Helpers::areCanonicallyEqual(const std::string &str1, const std::string &str2) {
         const std::string norm1 = una::norm::to_nfc_utf8(str1);
         const std::string norm2 = una::norm::to_nfc_utf8(str2);
 
         return norm1 == norm2;
     }
 
-    bool Helpers::checkDataType(const std::string& dataType, const std::string& returnType) {
+    bool Helpers::checkDataType(const std::string &dataType, const std::string &returnType) {
         if (dataType == "int" || dataType == "int8" || dataType == "int16" || dataType == "int32" || dataType == "int64") {
             return returnType == "int";
         }
@@ -51,7 +51,7 @@ namespace yogi::utils {
         return false;
     }
 
-    std::string Helpers::formatFloatNumberDecimal(const std::string& text, const int maxDecimals = -1) {
+    std::string Helpers::formatFloatNumberDecimal(const std::string &text, const int maxDecimals = -1) {
         double value;
         try {
             value = std::stod(text);
@@ -82,7 +82,7 @@ namespace yogi::utils {
         return result;
     }
 
-    long long Helpers::parseNumberString(const std::string& raw) {
+    long long Helpers::parseNumberString(const std::string &raw) {
         try {
             // Binary: 0bXXXX
             if (raw.rfind("0b", 0) == 0 || raw.rfind("0B", 0) == 0)
@@ -142,12 +142,12 @@ namespace yogi::utils {
         return value;
     }
 
-    std::string Helpers::parseString(const std::string& rawInput) {
+    std::string Helpers::parseString(const std::string &rawInput) {
         std::string raw = rawInput;
 
         // Helper lambdas for starts_with and ends_with (C++11 compatible)
-        auto starts_with = [](const std::string& str, const std::string& prefix) { return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0; };
-        auto ends_with = [](const std::string& str, const std::string& suffix) { return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0; };
+        auto starts_with = [](const std::string &str, const std::string &prefix) { return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0; };
+        auto ends_with = [](const std::string &str, const std::string &suffix) { return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0; };
 
         // 1️⃣ Detect triple-quoted string ("""...""" or '''...''')
         bool triple = false;
@@ -222,14 +222,14 @@ namespace yogi::utils {
         return result;
     }
 
-    json Helpers::getPosition(const antlr4::Token* token) {
+    json Helpers::getPosition(const antlr4::Token *token) {
         json pos;
         pos["line"] = token->getLine();
         pos["column"] = token->getCharPositionInLine();
         return pos;
     }
 
-    json Helpers::createNode(const std::string& raw, const std::string& kind, const antlr4::Token* start, const antlr4::Token* stop) {
+    json Helpers::createNode(const std::string &raw, const std::string &kind, const antlr4::Token *start, const antlr4::Token *stop) {
         json node;
         node["kind"] = kind;
         node["start"] = getPosition(start);
@@ -308,7 +308,7 @@ namespace yogi::utils {
         }
     }
 
-    json Helpers::nodeToJson(const std::any& node) {
+    json Helpers::nodeToJson(const std::any &node) {
         using namespace yogi::visitor::nodes;
 
         if (!node.has_value())
@@ -319,47 +319,47 @@ namespace yogi::utils {
         // -------------------------------------------------
 
         if (node.type() == typeid(IntegerLiteralNode)) {
-            const auto& n = std::any_cast<const IntegerLiteralNode&>(node);
+            const auto &n = std::any_cast<const IntegerLiteralNode &>(node);
             return {{"kind", "IntegerLiteral"}, {"value", n.value}};
         }
 
         if (node.type() == typeid(FloatLiteralNode)) {
-            const auto& n = std::any_cast<const FloatLiteralNode&>(node);
+            const auto &n = std::any_cast<const FloatLiteralNode &>(node);
             return {{"kind", "FloatLiteral"}, {"value", n.value}};
         }
 
         if (node.type() == typeid(StringLiteralNode)) {
-            const auto& n = std::any_cast<const StringLiteralNode&>(node);
+            const auto &n = std::any_cast<const StringLiteralNode &>(node);
             return {{"kind", "StringLiteral"}, {"value", n.value}};
         }
 
         if (node.type() == typeid(std::vector<StringLiteralNode>)) {
-            const auto& strLiteral = std::any_cast<const std::vector<StringLiteralNode>&>(node);
+            const auto &strLiteral = std::any_cast<const std::vector<StringLiteralNode> &>(node);
 
             json elements = json::array();
-            for (const auto& s : strLiteral) {
+            for (const auto &s: strLiteral) {
                 elements.push_back(nodeToJson(s));
             }
             return elements;
         }
 
         if (node.type() == typeid(RegexLiteralNode)) {
-            const auto& n = std::any_cast<const RegexLiteralNode&>(node);
+            const auto &n = std::any_cast<const RegexLiteralNode &>(node);
             return {{"kind", "RegexLiteral"}, {"value", n.value}};
         }
 
         if (node.type() == typeid(BooleanLiteralNode)) {
-            const auto& n = std::any_cast<const BooleanLiteralNode&>(node);
+            const auto &n = std::any_cast<const BooleanLiteralNode &>(node);
             return {{"kind", "BooleanLiteral"}, {"value", n.value == "1"}};
         }
 
         if (node.type() == typeid(NoneLiteralNode)) {
-            const auto& n = std::any_cast<const NoneLiteralNode&>(node);
+            const auto &n = std::any_cast<const NoneLiteralNode &>(node);
             return {{"kind", "NoneLiteral"}, {"value", n.value}};
         }
 
         if (node.type() == typeid(IdentifierLiteral)) {
-            const auto& n = std::any_cast<const IdentifierLiteral&>(node);
+            const auto &n = std::any_cast<const IdentifierLiteral &>(node);
             return {{"kind", "IdentifierLiteral"}, {"value", n.value}};
         }
 
@@ -368,10 +368,10 @@ namespace yogi::utils {
         // -------------------------------------------------
 
         if (node.type() == typeid(std::vector<ArrayElementNode>)) {
-            const auto& n = std::any_cast<const std::vector<ArrayElementNode>&>(node);
+            const auto &n = std::any_cast<const std::vector<ArrayElementNode> &>(node);
 
             json elements = json::array();
-            for (const auto& el : n) {
+            for (const auto &el: n) {
                 auto rNode = resolveItem(node);
                 elements.push_back(nodeToJson(el));
             }
@@ -380,14 +380,14 @@ namespace yogi::utils {
         }
 
         if (node.type() == typeid(MemberExpressionNode)) {
-            const auto& n = std::any_cast<MemberExpressionNode>(node);
+            const auto &n = std::any_cast<MemberExpressionNode>(node);
             // const auto items = std::any_cast<std::vector<std::any>>(n.value);
 
             return {{"kind", "Members"}, {"values", nodeToJson(n.value)}};
         }
 
         if (node.type() == typeid(ArrayElementNode)) {
-            const auto& n = std::any_cast<const ArrayElementNode&>(node);
+            const auto &n = std::any_cast<const ArrayElementNode &>(node);
             return nodeToJson(n.value); // unwrap
         }
 
@@ -396,7 +396,7 @@ namespace yogi::utils {
         // -------------------------------------------------
 
         if (node.type() == typeid(BinaryExpressionNode)) {
-            const auto& n = std::any_cast<const BinaryExpressionNode&>(node);
+            const auto &n = std::any_cast<const BinaryExpressionNode &>(node);
             auto expr = evaluateExpression(node);
 
             return {{"kind", "BinaryExpression"}, {"operator", n.op}, {"resultType", expr.type}, {"value", expr.value}, {"left", nodeToJson(n.left)}, {"right", nodeToJson(n.right)}};
@@ -407,20 +407,20 @@ namespace yogi::utils {
         // -------------------------------------------------
 
         if (node.type() == typeid(StatementNode)) {
-            const auto& n = std::any_cast<const StatementNode&>(node);
+            const auto &n = std::any_cast<const StatementNode &>(node);
 
             json children = json::array();
-            for (const auto& child : n.children)
+            for (const auto &child: n.children)
                 children.push_back(nodeToJson(child));
 
             return {{"kind", "Statement"}, {"children", children}};
         }
 
         if (node.type() == typeid(ProgramNode)) {
-            const auto& n = std::any_cast<const ProgramNode&>(node);
+            const auto &n = std::any_cast<const ProgramNode &>(node);
 
             json body = json::array();
-            for (const auto& stmt : n.body)
+            for (const auto &stmt: n.body)
                 body.push_back(nodeToJson(stmt));
 
             return {{"kind", "Program"}, {"body", body}};
@@ -430,20 +430,20 @@ namespace yogi::utils {
         // Declarations
         // -------------------------------------------------
         if (node.type() == typeid(VariableDeclarationNode)) {
-            const auto& n = std::any_cast<const VariableDeclarationNode&>(node);
+            const auto &n = std::any_cast<const VariableDeclarationNode &>(node);
             return {{"kind", "VariableDeclaration"}, {"identifier", n.identifier}, {"type", n.varType}, {"isConstant", n.isConstant}, {"value", nodeToJson(n.value)}};
         }
 
         if (node.type() == typeid(ArrayDeclarationNode)) {
-            const auto& n = std::any_cast<const ArrayDeclarationNode&>(node);
+            const auto &n = std::any_cast<const ArrayDeclarationNode &>(node);
 
             json elements = json::array();
-            for (const auto& el : n.elements) {
+            for (const auto &el: n.elements) {
                 elements.push_back(nodeToJson(el));
             }
 
             json dims = json::array();
-            for (const auto& d : n.dimensions)
+            for (const auto &d: n.dimensions)
                 dims.push_back(d);
 
             return {
@@ -451,36 +451,58 @@ namespace yogi::utils {
                 {"identifier", n.identifier},
                 {"elementType", n.type},
                 {"dimensions", dims}, // reemplazamos "size" por "dimensions"
-                {"elements", elements}};
+                {"elements", elements}
+            };
         }
 
         if (node.type() == typeid(DictionaryDeclarationNode)) {
-            const auto& n = std::any_cast<const DictionaryDeclarationNode&>(node);
+            const auto &n = std::any_cast<const DictionaryDeclarationNode &>(node);
             return {{"kind", "DictionaryDeclaration"}, {"identifier", n.identifier}, {"keyType", n.keyType}, {"valueType", n.valueType}, {"size", n.size}};
+        }
+
+        if (node.type() == typeid(BaseNode)) {
+            const auto &n = std::any_cast<const BaseNode &>(node);
+            json start = {
+                {"line", n.start.line},
+                {"column", n.start.column}
+            };
+
+            json end = {
+                {"line", n.end.line},
+                {"column", n.end.column}
+            };
+
+            return {
+                {"start", start},
+                {"end", end}
+            };
         }
 
         // -------------------------------------------------
         // Formatted String
         // -------------------------------------------------
-
         if (node.type() == typeid(FormattedStringNode)) {
-            const auto& n = std::any_cast<const FormattedStringNode&>(node);
+            const auto &n = std::any_cast<const FormattedStringNode &>(node);
 
-            json params = json::array();
-            for (const auto& p : n.params)
-                params.push_back(nodeToJson(p));
+            json parts = json::array();
+            for (const auto &v: n.value) {
+                parts.push_back(nodeToJson(v));
+            }
 
-            return {{"kind", "FormattedString"}, {"value", n.value}, {"params", params}};
+            return {
+                {"kind", "FormattedString"},
+                {"value", parts}
+            };
         }
 
         // -------------------------------------------------
         // Fallback
         // -------------------------------------------------
         if (node.type() == typeid(IfStatementNode)) {
-            const auto& n = std::any_cast<const IfStatementNode&>(node);
+            const auto &n = std::any_cast<const IfStatementNode &>(node);
 
             json branchesJson = json::array();
-            for (const auto& [bCondition, bBody] : n.branches) {
+            for (const auto &[bCondition, bBody]: n.branches) {
                 json branchJson;
 
                 // condition is null for "else"
@@ -494,7 +516,7 @@ namespace yogi::utils {
 
                 // body
                 json body = json::array();
-                for (const auto& stmt : bBody) {
+                for (const auto &stmt: bBody) {
                     body.push_back(nodeToJson(stmt));
                 }
                 branchJson["body"] = body;
@@ -506,13 +528,14 @@ namespace yogi::utils {
 
         return {{"kind", "Unknown"}, {"type", node.type().name()}};
     }
+
     // Print AST nodes in JSON-like format
-    void Helpers::printNode(const std::any& node, const int indent) {
+    void Helpers::printNode(const std::any &node, const int indent) {
         const json ast = nodeToJson(node);
         std::cout << ast.dump(indent) << std::endl;
     }
 
-    Helpers::ResolvedItem Helpers::resolveItem(const std::any& itemResult) {
+    Helpers::ResolvedItem Helpers::resolveItem(const std::any &itemResult) {
         if (itemResult.type() == typeid(visitor::nodes::IntegerLiteralNode)) {
             auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(itemResult);
             return {"int", n.value, itemResult};
@@ -548,7 +571,7 @@ namespace yogi::utils {
         return {}; // unreachable
     }
 
-    visitor::nodes::Kind Helpers::resolveKind(const std::any& itemResult) {
+    visitor::nodes::Kind Helpers::resolveKind(const std::any &itemResult) {
         if (itemResult.type() == typeid(visitor::nodes::IntegerLiteralNode)) {
             return visitor::nodes::Kind::INTEGER_LITERAL;
         }
@@ -576,7 +599,7 @@ namespace yogi::utils {
         return visitor::nodes::Kind::NONE_LITERAL;
     }
 
-    std::string Helpers::resolveDataType(const std::any& itemResult) {
+    std::string Helpers::resolveDataType(const std::any &itemResult) {
         if (itemResult.type() == typeid(visitor::nodes::IntegerLiteralNode)) {
             auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(itemResult);
             return n.value;
@@ -611,5 +634,5 @@ namespace yogi::utils {
         auto n = std::any_cast<visitor::nodes::NoneLiteralNode>(itemResult);
         return n.value;
     }
-    
+
 } // namespace yogi::utils

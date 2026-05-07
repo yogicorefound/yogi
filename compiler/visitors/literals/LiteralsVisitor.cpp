@@ -136,65 +136,47 @@ namespace yogi::visitor {
         return nodes::IdentifierLiteral(identifier, start, end);
     }
 
-    std::any LiteralsVisitor::visitFormattedString(Grammar::FormattedStringContext *ctx) {
-        const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
-        const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
+    std::any LiteralsVisitor::visitFormattedString(
+        Grammar::FormattedStringContext *ctx
+    ) {
+        const nodes::Position start{
+            ctx->start->getLine(),
+            ctx->start->getCharPositionInLine()
+        };
 
-        if (const auto fStringPrefix = ctx->FORMATTED_STRING_START()->getText(); fStringPrefix == "r\"") {
+        const nodes::Position end{
+            ctx->stop->getLine(),
+            ctx->stop->getCharPositionInLine()
+        };
+
+        // Regex literal
+        if (const auto prefix = ctx->FORMATTED_STRING_START()->getText();
+            prefix == "r\"") {
+
             std::string value;
+
             for (const auto child: ctx->formattedStringContent()) {
                 value += child->getText();
             }
 
-            auto node = nodes::RegexLiteralNode(value, start, end);
-            return node;
+            return nodes::RegexLiteralNode(value, start, end);
         }
 
-        auto node = nodes::StringLiteralNode("", start, end);
+        std::vector<std::any> parts = {};
         for (const auto child: ctx->formattedStringContent()) {
-            if (auto result = visit(child); result.has_value()) {
-                try {
-                    // Try to cast to different node types and add to params
-                    if (result.type() == typeid(nodes::StringLiteralNode)) {
-                        auto contentNode = std::any_cast<nodes::StringLiteralNode>(result);
-                        node.value += contentNode.value;
-                    } else if (result.type() == typeid(nodes::IntegerLiteralNode)) {
-                        auto contentNode = std::any_cast<nodes::IntegerLiteralNode>(result);
-                        node.value += contentNode.value;
-                    } else if (result.type() == typeid(nodes::FloatLiteralNode)) {
-                        auto contentNode = std::any_cast<nodes::FloatLiteralNode>(result);
-                        node.value += contentNode.value;
-                    } else if (result.type() == typeid(nodes::BooleanLiteralNode)) {
-                        auto contentNode = std::any_cast<nodes::BooleanLiteralNode>(result);
-                        node.value += contentNode.value == "1" ? "true" : "false";
-                    } else if (result.type() == typeid(nodes::IdentifierLiteral)) {
-                        auto contentNode = std::any_cast<nodes::IdentifierLiteral>(result);
-                        const auto variable = scope->lookupVariable(contentNode.value);
-                        if (!variable.has_value()) {
-                            throwScopeError("Variable not found", contentNode.value, node, source);
-                        }
 
-                        const auto &varNode = variable.value();
-                        if (varNode->kind != nodes::Kind::VARIABLE_DECLARATION) {
-                            throwTypeError("Variable is not a variable declaration", contentNode.value, node, source);
-                        }
+            auto result = visit(child);
 
-                        const auto [type, value, _] = resolveItem(varNode->value);
-                        node.value += value;
-
-                    } else if (result.type() == typeid(nodes::BinaryExpressionNode)) {
-                        auto expr = evaluateExpression(result);
-                        node.value += expr.value;
-                    }
-
-                    // Add more types as needed (expressions, etc.)
-                } catch (const std::bad_any_cast &_) {
-                    // ReSharper disable once CppRedundantControlFlowJump
-                    continue;
-                }
+            if (!result.has_value()) {
+                continue;
             }
+
+            // preserve order
+            parts.push_back(result);
+
         }
 
+        nodes::FormattedStringNode node(parts, start, end);
         return node;
     }
 

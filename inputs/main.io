@@ -1,1 +1,1 @@
-bool a = false
+str b = f"I am, {2026 - 1994}"
