@@ -4,8 +4,8 @@
 
 #include "ArraysVisitor.h"
 #include "semantic/BaseSemantic.h"
-#include "semantic/variables/helpers.h"
-// #include "semantic/semantic.h"
+#include "utils/utils.h"
+#include "utils/helpers/visitor/variables.h"
 
 namespace yogi::visitor {
 
@@ -85,7 +85,7 @@ namespace yogi::visitor {
             while (elements.size() < expectedSize) {
                 std::vector<size_t> subDimensions(dimensions.begin() + 1, dimensions.end());
                 if (subDimensions.empty()) {
-                    throwTypeError("Array element type mismatch", semantic::convertTypeToString(elementType), elements, source);
+                    throwTypeError("Array element type mismatch", utils::VisitorHelpers::convertTypeToString(elementType), elements, source);
 
                 } else {
                     auto subElements = buildArrayElementsRecursively(nullptr, elementType, subDimensions, start, end);
@@ -261,8 +261,7 @@ namespace yogi::visitor {
     std::any ArraysVisitor::visitArrayDeclarationTypeSizes(Grammar::ArrayDeclarationTypeSizesContext *ctx) {
         std::vector<size_t> dimensions;
         for (auto *exprCtx: ctx->expression()) {
-            const auto exprAny = visit(exprCtx);
-            if (exprAny.type() == typeid(nodes::IntegerLiteralNode)) {
+            if (const auto exprAny = visit(exprCtx); exprAny.type() == typeid(nodes::IntegerLiteralNode)) {
                 dimensions.push_back(std::stoul(std::any_cast<nodes::IntegerLiteralNode>(exprAny).value));
             } else {
                 throwError("InvalidArrayDimension", "Array dimensions must be integer literals", ctx->start->getLine(), source);

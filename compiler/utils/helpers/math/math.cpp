@@ -200,11 +200,6 @@ namespace yogi::utils::helpers {
         return n > maxPos;
     }
 
-    bool Math::isInteger(const double number) {
-        double intPart;
-        return std::modf(number, &intPart) == 0.0;
-    }
-
     bool Math::couldBeFloat(const double value) {
         return !couldBeInteger(value);
     }

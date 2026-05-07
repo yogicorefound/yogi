@@ -18,7 +18,6 @@ namespace yogi::utils::helpers {
         static bool isGreaterUnsigned(const std::string& num, const std::string& max);
         static bool isGreaterSigned(const std::string& num, const std::string& maxPos, const std::string& maxNeg);
         static bool isValidNumber(const std::string& str);
-        static bool isInteger(double number);
         static bool couldBeInteger(double value);
         static bool couldBeFloat(double value);
 

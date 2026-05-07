@@ -21,7 +21,7 @@ namespace yogi::utils::helpers {
         };
 
 
-        static double applyOperator(double l, double r, std::string op);
+        static double applyOperator(double l, double r, const std::string &op);
 
         static EvalExpressionResult evaluateExpression(const std::any &node);
     };

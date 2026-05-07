@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "utils/utils.h"
+#include "utils/types/Types.h"
 
 namespace yogi::utils {
     class VisitorHelpers {

@@ -12,7 +12,7 @@
 #include <vector>
 #include "antlr4-runtime.h"
 #include "libs/uni-algo/include/uni_algo/norm.h"
-#include "semantic/variables/helpers.h"
+#include "utils/helpers/visitor/variables.h"
 
 namespace yogi::utils {
 
@@ -542,7 +542,7 @@ namespace yogi::utils {
             auto n = std::any_cast<visitor::nodes::BinaryExpressionNode>(itemResult);
             auto expr = evaluateExpression(&n);
 
-            return {semantic::convertTypeToString(expr.type), expr.value, itemResult};
+            return {utils::VisitorHelpers::convertTypeToString(expr.type), expr.value, itemResult};
         }
 
         return {}; // unreachable

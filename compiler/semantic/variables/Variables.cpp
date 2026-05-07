@@ -5,23 +5,19 @@
 #include "semantic/variables/Variables.h"
 #include <visitors/nodes/nodes.h>
 #include <string>
-#include <unordered_set>
-
-#include "helpers.h"
 #include "semantic/BaseSemantic.h"
 #include "utils/utils.h"
+#include "utils/helpers/visitor/variables.h"
+
 
 namespace yogi::semantic {
     using namespace yogi::visitor::nodes;
+    using namespace yogi::utils::helpers;
 
     // --------------------------------------------------------
     // TODO: Implement default variable initialization logic
     // --------------------------------------------------------
-    void Variables::analyzeVariableWithoutAssignment(
-        const VariableDeclarationNode &node,
-        const Position &start,
-        const Position &end
-    ) {
+    void Variables::analyzeVariableWithoutAssignment(const VariableDeclarationNode &node, const Position &start, const Position &end) {
     }
 
     // utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);
@@ -35,24 +31,24 @@ namespace yogi::semantic {
 
 
         if (error) {
-            utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);;
+            utils::Errors::throwTypeError(node.identifier, utils::VisitorHelpers::convertTypeToString(node.varType), node, source);;
         }
 
         // =========================
         // ❌ FLOAT ↔ INT MIX (BLOCK)
         // =========================
-        if ((isInteger(from) && isFloat(to)) || (isFloat(from) && isInteger(to))) {
-            utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);
+        if ((utils::VisitorHelpers::isInteger(from) && utils::VisitorHelpers::isFloat(to)) || (utils::VisitorHelpers::isFloat(from) && utils::VisitorHelpers::isInteger(to))) {
+            utils::Errors::throwTypeError(node.identifier, utils::VisitorHelpers::convertTypeToString(node.varType), node, source);
         }
 
         // =========================
         // ✔ INTEGER → INTEGER (ALLOW WIDENING)
         // =========================
-        if (isInteger(from) && isInteger(to)) {
+        if (utils::VisitorHelpers::isInteger(from) && utils::VisitorHelpers::isInteger(to)) {
 
             // check range
-            if (const long long v = std::stoll(value); !fitsInRange(v, to)) {
-                utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);
+            if (const long long v = std::stoll(value); !utils::VisitorHelpers::fitsInRange(v, to)) {
+                utils::Errors::throwTypeError(node.identifier, utils::VisitorHelpers::convertTypeToString(node.varType), node, source);
             }
 
             // insert cast if needed
@@ -66,7 +62,7 @@ namespace yogi::semantic {
         // =========================
         // ✔ FLOAT → FLOAT ONLY
         // =========================
-        if (isFloat(from) && isFloat(to)) {
+        if (utils::VisitorHelpers::isFloat(from) && utils::VisitorHelpers::isFloat(to)) {
             if (from != to) {
                 // node.value = createCastNode(to, std::move(node.value));
             }
@@ -82,7 +78,7 @@ namespace yogi::semantic {
         // =========================
         // EVERYTHING ELSE → ERROR
         // =========================
-        utils::Errors::throwTypeError(node.identifier, convertTypeToString(node.varType), node, source);
+        utils::Errors::throwTypeError(node.identifier, utils::VisitorHelpers::convertTypeToString(node.varType), node, source);
     }
 
     // --------------------------------------------------------

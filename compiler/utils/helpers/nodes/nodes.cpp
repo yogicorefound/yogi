@@ -4,12 +4,13 @@
 
 #include "nodes.h"
 #include "semantic/scopes/Scope.h"
-#include "semantic/variables/helpers.h"
+#include "utils/utils.h"
 #include "utils/types/Types.h"
+#include "utils/helpers/visitor/variables.h"
 
 
 namespace yogi::utils::helpers {
-    double Nodes::applyOperator(const double l, const double r, std::string op) {
+    double Nodes::applyOperator(const double l, const double r, const std::string &op) {
         if (op == "+") return l + r;
         if (op == "-") return l - r;
         if (op == "*") return l * r;
@@ -20,7 +21,7 @@ namespace yogi::utils::helpers {
     Nodes::EvalExpressionResult Nodes::evaluateExpression(const std::any &node) {
         // INTEGER
         if (const auto n = std::any_cast<visitor::nodes::IntegerLiteralNode>(&node)) {
-            const Types type = semantic::inferIntegerType(Helpers::parseInteger(n->value));
+            const Types type = VisitorHelpers::inferIntegerType(Helpers::parseInteger(n->value));
             return {type, n->value, false, ""};
         }
 
@@ -30,12 +31,12 @@ namespace yogi::utils::helpers {
         }
 
         // STRING
-        if (auto n = std::any_cast<visitor::nodes::StringLiteralNode>(&node)) {
+        if (const auto n = std::any_cast<visitor::nodes::StringLiteralNode>(&node)) {
             return {Types::String, n->value, false, ""};
         }
 
         // BOOLEAN → ERROR (for now strict)
-        if (auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(&node)) {
+        if (const auto n = std::any_cast<visitor::nodes::BooleanLiteralNode>(&node)) {
             return {Types::Boolean, n->value, false, ""};
         }
 
@@ -70,13 +71,13 @@ namespace yogi::utils::helpers {
             }
 
             // NUMERIC RULE (INT + FLOAT + DOUBLE + SIGNED/UNSIGNED)
-            if (semantic::isNumeric(ltype) && semantic::isNumeric(rtype)) {
+            if (VisitorHelpers::isNumeric(ltype) && VisitorHelpers::isNumeric(rtype)) {
                 const double l = std::stod(left.value);
                 const double r = std::stod(right.value);
                 const double result = applyOperator(l, r, n->op);
 
                 // determine resulting type
-                const Types resultType = semantic::resolveNumericResultType(ltype, rtype);
+                const Types resultType = VisitorHelpers::resolveNumericResultType(ltype, rtype);
 
                 return {
                     resultType,

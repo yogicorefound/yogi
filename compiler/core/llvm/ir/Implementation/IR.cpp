@@ -10,7 +10,7 @@
 #include <string>
 #include "llvm/IR/Verifier.h"
 #include "llvm/Linker/Linker.h"
-#include "semantic/variables/helpers.h"
+#include "utils/utils.h"
 
 namespace yogi::core::ir {
     using namespace yogi::visitor::nodes;

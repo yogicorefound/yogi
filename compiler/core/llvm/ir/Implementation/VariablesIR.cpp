@@ -5,7 +5,7 @@
 #include <core/llvm/ir/IR.h>
 
 #include "semantic/semantic.h"
-#include "semantic/variables/helpers.h"
+#include "utils/utils.h"
 
 namespace yogi::core::ir {
     inline uint64_t IR::getStringLength(const std::any &node) {
