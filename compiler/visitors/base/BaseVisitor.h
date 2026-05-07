@@ -12,19 +12,22 @@
 namespace yogi::visitor {
 
     class BaseVisitor : public GrammarVisitor, public utils::Errors, public utils::Helpers, public semantic::Semantic {
-       protected:
-        std::string& source;
-        Grammar* parser;
-        std::unique_ptr<semantic::Scope> rootScope;
-        semantic::Scope* scope;
+        protected:
+            std::string &source;
+            std::string &filePath;
+            Grammar *parser;
+            std::unique_ptr<semantic::Scope> rootScope;
+            semantic::Scope *scope;
 
-       public:
-        explicit BaseVisitor(std::string& source, Grammar* parser) : source(source), parser(parser), rootScope(std::make_unique<semantic::Scope>(nullptr)), scope(rootScope.get()) {}
+        public:
+            explicit BaseVisitor(std::string &source, std::string &filePath, Grammar *parser) : source(source), filePath(filePath), parser(parser), rootScope(std::make_unique<semantic::Scope>(nullptr)), scope(rootScope.get()) {
+            }
 
-        void enterScope();
-        void exitScope();
+            void enterScope();
 
-        semantic::Scope* getCurrentScope() const;
+            void exitScope();
+
+            semantic::Scope *getCurrentScope() const;
     };
 
 } // namespace yogi::visitor

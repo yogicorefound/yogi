@@ -12,18 +12,21 @@
 #include "visitors/literals/LiteralsVisitor.h"
 #include "visitors/members/MembersVisitor.h"
 #include "visitors/variables/VariablesVisitor.h"
+#include "cache/cache.h"
 
 namespace yogi::visitor {
-    class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor {
-       public:
-        explicit Visitor(std::string& source, Grammar* parser)
-            : BaseVisitor(source, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), source(source), parser(parser) {}
+    class Visitor final : public compiler::cache::Cache, public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor {
+        public:
+            explicit Visitor(std::string &source, std::string &filePath, Grammar *parser)
+                : BaseVisitor(source, filePath, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), source(source), filePath(filePath), parser(parser) {
+            }
 
-        std::any visitProgram(Grammar::ProgramContext* ctx) override;
-        std::any visitStatements(Grammar::StatementsContext* ctx) override;
+            std::any visitProgram(Grammar::ProgramContext *ctx) override;
+            std::any visitStatements(Grammar::StatementsContext *ctx) override;
 
-       private:
-        std::string& source;
-        Grammar* parser;
+        private:
+            std::string &source;
+            std::string &filePath;
+            Grammar *parser;
     };
 } // namespace yogi::visitor

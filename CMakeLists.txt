@@ -83,7 +83,7 @@ add_subdirectory(runtime)
 include_directories(yogi_runtime)
 
 add_executable(${PROJECT_NAME}
-        ${CMAKE_SOURCE_DIR}/compiler/compiler.cpp
+        ${CMAKE_SOURCE_DIR}/yogi.cpp
         ${PROD_SOURCES}
 )
 

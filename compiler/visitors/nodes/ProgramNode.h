@@ -4,21 +4,31 @@
 
 #pragma once
 
+#include <utility>
+
 #include "BaseNode.h"
 #include "StatementNode.h"
 
 namespace yogi::visitor::nodes {
-    // Program Node (root of AST - holds all top-level statements)
     struct ProgramNode : BaseNode {
-        std::vector<std::any> body;  // All top-level statements
+        std::vector<std::any> body;
 
         explicit ProgramNode(
             const Position start,
             const Position end
-        ) : BaseNode(Kind::PROGRAM, start, end) {}
+        ) : BaseNode(Kind::PROGRAM, start, end) {
+        }
 
         void addStatement(std::any statement) {
             body.push_back(std::move(statement));
+        }
+    };
+
+    struct ASTNode {
+        std::string path;
+        const ProgramNode program;
+
+        explicit ASTNode(ProgramNode program, std::string path) : path(std::move(path)), program(std::move(program)) {
         }
     };
 

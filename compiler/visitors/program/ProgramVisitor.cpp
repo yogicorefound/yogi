@@ -9,6 +9,11 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
+    // Cache AST
+    if (const auto cachedAST = getCachedAST(filePath); cachedAST.has_value()) {
+        return cachedAST.value().program;
+    }
+
     // Create program node
     auto node = nodes::ProgramNode(start, end);
     for (const auto child : ctx->children) {
