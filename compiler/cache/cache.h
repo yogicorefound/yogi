@@ -6,18 +6,21 @@
 #include "../visitors/nodes/ProgramNode.h"
 #include <string>
 #include <unordered_map>
+#include <memory>
+#include <optional>
 
 namespace yogi::compiler::cache {
+
     class Cache {
         public:
-            Cache() {
-            }
+            Cache() = default;
 
-            std::optional<visitor::nodes::ASTNode> getCachedAST (const std::string &filePath);
+            std::optional<std::reference_wrapper<const visitor::nodes::ASTNode> > getCachedAST(const std::string &filePath) const;
+
+            void cacheAST(const std::string &filePath, std::unique_ptr<visitor::nodes::ASTNode> ast);
 
         private:
-            visitor::nodes::ASTNode get(const std::string &filePath);
-            void set(const std::string &filePath, visitor::nodes::ASTNode ast);
-            std::unordered_map<std::string, visitor::nodes::ASTNode> caches;
+            std::unordered_map<std::string, std::unique_ptr<visitor::nodes::ASTNode> > asts;
     };
+
 }

@@ -5,27 +5,31 @@
 #include "ProgramVisitor.h"
 #include <visitors/nodes/nodes.h>
 
-std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext* ctx) {
+std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext *ctx) {
     const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
     const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
     // Cache AST
-    if (const auto cachedAST = getCachedAST(filePath); cachedAST.has_value()) {
-        return cachedAST.value().program;
+    if (const auto cachedAST = getCachedAST(filePath)) {
+        return cachedAST->get().program;
     }
 
     // Create program node
     auto node = nodes::ProgramNode(start, end);
-    for (const auto child : ctx->children) {
+    for (const auto child: ctx->children) {
         if (auto statement = visit(child); statement.has_value()) {
             node.addStatement(std::move(statement));
         }
     }
 
+    // Cache AST
+    const auto ast = nodes::ASTNode(node, filePath);
+    cacheAST(filePath, std::make_unique<nodes::ASTNode>(ast));
+
     return node;
 }
 
-std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext* ctx) {
+std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext *ctx) {
     // Expression statement
     if (ctx->expression()) {
         const auto expressionResult = visit(ctx->expression());
