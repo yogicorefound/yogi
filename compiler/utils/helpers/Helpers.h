@@ -46,5 +46,7 @@ namespace yogi::utils {
             static std::string resolveDataType(const std::any &itemResult);
 
             static bool areCanonicallyEqual(const std::string &str1, const std::string &str2);
+
+            static std::string getBuildDirectory();
     };
 } // namespace yogi::utils

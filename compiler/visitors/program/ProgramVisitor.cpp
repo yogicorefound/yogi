@@ -26,6 +26,9 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext *ctx) {
     const auto ast = nodes::ASTNode(node, filePath);
     cacheAST(filePath, std::make_unique<nodes::ASTNode>(ast));
 
+    std::unordered_map<std::string, std::unique_ptr<nodes::ASTNode> > &asts = getAllCachedASTs();
+    // TODO: Return the ASTs
+
     return node;
 }
 

@@ -19,6 +19,9 @@ namespace yogi::compiler::cache {
 
             void cacheAST(const std::string &filePath, std::unique_ptr<visitor::nodes::ASTNode> ast);
 
+            // get all cached ASTs
+            std::unordered_map<std::string, std::unique_ptr<visitor::nodes::ASTNode> > &getAllCachedASTs();
+
         private:
             std::unordered_map<std::string, std::unique_ptr<visitor::nodes::ASTNode> > asts;
     };

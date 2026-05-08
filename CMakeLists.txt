@@ -21,7 +21,7 @@ cmake_policy(SET CMP0075 NEW)
 cmake_policy(SET CMP0074 NEW)
 
 set(LLVM_ENABLE_RTTI ON)
-set(LLVM_ROOT "/opt/homebrew/opt/llvm")
+set(LLVM_ROOT "/opt/homebrew/opt/llvm@21")
 
 set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_compact_unwind"
@@ -29,6 +29,7 @@ set(CMAKE_EXE_LINKER_FLAGS
 
 list(APPEND CMAKE_PREFIX_PATH "${LLVM_ROOT}")
 find_package(LLVM REQUIRED CONFIG)
+find_package(OpenSSL REQUIRED)
 
 # ============================================================
 # LLVM COMPONENTS (FIX: ORC/JIT ADDED)
@@ -97,9 +98,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ${LIBS_DIR}
 )
 
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
         "${ANTLR4_RUNTIME_LIB}/libantlr4-runtime.4.13.2.dylib"
         "${LIBS_DIR}/uni-algo/build/libuni-algo.a"
         ${llvm_libs}
         yogi_runtime
+        OpenSSL::Crypto
 )

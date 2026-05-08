@@ -11,9 +11,8 @@ int main(const int argc, const char *argv[]) {
         yogi::compiler::Compiler compiler(argc, argv);
 
         const yogi::visitor::nodes::ASTNode ast = compiler.compile();
-        std::cout << ast.path << std::endl;
-
-        // yogi::Yogi::printAST(ast.program);
+        // compiler.printAST(ast.program);
+        // compiler.processLLVM(ast.program);
 
     } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;

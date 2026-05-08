@@ -18,13 +18,15 @@ namespace yogi::compiler {
             visitor::nodes::ASTNode compile();
 
             static visitor::nodes::ProgramNode testAST(std::string &text, std::string &filePath);
+
             static void printAST(const std::any &ast);
+
+            void processLLVM(const std::any &ast) const;
 
         private:
             visitor::nodes::ProgramNode getAST();
 
             // LLVM
-            void processLLVM(const std::any &ast) const;
             void getContent(int argc, const char *argv[]);
 
             std::string content;

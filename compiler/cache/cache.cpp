@@ -19,4 +19,9 @@ namespace yogi::compiler::cache {
         asts[filePath] = std::move(ast);
     }
 
+    std::unordered_map<std::string, std::unique_ptr<visitor::nodes::ASTNode> > &Cache::getAllCachedASTs() {
+        return asts;
+    }
+
+
 }

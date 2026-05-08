@@ -9,12 +9,22 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 #include <vector>
 #include "antlr4-runtime.h"
 #include "libs/uni-algo/include/uni_algo/norm.h"
 #include "utils/helpers/visitor/variables.h"
 
 namespace yogi::utils {
+    std::string Helpers::getBuildDirectory() {
+        char cwd[PATH_MAX];
+
+        if (getcwd(cwd, sizeof(cwd)) == nullptr) {
+            perror("getcwd");
+        }
+
+        return cwd;
+    }
 
     bool Helpers::areCanonicallyEqual(const std::string &str1, const std::string &str2) {
         const std::string norm1 = una::norm::to_nfc_utf8(str1);

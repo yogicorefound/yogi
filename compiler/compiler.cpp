@@ -132,6 +132,7 @@ namespace yogi::compiler {
     }
 
     void Compiler::processLLVM(const std::any &ast) const {
+        std::cout << "buildDir" << std::endl;
         const auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
         core::ir::IR ir(fileName);
@@ -141,6 +142,7 @@ namespace yogi::compiler {
 
         namespace fs = std::filesystem;
         const fs::path buildDir = fs::current_path();
+        std::cout << buildDir << std::endl;
 
         fs::create_directories(buildDir);
         fs::path output = buildDir / "app";
@@ -173,6 +175,7 @@ namespace yogi::compiler {
         std::string lSystem = sdkPath + "/usr/lib/libSystem.tbd";
         std::string objStr = objFile.string();
         std::string outputStr = output.string();
+        std::string runtime = utils::Helpers::getBuildDirectory() + "/runtime/libyogi_runtime.a";
 
         // ld64.lld is the Mach-O linker — NOT ld.lld (which is ELF)
         std::vector<char *> args = {
@@ -187,7 +190,7 @@ namespace yogi::compiler {
             (char *) sdkPath.c_str(),
             (char *) lSystem.c_str(), // link libSystem directly via .tbd
             (char *) objStr.c_str(),
-            (char *) "/Users/brayhandeaza/Documents/dev/projects/yogi/build/runtime/libyogi_runtime.a",
+            (char *)  runtime.c_str(),
             (char *) "-o",
             (char *) outputStr.c_str(),
             nullptr

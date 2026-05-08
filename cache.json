@@ -1,0 +1,16 @@
+{
+  "modules": {
+    "9fa13b2gertfgb7ryg7byr87gyb78ryb7ybtgj5tgj56jy36": {
+      "hash": {
+        "ast": "abcf64576567568grthytj...",
+        "semantic": "abc1uk8567846578y...",
+        "object": "abyuyiu8476585678iu..."
+      },
+      "paths": {
+        "object": ".cache/modules/9fa13b2gertfgb7ryg7byr87gyb78ryb7ybtgj5tgj56jy36/helpers.o",
+        "ast": ".cache/modules/9fa13b2gertfgb7ryg7byr87gyb78ryb7ybtgj5tgj56jy36/ast.json",
+        "semantic": ".cache/modules/9fa13b2gertfgb7ryg7byr87gyb78ryb7ybtgj5tgj56jy36/semantic.json"
+      }
+    }
+  }
+}
