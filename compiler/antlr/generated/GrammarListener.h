@@ -194,6 +194,15 @@ public:
   virtual void enterIfStatementBody(Grammar::IfStatementBodyContext *ctx) = 0;
   virtual void exitIfStatementBody(Grammar::IfStatementBodyContext *ctx) = 0;
 
+  virtual void enterImportStatement(Grammar::ImportStatementContext *ctx) = 0;
+  virtual void exitImportStatement(Grammar::ImportStatementContext *ctx) = 0;
+
+  virtual void enterImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) = 0;
+  virtual void exitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) = 0;
+
+  virtual void enterImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) = 0;
+  virtual void exitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) = 0;
+
 
 };
 

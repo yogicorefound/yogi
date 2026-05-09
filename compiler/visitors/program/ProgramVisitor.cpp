@@ -11,23 +11,50 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext *ctx) {
 
     // Cache AST
     if (const auto cachedAST = getCachedAST(filePath)) {
-        return cachedAST->get().program;
+        return cachedAST->get().ast;
     }
 
     // Create program node
+    bool hasVarDeclarations = false;
     auto node = nodes::ProgramNode(start, end);
+    auto pathModules = nodes::ModulesPathsNode();
+    std::vector<nodes::ImportNode> modules;
+
     for (const auto child: ctx->children) {
         if (auto statement = visit(child); statement.has_value()) {
-            node.addStatement(std::move(statement));
+            if (!justScan) {
+                if (statement.type() == typeid(nodes::ImportNode)) {
+                    const auto importModule = std::any_cast<nodes::ImportNode>(statement);
+                    pathModules.addModule(nodes::ModulesPathsNode(importModule.path));
+                }
+            } else {
+                node.addStatement(std::move(statement));
+            }
         }
     }
 
-    // Cache AST
-    const auto ast = nodes::ASTNode(node, filePath);
-    cacheAST(filePath, std::make_unique<nodes::ASTNode>(ast));
+    std::cout << "pathModules: ";
+    pathModules.print();
 
-    std::unordered_map<std::string, std::unique_ptr<nodes::ASTNode> > &asts = getAllCachedASTs();
-    // TODO: Return the ASTs
+    // Get hash of file absolutes path
+    const auto rootPath = getBuildDirectory();
+    const auto absoluteFilePath = pathResolver(getBuildDirectory(), filePath);
+    const auto filePathHash = hashString(absoluteFilePath);
+
+    // hash source and ast nodes
+    const auto sourceHash = hashString(source);
+    const auto astHash = hashString(nodeToJson(node).dump());
+
+    // std::cout << "hasVarDeclarations: " << hasVarDeclarations << std::endl;
+    // std::cout << "FilePathHash: " << filePathHash << std::endl;
+    // std::cout << "SourceHash: " << sourceHash << std::endl;
+    // std::cout << "NodeToJson: " << astHash << std::endl;
+    // std::cout << "absoluteFilePath: " << absoluteFilePath << std::endl;
+
+    // Cache AST
+    const auto ast = nodes::CacheNode(astHash, true, node);
+    // cacheAST(filePath, std::make_unique<nodes::CacheNode>(ast));
+
 
     return node;
 }

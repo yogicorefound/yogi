@@ -39,6 +39,8 @@ namespace yogi::utils {
 
             static json nodeToJson(const std::any &node);
 
+            static std::string hashString(const std::string &input);
+
             static ResolvedItem resolveItem(const std::any &itemResult);
 
             static visitor::nodes::Kind resolveKind(const std::any &itemResult);
@@ -48,5 +50,11 @@ namespace yogi::utils {
             static bool areCanonicallyEqual(const std::string &str1, const std::string &str2);
 
             static std::string getBuildDirectory();
+
+            static std::filesystem::path pathResolver(const std::filesystem::path &currentFile, const std::string &importPath);
+
+            static std::filesystem::path pathNormalizer(const std::filesystem::path &path);
+
+            static std::string pathModuleId(const std::filesystem::path &absolutePath);
     };
 } // namespace yogi::utils

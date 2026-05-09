@@ -42,6 +42,8 @@ namespace yogi::visitor::nodes {
         // Statement
         VARIABLE_DECLARATION,
 
+        IMPORT_STATEMENT,
+
         ARRAY_DECLARATION,
         ARRAY_ELEMENT,
         ARRAY_ELEMENTS,

@@ -196,6 +196,15 @@ public:
   virtual void enterIfStatementBody(Grammar::IfStatementBodyContext * /*ctx*/) override { }
   virtual void exitIfStatementBody(Grammar::IfStatementBodyContext * /*ctx*/) override { }
 
+  virtual void enterImportStatement(Grammar::ImportStatementContext * /*ctx*/) override { }
+  virtual void exitImportStatement(Grammar::ImportStatementContext * /*ctx*/) override { }
+
+  virtual void enterImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext * /*ctx*/) override { }
+  virtual void exitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext * /*ctx*/) override { }
+
+  virtual void enterImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext * /*ctx*/) override { }
+  virtual void exitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext * /*ctx*/) override { }
+
 
   virtual void enterEveryRule(antlr4::ParserRuleContext * /*ctx*/) override { }
   virtual void exitEveryRule(antlr4::ParserRuleContext * /*ctx*/) override { }

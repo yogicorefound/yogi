@@ -11,6 +11,8 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <openssl/sha.h>
+
 #include "antlr4-runtime.h"
 #include "libs/uni-algo/include/uni_algo/norm.h"
 #include "utils/helpers/visitor/variables.h"
@@ -575,7 +577,7 @@ namespace yogi::utils {
             auto n = std::any_cast<visitor::nodes::BinaryExpressionNode>(itemResult);
             auto expr = evaluateExpression(&n);
 
-            return {utils::VisitorHelpers::convertTypeToString(expr.type), expr.value, itemResult};
+            return {VisitorHelpers::convertTypeToString(expr.type), expr.value, itemResult};
         }
 
         return {}; // unreachable
@@ -644,5 +646,51 @@ namespace yogi::utils {
         auto n = std::any_cast<visitor::nodes::NoneLiteralNode>(itemResult);
         return n.value;
     }
+
+
+    std::filesystem::path Helpers::pathNormalizer(const std::filesystem::path &path) {
+        try {
+            return std::filesystem::weakly_canonical(path);
+        } catch (...) {
+            // fallback if path doesn't exist yet
+            return std::filesystem::absolute(path);
+        }
+    }
+
+    // -------------------------
+    // Resolve import path
+    // -------------------------
+
+    std::filesystem::path Helpers::pathResolver(const std::filesystem::path &currentFile, const std::string &importPath) {
+        const std::filesystem::path currentDir = currentFile;
+        const std::filesystem::path combined = currentDir / importPath;
+
+        return pathNormalizer(combined);
+    }
+
+    // -------------------------
+    // Module ID (hash of absolute path)
+    // -------------------------
+
+    std::string Helpers::pathModuleId(const std::filesystem::path &absolutePath) {
+        return hashString(absolutePath.string());
+    }
+
+    // -------------------------
+    // Hash helpers
+    // -------------------------
+    std::string Helpers::hashString(const std::string &input) {
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        SHA256(reinterpret_cast<const unsigned char *>(input.c_str()), input.size(), hash);
+
+        std::stringstream ss;
+        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+            ss << std::hex << std::setw(2) << std::setfill('0')
+                    << static_cast<int>(hash[i]);
+        }
+
+        return ss.str();
+    }
+
 
 } // namespace yogi::utils

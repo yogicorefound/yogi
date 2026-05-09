@@ -21,9 +21,9 @@ public:
     LTE = 33, GT = 34, GTE = 35, NEQ = 36, COLON = 37, QUESTION = 38, BIT_OR = 39, 
     BIT_XOR = 40, BIT_NOT = 41, SHL = 42, SHR = 43, NEWLINE = 44, NEWLINE_VISIBLE = 45, 
     WS_VISIBLE = 46, COMMENT = 47, BLOCK_COMMENT = 48, WS = 49, FLOAT = 50, 
-    INTEGER = 51, STRING = 52, FORMATTED_STRING_START = 53, FORMATTED_STRING_TEXT = 54, 
-    REGEX_LITERAL = 55, LBRACE_IN_FSTRING = 56, FORMATTED_STRING_END = 57, 
-    RBRACE_IN_FSTRING = 58, EXPR_WS = 59
+    INTEGER = 51, STRING = 52, FORMATTED_STRING_START = 53, IMPORT = 54, 
+    FROM = 55, FORMATTED_STRING_TEXT = 56, REGEX_LITERAL = 57, LBRACE_IN_FSTRING = 58, 
+    FORMATTED_STRING_END = 59, RBRACE_IN_FSTRING = 60, EXPR_WS = 61
   };
 
   enum {
@@ -47,7 +47,8 @@ public:
     RuleArrayItem = 49, RuleArrayElement = 50, RuleArrayReAssignment = 51, 
     RuleArrayType = 52, RuleArrayDeclarationTypeSizes = 53, RuleArrayDataType = 54, 
     RuleIfStatement = 55, RuleElseIfStatement = 56, RuleIfStatementCondition = 57, 
-    RuleElseStatement = 58, RuleIfStatementBody = 59
+    RuleElseStatement = 58, RuleIfStatementBody = 59, RuleImportStatement = 60, 
+    RuleImportStatementWithBrackets = 61, RuleImportStatementWithoutBrackets = 62
   };
 
   explicit Grammar(antlr4::TokenStream *input);
@@ -132,7 +133,10 @@ public:
   class ElseIfStatementContext;
   class IfStatementConditionContext;
   class ElseStatementContext;
-  class IfStatementBodyContext; 
+  class IfStatementBodyContext;
+  class ImportStatementContext;
+  class ImportStatementWithBracketsContext;
+  class ImportStatementWithoutBracketsContext; 
 
   class  ProgramContext : public antlr4::ParserRuleContext {
   public:
@@ -165,6 +169,7 @@ public:
     IfStatementContext *ifStatement();
     BooleanLiteralContext *booleanLiteral();
     NoneLiteralContext *noneLiteral();
+    ImportStatementContext *importStatement();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -1225,6 +1230,63 @@ public:
   };
 
   IfStatementBodyContext* ifStatementBody();
+
+  class  ImportStatementContext : public antlr4::ParserRuleContext {
+  public:
+    ImportStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ImportStatementWithBracketsContext *importStatementWithBrackets();
+    ImportStatementWithoutBracketsContext *importStatementWithoutBrackets();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ImportStatementContext* importStatement();
+
+  class  ImportStatementWithBracketsContext : public antlr4::ParserRuleContext {
+  public:
+    ImportStatementWithBracketsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *IMPORT();
+    antlr4::tree::TerminalNode *LBRACKET();
+    antlr4::tree::TerminalNode *RBRACKET();
+    antlr4::tree::TerminalNode *FROM();
+    StringLiteralContext *stringLiteral();
+    std::vector<IdentifierLiteralContext *> identifierLiteral();
+    IdentifierLiteralContext* identifierLiteral(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ImportStatementWithBracketsContext* importStatementWithBrackets();
+
+  class  ImportStatementWithoutBracketsContext : public antlr4::ParserRuleContext {
+  public:
+    ImportStatementWithoutBracketsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *IMPORT();
+    IdentifierLiteralContext *identifierLiteral();
+    antlr4::tree::TerminalNode *FROM();
+    StringLiteralContext *stringLiteral();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ImportStatementWithoutBracketsContext* importStatementWithoutBrackets();
 
 
   // By default the static state used to implement the parser is lazily initialized during the first

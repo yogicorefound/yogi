@@ -7,6 +7,7 @@
 #include <visitors/nodes/ProgramNode.h>
 #include <llvm/IR/Module.h>
 #include <any>
+#include "compiler/scanner/Scanner.h"
 
 namespace yogi::compiler {
     class Compiler final {

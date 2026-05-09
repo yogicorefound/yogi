@@ -139,6 +139,12 @@ public:
 
     virtual std::any visitIfStatementBody(Grammar::IfStatementBodyContext *context) = 0;
 
+    virtual std::any visitImportStatement(Grammar::ImportStatementContext *context) = 0;
+
+    virtual std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *context) = 0;
+
+    virtual std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *context) = 0;
+
 
 };
 

@@ -1,1 +1,1 @@
-str b = f"I am, {2026 - 1994}"
+str b = "Hello"

@@ -255,6 +255,18 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitImportStatement(Grammar::ImportStatementContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
 
 };
 

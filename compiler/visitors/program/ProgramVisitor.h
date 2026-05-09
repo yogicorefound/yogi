@@ -11,14 +11,14 @@
 #include "visitors/expressions/ExpressionVisitor.h"
 #include "visitors/literals/LiteralsVisitor.h"
 #include "visitors/members/MembersVisitor.h"
+#include "visitors/modules/ModulesVisitor.h"
 #include "visitors/variables/VariablesVisitor.h"
-#include "utils/helpers/cache/cache.h"
 
 namespace yogi::visitor {
-    class Visitor final : public utils::helper::cache::Cache, public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor {
+    class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor, public ModulesVisitor {
         public:
-            explicit Visitor(std::string &source, std::string &filePath, Grammar *parser)
-                : BaseVisitor(source, filePath, parser), Cache(getBuildDirectory()), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), source(source), filePath(filePath), parser(parser) {
+            explicit Visitor(std::string &source, std::string &filePath, Grammar *parser, const bool justScan)
+                : BaseVisitor(source, filePath, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), ModulesVisitor(), justScan(justScan), source(source), filePath(filePath), parser(parser) {
             }
 
             std::any visitProgram(Grammar::ProgramContext *ctx) override;
@@ -26,8 +26,11 @@ namespace yogi::visitor {
             std::any visitStatements(Grammar::StatementsContext *ctx) override;
 
         private:
+            bool justScan;
             std::string &source;
             std::string &filePath;
             Grammar *parser;
+            nodes::FullProgramASTSNode allASTs; // empty;
+
     };
 } // namespace yogi::visitor

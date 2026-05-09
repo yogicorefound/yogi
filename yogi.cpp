@@ -5,14 +5,21 @@
 #include <iostream>
 #include <filesystem>
 #include "compiler/compiler.h"
+#include "utils/helpers/Helpers.h"
 
 int main(const int argc, const char *argv[]) {
     try {
-        yogi::compiler::Compiler compiler(argc, argv);
+        // Modules Paths Scanner
+        yogi::compiler::scanner::Scanner scanner(argc, argv);
+        auto modules = scanner.scan();
 
+
+        // // Compiler
+        yogi::compiler::Compiler compiler(argc, argv);
         const yogi::visitor::nodes::ASTNode ast = compiler.compile();
+        //
+        // // Print AST
         // compiler.printAST(ast.program);
-        // compiler.processLLVM(ast.program);
 
     } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;

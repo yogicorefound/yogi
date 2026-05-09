@@ -21,6 +21,8 @@
 namespace yogi::compiler {
     visitor::nodes::ASTNode Compiler::compile() {
         const visitor::nodes::ProgramNode ast = getAST();
+
+
         return visitor::nodes::ASTNode(ast, filePath);
     }
 
@@ -72,7 +74,7 @@ namespace yogi::compiler {
         // Feed Tokens into Grammar
         // ---------------------------------------------
         auto *tree = grammar.program();
-        visitor::Visitor visitor(text, filePath, &grammar);
+        visitor::Visitor visitor(text, filePath, &grammar, false);
 
         // ---------------------------------------------
         // Feed Grammar into Visitor and generate AST
@@ -110,7 +112,7 @@ namespace yogi::compiler {
         // Feed Tokens into Grammar
         // ---------------------------------------------
         auto *tree = grammar.program();
-        visitor::Visitor visitor(content, filePath, &grammar);
+        visitor::Visitor visitor(content, filePath, &grammar, false);
 
         // ---------------------------------------------
         // Feed Grammar into Visitor and generate AST
