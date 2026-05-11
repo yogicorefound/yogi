@@ -6,8 +6,11 @@
 #include "Tokens.h"
 
 namespace yogi::compiler::scanner {
-    visitor::nodes::ModulesPathsNode Scanner::scan() {
-        antlr4::ANTLRInputStream input(content);
+    visitor::nodes::ModulesPathsNode Scanner::scan() const {
+        std::string content = setContentFromFilePath(utils::Helpers::pathResolver(utils::Helpers::getBuildDirectory(), filePath));
+        antlr4::ANTLRInputStream input(setContentFromFilePath(content));
+
+        // currentDirectory = std::move(utils::Helpers::pathResolver(filePath, "./").parent_path());
 
         // ---------------------------------------------
         // Feed ANTLR into Tokens
@@ -30,15 +33,20 @@ namespace yogi::compiler::scanner {
         // Feed Tokens into Grammar
         // ---------------------------------------------
         auto *tree = grammar.program();
-        visitor::Visitor visitor(content, filePath, &grammar, true);
+
+        std::string fileUrl = filePath;
+        visitor::Visitor visitor(content, fileUrl, &grammar, true);
 
         auto ast = visitor.visit(tree);
-        auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
+        auto node = std::any_cast<visitor::nodes::ModulesPathsNode>(ast);
 
-        return modulesPaths;
+        // std::cout << "currentDirectory...: " << filePath;
+        node.print();
+
+        return node;
     }
 
-    void Scanner::print(const std::optional<uint8_t> indent = 2) const {
+    void Scanner::print(const std::optional<uint8_t> indent) const {
         using json = nlohmann::json;
 
         std::function<json(const visitor::nodes::ModulesPathsNode &)> serializeModule;
@@ -62,25 +70,20 @@ namespace yogi::compiler::scanner {
         std::cout << output.dump(indent.value_or(2)) << std::endl;
     }
 
-    void Scanner::getContent(const int argc, const char *argv[]) {
-        if (argc < 2) {
-            std::cerr << "Usage: " << argv[0] << " <input-file>" << std::endl;
-            std::exit(1);
-        }
 
-        const std::ifstream file(argv[1]);
+    std::string Scanner::setContentFromFilePath(const std::string &fileUrl) const {
+        // std::cout << "setContentFromDirectoryPath: " << utils::Helpers::pathResolver(currentDirectory, fileUrl) << std::endl;
+        // // std::cout << "setContentFromFilePath: " << fileUrl << std::endl;
+        const std::ifstream file(fileUrl);
         if (!file) {
-            std::cerr << "Error: Could not open file " << argv[1] << std::endl;
+            std::cerr << "Error: Could not open file " << fileUrl << std::endl;
             std::exit(1);
         }
-
-
-        filePath = argv[1];
-        fileName = filePath.substr(filePath.find_last_of('/') + 1);
 
         std::stringstream buffer;
         buffer << file.rdbuf();
-        this->content = buffer.str();
+
+        return buffer.str();
     }
 
 }

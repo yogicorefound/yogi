@@ -23,17 +23,33 @@ public:
 
     virtual std::any visitStatements(Grammar::StatementsContext *context) = 0;
 
-    virtual std::any visitDictionaryDeclaration(Grammar::DictionaryDeclarationContext *context) = 0;
+    virtual std::any visitImportStatement(Grammar::ImportStatementContext *context) = 0;
 
-    virtual std::any visitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *context) = 0;
+    virtual std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *context) = 0;
 
-    virtual std::any visitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *context) = 0;
+    virtual std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *context) = 0;
 
-    virtual std::any visitDictionaryTypeElement(Grammar::DictionaryTypeElementContext *context) = 0;
+    virtual std::any visitLiterals(Grammar::LiteralsContext *context) = 0;
 
-    virtual std::any visitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *context) = 0;
+    virtual std::any visitNumberLiterals(Grammar::NumberLiteralsContext *context) = 0;
 
-    virtual std::any visitDictionaryDataType(Grammar::DictionaryDataTypeContext *context) = 0;
+    virtual std::any visitStringLiterals(Grammar::StringLiteralsContext *context) = 0;
+
+    virtual std::any visitFormattedString(Grammar::FormattedStringContext *context) = 0;
+
+    virtual std::any visitFormattedStringContent(Grammar::FormattedStringContentContext *context) = 0;
+
+    virtual std::any visitStringLiteral(Grammar::StringLiteralContext *context) = 0;
+
+    virtual std::any visitFloatLiteral(Grammar::FloatLiteralContext *context) = 0;
+
+    virtual std::any visitIntegerLiteral(Grammar::IntegerLiteralContext *context) = 0;
+
+    virtual std::any visitBooleanLiteral(Grammar::BooleanLiteralContext *context) = 0;
+
+    virtual std::any visitNoneLiteral(Grammar::NoneLiteralContext *context) = 0;
+
+    virtual std::any visitIdentifierLiteral(Grammar::IdentifierLiteralContext *context) = 0;
 
     virtual std::any visitExpression(Grammar::ExpressionContext *context) = 0;
 
@@ -65,28 +81,6 @@ public:
 
     virtual std::any visitPrimaryExpression(Grammar::PrimaryExpressionContext *context) = 0;
 
-    virtual std::any visitLiterals(Grammar::LiteralsContext *context) = 0;
-
-    virtual std::any visitNumberLiterals(Grammar::NumberLiteralsContext *context) = 0;
-
-    virtual std::any visitStringLiterals(Grammar::StringLiteralsContext *context) = 0;
-
-    virtual std::any visitFormattedString(Grammar::FormattedStringContext *context) = 0;
-
-    virtual std::any visitFormattedStringContent(Grammar::FormattedStringContentContext *context) = 0;
-
-    virtual std::any visitStringLiteral(Grammar::StringLiteralContext *context) = 0;
-
-    virtual std::any visitFloatLiteral(Grammar::FloatLiteralContext *context) = 0;
-
-    virtual std::any visitIntegerLiteral(Grammar::IntegerLiteralContext *context) = 0;
-
-    virtual std::any visitBooleanLiteral(Grammar::BooleanLiteralContext *context) = 0;
-
-    virtual std::any visitNoneLiteral(Grammar::NoneLiteralContext *context) = 0;
-
-    virtual std::any visitIdentifierLiteral(Grammar::IdentifierLiteralContext *context) = 0;
-
     virtual std::any visitMemberExpression(Grammar::MemberExpressionContext *context) = 0;
 
     virtual std::any visitValuePostfix(Grammar::ValuePostfixContext *context) = 0;
@@ -94,6 +88,18 @@ public:
     virtual std::any visitArgumentList(Grammar::ArgumentListContext *context) = 0;
 
     virtual std::any visitValueAtom(Grammar::ValueAtomContext *context) = 0;
+
+    virtual std::any visitDictionaryDeclaration(Grammar::DictionaryDeclarationContext *context) = 0;
+
+    virtual std::any visitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *context) = 0;
+
+    virtual std::any visitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *context) = 0;
+
+    virtual std::any visitDictionaryTypeElement(Grammar::DictionaryTypeElementContext *context) = 0;
+
+    virtual std::any visitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *context) = 0;
+
+    virtual std::any visitDictionaryDataType(Grammar::DictionaryDataTypeContext *context) = 0;
 
     virtual std::any visitVariables(Grammar::VariablesContext *context) = 0;
 
@@ -138,12 +144,6 @@ public:
     virtual std::any visitElseStatement(Grammar::ElseStatementContext *context) = 0;
 
     virtual std::any visitIfStatementBody(Grammar::IfStatementBodyContext *context) = 0;
-
-    virtual std::any visitImportStatement(Grammar::ImportStatementContext *context) = 0;
-
-    virtual std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *context) = 0;
-
-    virtual std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *context) = 0;
 
 
 };

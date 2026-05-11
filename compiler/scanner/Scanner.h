@@ -6,24 +6,23 @@
 #include <vector>
 #include <string>
 #include <visitors/program/ProgramVisitor.h>
+#include "utils/helpers/Helpers.h"
 
 namespace yogi::compiler::scanner {
     class Scanner {
         public:
-            Scanner(const int argc, const char *argv[]) {
-                getContent(argc, argv);
-            };
+            explicit Scanner(const std::string &filePath) : filePath(utils::Helpers::pathResolver(utils::Helpers::getBuildDirectory(), filePath)) {
+            }
 
-            visitor::nodes::ModulesPathsNode scan();
+            visitor::nodes::ModulesPathsNode scan() const;
 
             void print(std::optional<uint8_t> indent) const;
 
-        private:
-            void getContent(int argc, const char *argv[]);
+            std::string setContentFromFilePath(const std::string &fileUrl) const;
 
+        private:
             visitor::nodes::ModulesPathsNode modulesPaths;
-            std::string content;
-            std::string fileName;
+            std::string currentDirectory = utils::Helpers::pathNormalizer(utils::Helpers::getBuildDirectory());
             std::string filePath;
     };
 }

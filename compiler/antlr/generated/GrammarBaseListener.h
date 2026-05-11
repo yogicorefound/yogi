@@ -22,23 +22,47 @@ public:
   virtual void enterStatements(Grammar::StatementsContext * /*ctx*/) override { }
   virtual void exitStatements(Grammar::StatementsContext * /*ctx*/) override { }
 
-  virtual void enterDictionaryDeclaration(Grammar::DictionaryDeclarationContext * /*ctx*/) override { }
-  virtual void exitDictionaryDeclaration(Grammar::DictionaryDeclarationContext * /*ctx*/) override { }
+  virtual void enterImportStatement(Grammar::ImportStatementContext * /*ctx*/) override { }
+  virtual void exitImportStatement(Grammar::ImportStatementContext * /*ctx*/) override { }
 
-  virtual void enterDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext * /*ctx*/) override { }
-  virtual void exitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext * /*ctx*/) override { }
+  virtual void enterImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext * /*ctx*/) override { }
+  virtual void exitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext * /*ctx*/) override { }
 
-  virtual void enterDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext * /*ctx*/) override { }
-  virtual void exitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext * /*ctx*/) override { }
+  virtual void enterImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext * /*ctx*/) override { }
+  virtual void exitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext * /*ctx*/) override { }
 
-  virtual void enterDictionaryTypeElement(Grammar::DictionaryTypeElementContext * /*ctx*/) override { }
-  virtual void exitDictionaryTypeElement(Grammar::DictionaryTypeElementContext * /*ctx*/) override { }
+  virtual void enterLiterals(Grammar::LiteralsContext * /*ctx*/) override { }
+  virtual void exitLiterals(Grammar::LiteralsContext * /*ctx*/) override { }
 
-  virtual void enterDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext * /*ctx*/) override { }
-  virtual void exitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext * /*ctx*/) override { }
+  virtual void enterNumberLiterals(Grammar::NumberLiteralsContext * /*ctx*/) override { }
+  virtual void exitNumberLiterals(Grammar::NumberLiteralsContext * /*ctx*/) override { }
 
-  virtual void enterDictionaryDataType(Grammar::DictionaryDataTypeContext * /*ctx*/) override { }
-  virtual void exitDictionaryDataType(Grammar::DictionaryDataTypeContext * /*ctx*/) override { }
+  virtual void enterStringLiterals(Grammar::StringLiteralsContext * /*ctx*/) override { }
+  virtual void exitStringLiterals(Grammar::StringLiteralsContext * /*ctx*/) override { }
+
+  virtual void enterFormattedString(Grammar::FormattedStringContext * /*ctx*/) override { }
+  virtual void exitFormattedString(Grammar::FormattedStringContext * /*ctx*/) override { }
+
+  virtual void enterFormattedStringContent(Grammar::FormattedStringContentContext * /*ctx*/) override { }
+  virtual void exitFormattedStringContent(Grammar::FormattedStringContentContext * /*ctx*/) override { }
+
+  virtual void enterStringLiteral(Grammar::StringLiteralContext * /*ctx*/) override { }
+  virtual void exitStringLiteral(Grammar::StringLiteralContext * /*ctx*/) override { }
+
+  virtual void enterFloatLiteral(Grammar::FloatLiteralContext * /*ctx*/) override { }
+  virtual void exitFloatLiteral(Grammar::FloatLiteralContext * /*ctx*/) override { }
+
+  virtual void enterIntegerLiteral(Grammar::IntegerLiteralContext * /*ctx*/) override { }
+  virtual void exitIntegerLiteral(Grammar::IntegerLiteralContext * /*ctx*/) override { }
+
+  virtual void enterBooleanLiteral(Grammar::BooleanLiteralContext * /*ctx*/) override { }
+  virtual void exitBooleanLiteral(Grammar::BooleanLiteralContext * /*ctx*/) override { }
+
+  virtual void enterNoneLiteral(Grammar::NoneLiteralContext * /*ctx*/) override { }
+  virtual void exitNoneLiteral(Grammar::NoneLiteralContext * /*ctx*/) override { }
+
+  virtual void enterIdentifierLiteral(Grammar::IdentifierLiteralContext * /*ctx*/) override { }
+  virtual void exitIdentifierLiteral(Grammar::IdentifierLiteralContext * /*ctx*/) override { }
 
   virtual void enterExpression(Grammar::ExpressionContext * /*ctx*/) override { }
   virtual void exitExpression(Grammar::ExpressionContext * /*ctx*/) override { }
@@ -85,39 +109,6 @@ public:
   virtual void enterPrimaryExpression(Grammar::PrimaryExpressionContext * /*ctx*/) override { }
   virtual void exitPrimaryExpression(Grammar::PrimaryExpressionContext * /*ctx*/) override { }
 
-  virtual void enterLiterals(Grammar::LiteralsContext * /*ctx*/) override { }
-  virtual void exitLiterals(Grammar::LiteralsContext * /*ctx*/) override { }
-
-  virtual void enterNumberLiterals(Grammar::NumberLiteralsContext * /*ctx*/) override { }
-  virtual void exitNumberLiterals(Grammar::NumberLiteralsContext * /*ctx*/) override { }
-
-  virtual void enterStringLiterals(Grammar::StringLiteralsContext * /*ctx*/) override { }
-  virtual void exitStringLiterals(Grammar::StringLiteralsContext * /*ctx*/) override { }
-
-  virtual void enterFormattedString(Grammar::FormattedStringContext * /*ctx*/) override { }
-  virtual void exitFormattedString(Grammar::FormattedStringContext * /*ctx*/) override { }
-
-  virtual void enterFormattedStringContent(Grammar::FormattedStringContentContext * /*ctx*/) override { }
-  virtual void exitFormattedStringContent(Grammar::FormattedStringContentContext * /*ctx*/) override { }
-
-  virtual void enterStringLiteral(Grammar::StringLiteralContext * /*ctx*/) override { }
-  virtual void exitStringLiteral(Grammar::StringLiteralContext * /*ctx*/) override { }
-
-  virtual void enterFloatLiteral(Grammar::FloatLiteralContext * /*ctx*/) override { }
-  virtual void exitFloatLiteral(Grammar::FloatLiteralContext * /*ctx*/) override { }
-
-  virtual void enterIntegerLiteral(Grammar::IntegerLiteralContext * /*ctx*/) override { }
-  virtual void exitIntegerLiteral(Grammar::IntegerLiteralContext * /*ctx*/) override { }
-
-  virtual void enterBooleanLiteral(Grammar::BooleanLiteralContext * /*ctx*/) override { }
-  virtual void exitBooleanLiteral(Grammar::BooleanLiteralContext * /*ctx*/) override { }
-
-  virtual void enterNoneLiteral(Grammar::NoneLiteralContext * /*ctx*/) override { }
-  virtual void exitNoneLiteral(Grammar::NoneLiteralContext * /*ctx*/) override { }
-
-  virtual void enterIdentifierLiteral(Grammar::IdentifierLiteralContext * /*ctx*/) override { }
-  virtual void exitIdentifierLiteral(Grammar::IdentifierLiteralContext * /*ctx*/) override { }
-
   virtual void enterMemberExpression(Grammar::MemberExpressionContext * /*ctx*/) override { }
   virtual void exitMemberExpression(Grammar::MemberExpressionContext * /*ctx*/) override { }
 
@@ -129,6 +120,24 @@ public:
 
   virtual void enterValueAtom(Grammar::ValueAtomContext * /*ctx*/) override { }
   virtual void exitValueAtom(Grammar::ValueAtomContext * /*ctx*/) override { }
+
+  virtual void enterDictionaryDeclaration(Grammar::DictionaryDeclarationContext * /*ctx*/) override { }
+  virtual void exitDictionaryDeclaration(Grammar::DictionaryDeclarationContext * /*ctx*/) override { }
+
+  virtual void enterDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext * /*ctx*/) override { }
+  virtual void exitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext * /*ctx*/) override { }
+
+  virtual void enterDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext * /*ctx*/) override { }
+  virtual void exitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext * /*ctx*/) override { }
+
+  virtual void enterDictionaryTypeElement(Grammar::DictionaryTypeElementContext * /*ctx*/) override { }
+  virtual void exitDictionaryTypeElement(Grammar::DictionaryTypeElementContext * /*ctx*/) override { }
+
+  virtual void enterDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext * /*ctx*/) override { }
+  virtual void exitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext * /*ctx*/) override { }
+
+  virtual void enterDictionaryDataType(Grammar::DictionaryDataTypeContext * /*ctx*/) override { }
+  virtual void exitDictionaryDataType(Grammar::DictionaryDataTypeContext * /*ctx*/) override { }
 
   virtual void enterVariables(Grammar::VariablesContext * /*ctx*/) override { }
   virtual void exitVariables(Grammar::VariablesContext * /*ctx*/) override { }
@@ -195,15 +204,6 @@ public:
 
   virtual void enterIfStatementBody(Grammar::IfStatementBodyContext * /*ctx*/) override { }
   virtual void exitIfStatementBody(Grammar::IfStatementBodyContext * /*ctx*/) override { }
-
-  virtual void enterImportStatement(Grammar::ImportStatementContext * /*ctx*/) override { }
-  virtual void exitImportStatement(Grammar::ImportStatementContext * /*ctx*/) override { }
-
-  virtual void enterImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext * /*ctx*/) override { }
-  virtual void exitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext * /*ctx*/) override { }
-
-  virtual void enterImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext * /*ctx*/) override { }
-  virtual void exitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext * /*ctx*/) override { }
 
 
   virtual void enterEveryRule(antlr4::ParserRuleContext * /*ctx*/) override { }

@@ -20,23 +20,47 @@ public:
   virtual void enterStatements(Grammar::StatementsContext *ctx) = 0;
   virtual void exitStatements(Grammar::StatementsContext *ctx) = 0;
 
-  virtual void enterDictionaryDeclaration(Grammar::DictionaryDeclarationContext *ctx) = 0;
-  virtual void exitDictionaryDeclaration(Grammar::DictionaryDeclarationContext *ctx) = 0;
+  virtual void enterImportStatement(Grammar::ImportStatementContext *ctx) = 0;
+  virtual void exitImportStatement(Grammar::ImportStatementContext *ctx) = 0;
 
-  virtual void enterDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *ctx) = 0;
-  virtual void exitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *ctx) = 0;
+  virtual void enterImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) = 0;
+  virtual void exitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) = 0;
 
-  virtual void enterDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *ctx) = 0;
-  virtual void exitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *ctx) = 0;
+  virtual void enterImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) = 0;
+  virtual void exitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) = 0;
 
-  virtual void enterDictionaryTypeElement(Grammar::DictionaryTypeElementContext *ctx) = 0;
-  virtual void exitDictionaryTypeElement(Grammar::DictionaryTypeElementContext *ctx) = 0;
+  virtual void enterLiterals(Grammar::LiteralsContext *ctx) = 0;
+  virtual void exitLiterals(Grammar::LiteralsContext *ctx) = 0;
 
-  virtual void enterDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *ctx) = 0;
-  virtual void exitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *ctx) = 0;
+  virtual void enterNumberLiterals(Grammar::NumberLiteralsContext *ctx) = 0;
+  virtual void exitNumberLiterals(Grammar::NumberLiteralsContext *ctx) = 0;
 
-  virtual void enterDictionaryDataType(Grammar::DictionaryDataTypeContext *ctx) = 0;
-  virtual void exitDictionaryDataType(Grammar::DictionaryDataTypeContext *ctx) = 0;
+  virtual void enterStringLiterals(Grammar::StringLiteralsContext *ctx) = 0;
+  virtual void exitStringLiterals(Grammar::StringLiteralsContext *ctx) = 0;
+
+  virtual void enterFormattedString(Grammar::FormattedStringContext *ctx) = 0;
+  virtual void exitFormattedString(Grammar::FormattedStringContext *ctx) = 0;
+
+  virtual void enterFormattedStringContent(Grammar::FormattedStringContentContext *ctx) = 0;
+  virtual void exitFormattedStringContent(Grammar::FormattedStringContentContext *ctx) = 0;
+
+  virtual void enterStringLiteral(Grammar::StringLiteralContext *ctx) = 0;
+  virtual void exitStringLiteral(Grammar::StringLiteralContext *ctx) = 0;
+
+  virtual void enterFloatLiteral(Grammar::FloatLiteralContext *ctx) = 0;
+  virtual void exitFloatLiteral(Grammar::FloatLiteralContext *ctx) = 0;
+
+  virtual void enterIntegerLiteral(Grammar::IntegerLiteralContext *ctx) = 0;
+  virtual void exitIntegerLiteral(Grammar::IntegerLiteralContext *ctx) = 0;
+
+  virtual void enterBooleanLiteral(Grammar::BooleanLiteralContext *ctx) = 0;
+  virtual void exitBooleanLiteral(Grammar::BooleanLiteralContext *ctx) = 0;
+
+  virtual void enterNoneLiteral(Grammar::NoneLiteralContext *ctx) = 0;
+  virtual void exitNoneLiteral(Grammar::NoneLiteralContext *ctx) = 0;
+
+  virtual void enterIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) = 0;
+  virtual void exitIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) = 0;
 
   virtual void enterExpression(Grammar::ExpressionContext *ctx) = 0;
   virtual void exitExpression(Grammar::ExpressionContext *ctx) = 0;
@@ -83,39 +107,6 @@ public:
   virtual void enterPrimaryExpression(Grammar::PrimaryExpressionContext *ctx) = 0;
   virtual void exitPrimaryExpression(Grammar::PrimaryExpressionContext *ctx) = 0;
 
-  virtual void enterLiterals(Grammar::LiteralsContext *ctx) = 0;
-  virtual void exitLiterals(Grammar::LiteralsContext *ctx) = 0;
-
-  virtual void enterNumberLiterals(Grammar::NumberLiteralsContext *ctx) = 0;
-  virtual void exitNumberLiterals(Grammar::NumberLiteralsContext *ctx) = 0;
-
-  virtual void enterStringLiterals(Grammar::StringLiteralsContext *ctx) = 0;
-  virtual void exitStringLiterals(Grammar::StringLiteralsContext *ctx) = 0;
-
-  virtual void enterFormattedString(Grammar::FormattedStringContext *ctx) = 0;
-  virtual void exitFormattedString(Grammar::FormattedStringContext *ctx) = 0;
-
-  virtual void enterFormattedStringContent(Grammar::FormattedStringContentContext *ctx) = 0;
-  virtual void exitFormattedStringContent(Grammar::FormattedStringContentContext *ctx) = 0;
-
-  virtual void enterStringLiteral(Grammar::StringLiteralContext *ctx) = 0;
-  virtual void exitStringLiteral(Grammar::StringLiteralContext *ctx) = 0;
-
-  virtual void enterFloatLiteral(Grammar::FloatLiteralContext *ctx) = 0;
-  virtual void exitFloatLiteral(Grammar::FloatLiteralContext *ctx) = 0;
-
-  virtual void enterIntegerLiteral(Grammar::IntegerLiteralContext *ctx) = 0;
-  virtual void exitIntegerLiteral(Grammar::IntegerLiteralContext *ctx) = 0;
-
-  virtual void enterBooleanLiteral(Grammar::BooleanLiteralContext *ctx) = 0;
-  virtual void exitBooleanLiteral(Grammar::BooleanLiteralContext *ctx) = 0;
-
-  virtual void enterNoneLiteral(Grammar::NoneLiteralContext *ctx) = 0;
-  virtual void exitNoneLiteral(Grammar::NoneLiteralContext *ctx) = 0;
-
-  virtual void enterIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) = 0;
-  virtual void exitIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) = 0;
-
   virtual void enterMemberExpression(Grammar::MemberExpressionContext *ctx) = 0;
   virtual void exitMemberExpression(Grammar::MemberExpressionContext *ctx) = 0;
 
@@ -127,6 +118,24 @@ public:
 
   virtual void enterValueAtom(Grammar::ValueAtomContext *ctx) = 0;
   virtual void exitValueAtom(Grammar::ValueAtomContext *ctx) = 0;
+
+  virtual void enterDictionaryDeclaration(Grammar::DictionaryDeclarationContext *ctx) = 0;
+  virtual void exitDictionaryDeclaration(Grammar::DictionaryDeclarationContext *ctx) = 0;
+
+  virtual void enterDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *ctx) = 0;
+  virtual void exitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *ctx) = 0;
+
+  virtual void enterDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *ctx) = 0;
+  virtual void exitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *ctx) = 0;
+
+  virtual void enterDictionaryTypeElement(Grammar::DictionaryTypeElementContext *ctx) = 0;
+  virtual void exitDictionaryTypeElement(Grammar::DictionaryTypeElementContext *ctx) = 0;
+
+  virtual void enterDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *ctx) = 0;
+  virtual void exitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *ctx) = 0;
+
+  virtual void enterDictionaryDataType(Grammar::DictionaryDataTypeContext *ctx) = 0;
+  virtual void exitDictionaryDataType(Grammar::DictionaryDataTypeContext *ctx) = 0;
 
   virtual void enterVariables(Grammar::VariablesContext *ctx) = 0;
   virtual void exitVariables(Grammar::VariablesContext *ctx) = 0;
@@ -193,15 +202,6 @@ public:
 
   virtual void enterIfStatementBody(Grammar::IfStatementBodyContext *ctx) = 0;
   virtual void exitIfStatementBody(Grammar::IfStatementBodyContext *ctx) = 0;
-
-  virtual void enterImportStatement(Grammar::ImportStatementContext *ctx) = 0;
-  virtual void exitImportStatement(Grammar::ImportStatementContext *ctx) = 0;
-
-  virtual void enterImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) = 0;
-  virtual void exitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) = 0;
-
-  virtual void enterImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) = 0;
-  virtual void exitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) = 0;
 
 
 };

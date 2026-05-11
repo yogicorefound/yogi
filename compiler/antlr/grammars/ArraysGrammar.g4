@@ -5,6 +5,8 @@ options {
 }
 
 import LiteralsGrammar;
+
+
 arrays
     : arrayDeclaration
     | arrayReAssignment

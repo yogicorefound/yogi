@@ -2,7 +2,9 @@ parser grammar ImportGrammar;
 
 import LiteralsGrammar;
 
-
+options {
+    tokenVocab = Tokens;
+}
 
 importStatement
     : importStatementWithBrackets

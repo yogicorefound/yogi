@@ -23,27 +23,59 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDictionaryDeclaration(Grammar::DictionaryDeclarationContext *ctx) override {
+  virtual std::any visitImportStatement(Grammar::ImportStatementContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *ctx) override {
+  virtual std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *ctx) override {
+  virtual std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDictionaryTypeElement(Grammar::DictionaryTypeElementContext *ctx) override {
+  virtual std::any visitLiterals(Grammar::LiteralsContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *ctx) override {
+  virtual std::any visitNumberLiterals(Grammar::NumberLiteralsContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDictionaryDataType(Grammar::DictionaryDataTypeContext *ctx) override {
+  virtual std::any visitStringLiterals(Grammar::StringLiteralsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFormattedString(Grammar::FormattedStringContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFormattedStringContent(Grammar::FormattedStringContentContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitStringLiteral(Grammar::StringLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFloatLiteral(Grammar::FloatLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitIntegerLiteral(Grammar::IntegerLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitBooleanLiteral(Grammar::BooleanLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitNoneLiteral(Grammar::NoneLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -107,50 +139,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitLiterals(Grammar::LiteralsContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitNumberLiterals(Grammar::NumberLiteralsContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitStringLiterals(Grammar::StringLiteralsContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitFormattedString(Grammar::FormattedStringContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitFormattedStringContent(Grammar::FormattedStringContentContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitStringLiteral(Grammar::StringLiteralContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitFloatLiteral(Grammar::FloatLiteralContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitIntegerLiteral(Grammar::IntegerLiteralContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitBooleanLiteral(Grammar::BooleanLiteralContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitNoneLiteral(Grammar::NoneLiteralContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitIdentifierLiteral(Grammar::IdentifierLiteralContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitMemberExpression(Grammar::MemberExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -164,6 +152,30 @@ public:
   }
 
   virtual std::any visitValueAtom(Grammar::ValueAtomContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitDictionaryDeclaration(Grammar::DictionaryDeclarationContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitDictionaryAssignmentBody(Grammar::DictionaryAssignmentBodyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitDictionaryDeclarationType(Grammar::DictionaryDeclarationTypeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitDictionaryTypeElement(Grammar::DictionaryTypeElementContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitDictionaryDeclarationTypeArray(Grammar::DictionaryDeclarationTypeArrayContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitDictionaryDataType(Grammar::DictionaryDataTypeContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -252,18 +264,6 @@ public:
   }
 
   virtual std::any visitIfStatementBody(Grammar::IfStatementBodyContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitImportStatement(Grammar::ImportStatementContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) override {
     return visitChildren(ctx);
   }
 

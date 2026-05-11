@@ -1,1 +1,6 @@
-str b = "Hello"
+import utils from "dev.io"
+import utils from "dev.io"
+import utils from "dev.io"
+import utils from "dev.io"
+import utils from "dev.io"
+import utils from "utils.io"

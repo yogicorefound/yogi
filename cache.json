@@ -34,38 +34,26 @@
 //	}
 //}
 
-
 {
-	"path": "/project/src/main.yogi",
+	"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
 	"modules": [
 		{
-			"path": "\"/Users/brayhandeaza/Documents/dev/projects/yogi/src/main.yogi",
+			"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io",
 			"modules": [
 				{
-					"path": "\"/Users/brayhandeaza/Documents/dev/projects/yogi/src/auth.yogi",
-					"modules": []
-				},
-				{
-					"path": "\"/Users/brayhandeaza/Documents/dev/projects/yogi/src/utils.yogi",
+					"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
 					"modules": [
 						{
-							"path": "\"/Users/brayhandeaza/Documents/dev/projects/yogi/src/main.yogi",
-							"modules": [
-								{
-									"path": "\"/Users/brayhandeaza/Documents/dev/projects/yogi/src/auth.yogi",
-									"modules": []
-								},
-								{
-									"path": "\"/Users/brayhandeaza/Documents/dev/projects/yogi/src/utils.yogi",
-									"modules": [
-									
-									]
-								}
-							]
+							"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
+							"modules": []
 						}
 					]
 				}
 			]
+		},
+		{
+			"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
+			"modules": []
 		}
 	]
 }

@@ -18,9 +18,10 @@ namespace yogi::visitor {
             Grammar *parser;
             std::unique_ptr<semantic::Scope> rootScope;
             semantic::Scope *scope;
+            std::string currentPath;
 
         public:
-            explicit BaseVisitor(std::string &source, std::string &filePath, Grammar *parser) : Cache(getBuildDirectory()), source(source), filePath(filePath), parser(parser), rootScope(std::make_unique<semantic::Scope>(nullptr)), scope(rootScope.get()) {
+            explicit BaseVisitor(std::string &source, std::string &filePath, Grammar *parser) : Cache(getBuildDirectory()), source(source), filePath(filePath), parser(parser), rootScope(std::make_unique<semantic::Scope>(nullptr)), scope(rootScope.get()), currentPath(pathResolver(getBuildDirectory(), filePath).parent_path()) {
             }
 
             void enterScope();

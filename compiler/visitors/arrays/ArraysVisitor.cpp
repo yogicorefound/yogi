@@ -119,8 +119,6 @@ namespace yogi::visitor {
 
         std::any current = array.value()->elements;
 
-        std::cout << identifier << std::endl;
-
         // Navigate through each dimension using the indices
         for (size_t i = 0; i < indexes.size(); ++i) {
             size_t index = indexes[i];

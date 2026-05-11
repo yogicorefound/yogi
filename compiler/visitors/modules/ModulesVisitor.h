@@ -7,11 +7,13 @@
 #include <any>
 
 
-
 namespace yogi::visitor {
-    class ModulesVisitor : public virtual BaseVisitor  {
-        std::any visitImportStatement(Grammar::ImportStatementContext *ctx) override;
-        std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) override;
-        std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) override;
+    class ModulesVisitor : public virtual BaseVisitor {
+        public:
+            std::any visitImportStatement(Grammar::ImportStatementContext *ctx) override;
+
+            std::any visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) override;
+
+            std::any visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) override;
     };
 }

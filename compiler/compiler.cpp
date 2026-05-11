@@ -19,11 +19,13 @@
 #include <unistd.h>
 
 namespace yogi::compiler {
-    visitor::nodes::ASTNode Compiler::compile() {
-        const visitor::nodes::ProgramNode ast = getAST();
+    std::any Compiler::compile(const bool justScan) {
+        const auto ast = getAST(justScan);
 
+        if (justScan)
+            return std::any_cast<visitor::nodes::ModulesPathsNode>(ast);
 
-        return visitor::nodes::ASTNode(ast, filePath);
+        return std::any_cast<visitor::nodes::ProgramNode>(ast);
     }
 
     void Compiler::getContent(const int argc, const char *argv[]) {
@@ -47,7 +49,7 @@ namespace yogi::compiler {
         this->content = buffer.str();
     }
 
-    visitor::nodes::ProgramNode Compiler::testAST(std::string &text, std::string& filePath) {
+    visitor::nodes::ProgramNode Compiler::testAST(std::string &text, std::string &filePath) {
         // ---------------------------------------------
         // Feed file content into ANTLR
         // ---------------------------------------------
@@ -85,7 +87,8 @@ namespace yogi::compiler {
         return node;
     }
 
-    visitor::nodes::ProgramNode Compiler::getAST() {
+
+    std::any Compiler::getAST(bool justScan) {
         // ---------------------------------------------
         // Feed file content into ANTLR
         // ---------------------------------------------
@@ -112,29 +115,73 @@ namespace yogi::compiler {
         // Feed Tokens into Grammar
         // ---------------------------------------------
         auto *tree = grammar.program();
-        visitor::Visitor visitor(content, filePath, &grammar, false);
+        visitor::Visitor visitor(content, filePath, &grammar, justScan);
 
         // ---------------------------------------------
         // Feed Grammar into Visitor and generate AST
         // ---------------------------------------------
         auto ast = visitor.visit(tree);
-        auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
+        // auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
-        return node;
+        return ast;
     }
 
-    void Compiler::printAST(const std::any &ast) {
-        if (ast.type() == typeid(visitor::nodes::ProgramNode)) {
-            std::cout << "=== AST ===" << std::endl;
-            utils::Helpers::printNode(ast, 1);
-        } else {
-            std::cerr << "Error: Expected ProgramNode at root" << std::endl;
+
+    std::any Compiler::scan(std::string fPath) {
+        const std::ifstream file(fPath);
+        if (!file) {
+            std::cerr << "Error: Could not open file " << fPath << std::endl;
             std::exit(1);
         }
+
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+
+
+        // ---------------------------------------------
+        // Feed file content into ANTLR
+        // ---------------------------------------------
+        antlr4::ANTLRInputStream input(content);
+
+        // ---------------------------------------------
+        // Feed ANTLR into Tokens
+        // ---------------------------------------------
+        Tokens lexer(&input);
+        antlr4::CommonTokenStream tokens(&lexer);
+        Grammar grammar(&tokens);
+
+        // ---------------------------------------------
+        // Setup error listeners
+        // ---------------------------------------------
+        lexer.removeErrorListeners();
+        grammar.removeErrorListeners();
+
+        utils::errors::AntlrErrorListener errorListener(content);
+        lexer.addErrorListener(&errorListener);
+        grammar.addErrorListener(&errorListener);
+
+        // ---------------------------------------------
+        // Feed Tokens into Grammar
+        // ---------------------------------------------
+        auto *tree = grammar.program();
+        visitor::Visitor visitor(content, fPath, &grammar, true);
+
+        // ---------------------------------------------
+        // Feed Grammar into Visitor and generate AST
+        // ---------------------------------------------
+        auto ast = visitor.visit(tree);
+
+        return ast;
+    }
+
+
+    void Compiler::printAST(const std::any &ast) {
+        std::cout << "=== AST ===" << std::endl;
+        utils::Helpers::printNode(ast, 1);
     }
 
     void Compiler::processLLVM(const std::any &ast) const {
-        std::cout << "buildDir" << std::endl;
         const auto node = std::any_cast<visitor::nodes::ProgramNode>(ast);
 
         core::ir::IR ir(fileName);
@@ -192,7 +239,7 @@ namespace yogi::compiler {
             (char *) sdkPath.c_str(),
             (char *) lSystem.c_str(), // link libSystem directly via .tbd
             (char *) objStr.c_str(),
-            (char *)  runtime.c_str(),
+            (char *) runtime.c_str(),
             (char *) "-o",
             (char *) outputStr.c_str(),
             nullptr

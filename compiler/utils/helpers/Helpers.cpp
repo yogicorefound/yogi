@@ -326,14 +326,36 @@ namespace yogi::utils {
         if (!node.has_value())
             return nullptr;
 
+        // Entry
+        if (node.type() == typeid(ASTNode)) {
+            const auto &n = std::any_cast<const ASTNode &>(node);
+            return {{"kind", "Entry"}, {"path", n.path}, {"program", nodeToJson(n.program)}};
+        }
+
         // -------------------------------------------------
         // Literals
         // -------------------------------------------------
-
         if (node.type() == typeid(IntegerLiteralNode)) {
             const auto &n = std::any_cast<const IntegerLiteralNode &>(node);
             return {{"kind", "IntegerLiteral"}, {"value", n.value}};
         }
+
+        if (node.type() == typeid(ImportWithoutBracketsNode)) {
+            const auto &n = std::any_cast<const ImportWithoutBracketsNode &>(node);
+            return {{"kind", "ImportWithoutBrackets"}, {"path", n.path}, {"name", n.name}};
+        }
+
+        if (node.type() == typeid(ImportWithBracketsNode)) {
+            const auto &nodes = std::any_cast<const ImportWithBracketsNode &>(node);
+
+            json modules = json::array();
+            for (const auto n: nodes.modules) {
+                modules.push_back(nodeToJson(n));
+            }
+
+            return {{"kind", "ImportWithBrackets"}, {"modules", modules}, {"path", nodes.path}};
+        }
+
 
         if (node.type() == typeid(FloatLiteralNode)) {
             const auto &n = std::any_cast<const FloatLiteralNode &>(node);
@@ -691,6 +713,14 @@ namespace yogi::utils {
 
         return ss.str();
     }
+
+    std::string Helpers::removeQuotes(std::string str) {
+        str.erase(
+            std::ranges::remove(str, '"').begin(),
+            str.end()
+        );
+        return str;
+    };
 
 
 } // namespace yogi::utils

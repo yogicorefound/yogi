@@ -16,7 +16,7 @@ namespace yogi::compiler {
                 getContent(argc, argv);
             }
 
-            visitor::nodes::ASTNode compile();
+            std::any compile(bool justScan);
 
             static visitor::nodes::ProgramNode testAST(std::string &text, std::string &filePath);
 
@@ -24,8 +24,10 @@ namespace yogi::compiler {
 
             void processLLVM(const std::any &ast) const;
 
+            static std::any scan(std::string fPath);
+
         private:
-            visitor::nodes::ProgramNode getAST();
+            std::any getAST(bool justScan);
 
             // LLVM
             void getContent(int argc, const char *argv[]);

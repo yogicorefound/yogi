@@ -62,10 +62,11 @@ namespace yogi::visitor::nodes {
         std::string path;
         std::vector<ModulesPathsNode> modules;
 
+
         ModulesPathsNode() = default;
 
-        explicit ModulesPathsNode(std::string p)
-            : path(std::move(p)) {
+        explicit ModulesPathsNode(std::string path)
+            : path(std::move(path)) {
         }
 
         void addModule(ModulesPathsNode module) {

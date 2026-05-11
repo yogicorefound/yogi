@@ -19,6 +19,8 @@ namespace yogi::utils {
         static json getPosition(const antlr4::Token *token);
 
         public:
+            static std::string removeQuotes(std::string str);
+
             static long long parseInteger(std::string raw);
 
             static double parseFloat(std::string raw);

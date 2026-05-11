@@ -11,7 +11,7 @@ options {
         bool isNotOperator = false;
 }
 
-import DictionaryGrammar, VariableGrammar, ConditionsGrammar, ArraysGrammar, MembersGrammar,  LiteralsGrammar, ExpressionsGrammar, ImportGrammar;
+import ImportGrammar, DictionaryGrammar, VariableGrammar, ConditionsGrammar, ArraysGrammar, MembersGrammar,  LiteralsGrammar, ExpressionsGrammar;
 
 program: NEWLINE* (statements NEWLINE*)* EOF;
 
@@ -19,11 +19,11 @@ statements
     : expression
     | variables
     | arrays
+    | importStatement
     | dictionaryDeclaration
     | memberExpression
     | ifStatement
     | booleanLiteral
     | noneLiteral
-    | importStatement
     ;
 
