@@ -95,4 +95,55 @@ namespace yogi::visitor::nodes {
             }
     };
 
+    // -------------------------
+    // Final combined object
+    // -------------------------
+    struct YogiNode {
+        yogi::visitor::nodes::ModulesPathsNode dfs;
+        std::unordered_map<std::string, yogi::visitor::nodes::ProgramNode> asts;
+
+        // -----------------------------
+        // Convert AST map to JSON
+        // -----------------------------
+        json astsToJson() const {
+            json j = json::object();
+
+            for (const auto &[path, program]: asts) {
+                // NOTE: assumes ProgramNode is serializable OR you adapt this
+                j[path] = yogi::utils::Helpers::nodeToJson(program);
+            }
+
+            return j;
+        }
+
+        // -----------------------------
+        // Convert DFS tree to JSON
+        // (reuses ModulesPathsNode::toJson idea)
+        // -----------------------------
+        static json dfsToJson(const yogi::visitor::nodes::ModulesPathsNode &node) {
+            json j;
+            j["path"] = node.path;
+            j["flagged"] = node.flagged;
+            j["modules"] = json::array();
+
+            for (const auto &child: node.modules) {
+                j["modules"].push_back(dfsToJson(child));
+            }
+
+            return j;
+        }
+
+        // -----------------------------
+        // Final print function
+        // -----------------------------
+        void print() const {
+            json root;
+
+            root["dfs"] = dfsToJson(dfs);
+            root["asts"] = astsToJson();
+
+            std::cout << root.dump(4) << std::endl;
+        }
+    };
+
 } // namespace yogi::visitor::nodes
