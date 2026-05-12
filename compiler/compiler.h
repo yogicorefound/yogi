@@ -12,11 +12,9 @@
 namespace yogi::compiler {
     class Compiler final {
         public:
-            Compiler(const int argc, const char *argv[]) {
-                getContent(argc, argv);
-            }
+            Compiler() = default;
 
-            std::any compile(bool justScan);
+            std::any compile(std::string modulePath);
 
             static visitor::nodes::ProgramNode testAST(std::string &text, std::string &filePath);
 
@@ -31,6 +29,8 @@ namespace yogi::compiler {
 
             // LLVM
             void getContent(int argc, const char *argv[]);
+
+            void getModuleContent(std::string fPath);
 
             std::string content;
             std::string fileName;

@@ -1,6 +1,2 @@
-import utils from "dev.io"
-import utils from "dev.io"
-import utils from "dev.io"
-import utils from "dev.io"
-import utils from "dev.io"
-import utils from "utils.io"
+import main from "./dev.io"
+

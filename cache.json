@@ -34,26 +34,117 @@
 //	}
 //}
 
+//{
+//	"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
+//	"modules": [
+//		{
+//			"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
+//			"modules": [
+//				{
+//					"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
+//					"modules": [],
+//					"hash": "e93dd18ac7acae957d9533922d1b3f2e3bbb64e5a3618ccbbf0087d02b15fa5f",
+//					"flagged": false
+//				}
+//			],
+//			"hash": "377357296d505aca0cf3bbcfd4ead4aa02de5938b0dcafbb72dbed87f44e3b0b",
+//			"flagged": false
+//		}
+//	],
+//	"hash": "377357296d505aca0cf3bbcfd4ead4aa02de5938b0dcafbb72dbed87f44e3b0b",
+//	"flagged": false
+//}
+
+
 {
-	"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
-	"modules": [
-		{
-			"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io",
-			"modules": [
+	"dfs": {
+		"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
+		"flagged": false,
+		"modules": [
+			{
+				"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io",
+				"flagged": false,
+				"modules": [
+					{
+						"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
+						"flagged": false,
+						"modules": [
+							{
+								"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
+								"flagged": false,
+								"modules": []
+							},
+							{
+								"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
+								"flagged": true,
+								"modules": []
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	"asts": {
+		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io": {
+			"kind": "Program",
+			"body": [
 				{
-					"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
-					"modules": [
-						{
-							"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
-							"modules": []
-						}
-					]
+					"kind": "ImportWithoutBrackets",
+					"path": "\"utils.io\"",
+					"name": "utils"
 				}
 			]
 		},
-		{
-			"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
-			"modules": []
+		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io": {
+			"kind": "Program",
+			"body": [
+				{
+					"kind": "ImportWithoutBrackets",
+					"path": "\"main.io\"",
+					"name": "utils"
+				},
+				{
+					"kind": "ImportWithoutBrackets",
+					"path": "\"utils.io\"",
+					"name": "utils"
+				},
+				{
+					"kind": "ImportWithoutBrackets",
+					"path": "\"utils.io\"",
+					"name": "utils"
+				},
+				{
+					"kind": "ImportWithoutBrackets",
+					"path": "\"utils.io\"",
+					"name": "utils"
+				},
+				{
+					"kind": "ImportWithoutBrackets",
+					"path": "\"utils.io\"",
+					"name": "utils"
+				}
+			]
+		},
+		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io": {
+			"kind": "Program",
+			"body": [
+				{
+					"kind": "ImportWithoutBrackets",
+					"path": "\"./dev.io\"",
+					"name": "main"
+				},
+				{
+					"kind": "VariableDeclaration",
+					"identifier": "a",
+					"type": 6,
+					"isConstant": false,
+					"value": {
+						"kind": "IntegerLiteral",
+						"value": "10"
+					}
+				}
+			]
 		}
-	]
+	}
 }

@@ -62,6 +62,8 @@ namespace yogi::visitor::nodes {
         std::string path;
         std::vector<ModulesPathsNode> modules;
 
+        bool flagged = false;
+
 
         ModulesPathsNode() = default;
 
@@ -83,6 +85,7 @@ namespace yogi::visitor::nodes {
                 json j;
                 j["path"] = path;
                 j["modules"] = json::array();
+                j["flagged"] = flagged;
 
                 for (const auto &module: modules) {
                     j["modules"].push_back(module.toJson());

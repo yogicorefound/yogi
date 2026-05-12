@@ -17,7 +17,6 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext *ctx) {
     // Create program node
     auto node = nodes::ProgramNode(start, end);
     auto pathModules = nodes::ModulesPathsNode(pathResolver(currentPath, removeQuotes(filePath)));
-    std::vector<nodes::ImportNode> modules;
 
     for (const auto child: ctx->children) {
         if (auto statement = visit(child); statement.has_value()) {
@@ -33,32 +32,10 @@ std::any yogi::visitor::Visitor::visitProgram(Grammar::ProgramContext *ctx) {
                     pathModules.addModule(nodes::ModulesPathsNode(pathResolver(currentPath, removeQuotes(importModule.path))));
                 }
             } else {
-                node.addStatement(std::move(statement));
+                node.addStatement(statement);
             }
         }
     }
-
-    // pathModules.print();
-
-    // Get hash of file absolutes path
-    const auto rootPath = getBuildDirectory();
-    const auto absoluteFilePath = pathResolver(getBuildDirectory(), filePath);
-    const auto filePathHash = hashString(absoluteFilePath);
-
-    // hash source and ast nodes
-    const auto sourceHash = hashString(source);
-    const auto astHash = hashString(nodeToJson(node).dump());
-
-    // std::cout << "justScan: " << justScan << std::endl;
-    // std::cout << "hasVarDeclarations: " << hasVarDeclarations << std::endl;
-    // std::cout << "FilePathHash: " << filePathHash << std::endl;
-    // std::cout << "SourceHash: " << sourceHash << std::endl;
-    // std::cout << "NodeToJson: " << astHash << std::endl;
-    // std::cout << "absoluteFilePath: " << absoluteFilePath << std::endl;
-
-    // Cache AST
-    const auto ast = nodes::CacheNode(astHash, true, node);
-    // cacheAST(filePath, std::make_unique<nodes::CacheNode>(ast));
 
     if (justScan) {
         return pathModules;
