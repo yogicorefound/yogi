@@ -2,26 +2,26 @@ gen/
 .idea/
 .vscode
 build
+
 grammar/*.tokens
 grammar/*.listener
 grammar/*.base
 grammar/antlr
-libs/antlr4
+
+/ast.json
 
 /compiler/antlr/antlr
-/libs/antlr4/
-/ast.json
 /compiler/modules/runtime.bc
 /compiler/antlr/generated/
-/libs/uni-algo/
 /compiler/antlr/tokens/*.tokens
+
 *.zip
 libs/*.a
 /app
 /main.o
 cache.json
 cmake-build-debug
-.gitmodules
 
 .DS_Store
 app
+

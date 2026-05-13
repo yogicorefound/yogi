@@ -1,0 +1,12 @@
+[submodule "libs/uno-algo"]
+	path = libs/uno-algo
+	url = https://github.com/uni-algo/uni-algo.git
+
+
+[submodule "libs/antlr4"]
+	path = libs/antlr4
+	url = https://github.com/antlr/antlr4.git
+
+[submodule "libs/llvm-project"]
+	path = libs/llvm-project
+	url = https://github.com/llvm/llvm-project

@@ -12,6 +12,8 @@
 #include <visitors/program/ProgramVisitor.h>
 #include "antlr4-runtime.h"
 
+#include <lld/Common/Driver.h>
+
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -249,6 +251,9 @@ namespace yogi::compiler {
         fs::path objFile = buildDir / "main.o";
 
         lowering::CodeEmitter::toObjectFile(module, objFile.string());
+
+
+
 
         // Verify the object file was written correctly
         {

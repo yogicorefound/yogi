@@ -2,7 +2,7 @@
 // Created by Brayhan De Aza on 11/27/25.
 //
 
-#include <boost/multiprecision/cpp_int.hpp>
+// #include <boost/multiprecision/cpp_int.hpp>
 #ifdef EOF
 #undef EOF
 #endif
@@ -10,7 +10,6 @@
 #include "ConditionsVisitor.h"
 
 namespace yogi::visitor {
-    using BigInt = boost::multiprecision::int128_t; // or cpp_int for arbitrary size
 
     bool isConstexprBool(const std::any& value) {
         if (value.type() == typeid(nodes::BooleanLiteralNode))

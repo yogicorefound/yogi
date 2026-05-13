@@ -6,3 +6,4 @@
 
 #include "core/llvm/emitter/CodeEmitter.h"
 #include "core/llvm/ir/IR.h"
+#include "core/llvm/llvm.h"

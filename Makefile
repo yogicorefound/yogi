@@ -6,7 +6,7 @@ test: clean grammar runtime run-tests
 build: clean grammar runtime run
 
 run:
-	@cd ./build && cmake .. -DENABLE_TESTING_FOR_TYPES_HINTS=OFF
+	@cd ./build && cmake ..
 	@cd ./build && make -j
 	@cd ./build && ./yogi ../inputs/main.io
 	@cd ./build && ./app
@@ -35,6 +35,28 @@ runtime:
 	@clang++ -std=c++20 -O3 -emit-llvm -c \
 	$(shell find $(MODULES_DIR) -type f -name "*.cpp") \
 	-I $(MODULES_DIR) -o $(MODULES_DIR)/runtime.bc
+
+setup:
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
