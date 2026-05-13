@@ -16,7 +16,7 @@ grammar/antlr
 /compiler/antlr/tokens/*.tokens
 
 *.zip
-libs/*.a
+
 /app
 /main.o
 cache.json
@@ -25,3 +25,9 @@ cmake-build-debug
 .DS_Store
 app
 
+
+#libs
+/libs/llvm-project
+/libs/antlr4
+/libs/uni-algo
+/libs/*.a
