@@ -27,7 +27,7 @@ app
 
 
 #libs
-/libs/llvm-project
 /libs/antlr4
 /libs/uni-algo
 /libs/*.a
+/libs/llvm-custom/
