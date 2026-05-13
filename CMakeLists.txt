@@ -75,6 +75,7 @@ add_definitions(${LLVM_DEFINITIONS})
 file(GLOB_RECURSE PROD_SOURCES
         "${SOURCES_COMPILER}/*.cpp"
         "${ANTLR_GENERATED_DIR}/*.cpp"
+        "${CMAKE_SOURCE_DIR}/yogi/*.cpp"
 )
 
 # ============================================================
@@ -84,7 +85,7 @@ add_subdirectory(runtime)
 include_directories(yogi_runtime)
 
 add_executable(${PROJECT_NAME}
-        ${CMAKE_SOURCE_DIR}/yogi.cpp
+        ${CMAKE_SOURCE_DIR}/main.cpp
         ${PROD_SOURCES}
 )
 
