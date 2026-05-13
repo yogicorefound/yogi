@@ -8,14 +8,20 @@ grammar/*.base
 grammar/antlr
 libs/antlr4
 
-/src/antlr/antlr
+/compiler/antlr/antlr
 /libs/antlr4/
 /ast.json
-/src/modules/runtime.bc
-/src/antlr/generated/
+/compiler/modules/runtime.bc
+/compiler/antlr/generated/
 /libs/uni-algo/
-/src/antlr/tokens/*.tokens
+/compiler/antlr/tokens/*.tokens
 *.zip
 libs/*.a
 /app
 /main.o
+cache.json
+cmake-build-debug
+.gitmodules
+
+.DS_Store
+app
