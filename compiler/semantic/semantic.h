@@ -7,7 +7,7 @@
 #include "semantic/arrays/Arrays.h"
 #include "semantic/dictionaries/Dictionaries.h"
 #include "semantic/variables/Variables.h"
-#include "semantic/imports/Import.h"
+#include "semantic/imports/ImportSemantic.h"
 
 namespace yogi::compiler::semantic {
     class Semantic final : public virtual Variables, public virtual Arrays, public virtual Dictionaries, public virtual ImportSemantic {

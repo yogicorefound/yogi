@@ -55,7 +55,7 @@ namespace yogi {
             semanticAsts
         };
 
-        // std::cout << program.semanticAstsToJson().dump(1);
+        std::cout << program.semanticAstsToJson().dump(1);
     }
 
     void Yogi::print() const {

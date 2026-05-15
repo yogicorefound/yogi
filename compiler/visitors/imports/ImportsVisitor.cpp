@@ -6,7 +6,6 @@
 
 namespace yogi::visitor {
     std::any ImportsVisitor::visitImportStatement(Grammar::ImportStatementContext *ctx) {
-            std::cout << "visitImportStatementWithBrackets";
         if (ctx->importStatementWithBrackets()) {
 
             return visit(ctx->importStatementWithBrackets());
@@ -20,7 +19,6 @@ namespace yogi::visitor {
     }
 
     std::any ImportsVisitor::visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) {
-        std::cout << "visitImportStatementWithBrackets";
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 

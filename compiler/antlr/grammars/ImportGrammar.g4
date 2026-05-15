@@ -7,22 +7,16 @@ options {
 }
 
 importStatement
-    : importStatementWithBrackets
-    | importStatementWithoutBrackets
+    : importStatementWithoutBrackets
+    | importStatementWithBrackets
     ;
 
-
-// import {var1, var2, method1, method2} from "utils.io"
+// import { var1, var2 } from "utils.io"
 importStatementWithBrackets
-    : IMPORT LBRACKET (identifierLiteral (COMMA identifierLiteral)*)? RBRACKET FROM stringLiteral
+    : IMPORT LBRACE identifierLiteral (COMMA identifierLiteral)* RBRACE FROM stringLiteral
     ;
-
 
 // import utils from "utils.io"
 importStatementWithoutBrackets
     : IMPORT identifierLiteral FROM stringLiteral
     ;
-
-
-
-
