@@ -15,14 +15,12 @@ namespace yogi::compiler::semantic {
             explicit Semantic(const visitor::nodes::YogiNode &program) : Variables(), Arrays(), Dictionaries(), ImportSemantic(), program(program) {
             };
 
-            void analyze() const;
-
-            std::unordered_map<std::string, visitor::nodes::ProgramNode> asts;
+            std::unordered_map<std::string, visitor::nodes::ProgramNode> analyze() const;
 
         private:
             visitor::nodes::YogiNode program;
 
-            static void analyzeNode(const visitor::nodes::ProgramNode &program);
+            static visitor::nodes::ProgramNode analyzeNodes(const visitor::nodes::ProgramNode &program, const std::string &module);
 
     };
 } // namespace yogi::semantic

@@ -8,7 +8,7 @@
 
 
 namespace yogi::visitor {
-    class ModulesVisitor : public virtual BaseVisitor {
+    class ImportsVisitor : public virtual BaseVisitor {
         public:
             std::any visitImportStatement(Grammar::ImportStatementContext *ctx) override;
 

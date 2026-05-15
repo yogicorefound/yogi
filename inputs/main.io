@@ -1,3 +1,2 @@
-import main from "./dev.io"
-import main from "./foo.io"
+import {foo} from "./dev.io"
 

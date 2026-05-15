@@ -100,6 +100,7 @@ namespace yogi::visitor::nodes {
         std::vector<std::string> executionOrder;
         std::unordered_map<std::string, std::vector<std::string> > dependencyGraph;
         std::unordered_map<std::string, ProgramNode> asts;
+        std::unordered_map<std::string, ProgramNode> semanticAsts = {};
 
         // -----------------------------
         // Convert AST map to JSON
@@ -108,6 +109,16 @@ namespace yogi::visitor::nodes {
             json j = json::object();
 
             for (const auto &[path, program]: asts) {
+                j[path] = utils::Helpers::nodeToJson(program);
+            }
+
+            return j;
+        }
+
+        json semanticAstsToJson() const {
+            json j = json::object();
+
+            for (const auto &[path, program]: semanticAsts) {
                 j[path] = utils::Helpers::nodeToJson(program);
             }
 
@@ -125,6 +136,7 @@ namespace yogi::visitor::nodes {
                 {"executionOrder", executionOrder},
                 {"dependencyGraph", dependencyGraph},
                 {"asts", astsToJson()},
+                {"semanticAsts", semanticAstsToJson()}
             };
 
             std::cout << j.dump(1) << std::endl;

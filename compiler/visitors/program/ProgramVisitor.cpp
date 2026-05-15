@@ -93,8 +93,10 @@ std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext *ctx
         return node;
     }
 
+        std::cout << "visitImportStatementWithBrackets";
     // Import statement
     if (ctx->importStatement()) {
+
         const std::any node = visit(ctx->importStatement());
         return node;
     }

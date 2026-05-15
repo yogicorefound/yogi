@@ -9,7 +9,7 @@
 namespace yogi::compiler::semantic {
     class ImportSemantic : public virtual BaseSemantic {
         public:
-            static std::any analyzeImportStatement(const std::any &node);
+            static std::any analyzeImportStatements(const std::any &node, const std::string &module);
 
     };
 }

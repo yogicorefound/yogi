@@ -2,11 +2,13 @@
 // Created by Brayhan De Aza on 5/8/26.
 //
 
-#include "ModulesVisitor.h"
+#include "ImportsVisitor.h"
 
 namespace yogi::visitor {
-    std::any ModulesVisitor::visitImportStatement(Grammar::ImportStatementContext *ctx) {
+    std::any ImportsVisitor::visitImportStatement(Grammar::ImportStatementContext *ctx) {
+            std::cout << "visitImportStatementWithBrackets";
         if (ctx->importStatementWithBrackets()) {
+
             return visit(ctx->importStatementWithBrackets());
         }
 
@@ -17,12 +19,12 @@ namespace yogi::visitor {
         return nullptr;
     }
 
-    std::any ModulesVisitor::visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) {
+    std::any ImportsVisitor::visitImportStatementWithBrackets(Grammar::ImportStatementWithBracketsContext *ctx) {
+        std::cout << "visitImportStatementWithBrackets";
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         const auto path = ctx->stringLiteral()->getText();
-        const auto pathNode = std::any_cast<nodes::StringLiteralNode>(path);
 
         std::vector<nodes::IdentifierLiteral> modules;
         for (const auto module: ctx->identifierLiteral()) {
@@ -35,7 +37,7 @@ namespace yogi::visitor {
         return node;
     }
 
-    std::any ModulesVisitor::visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) {
+    std::any ImportsVisitor::visitImportStatementWithoutBrackets(Grammar::ImportStatementWithoutBracketsContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 

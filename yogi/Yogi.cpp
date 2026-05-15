@@ -44,17 +44,18 @@ namespace yogi {
             asts
         });
 
-        semantic.analyze();
-
+        const auto semanticAsts = semantic.analyze();
 
         program = {
             sccGraph,
             sccGroups,
             executionOrder,
             dependencyGraph,
-            asts
+            asts,
+            semanticAsts
         };
 
+        // std::cout << program.semanticAstsToJson().dump(1);
     }
 
     void Yogi::print() const {
