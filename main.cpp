@@ -2,6 +2,7 @@
 // Created by Brayhan De Aza on 5/4/26.
 //
 
+#include <iostream>
 #include "yogi/Yogi.h"
 
 int main(const int argc, const char *argv[]) {
@@ -9,11 +10,9 @@ int main(const int argc, const char *argv[]) {
         const yogi::Yogi yogi(argc, argv);
         yogi.print();
 
-        std::cout << LLD_PATH << std::endl;  // prints the path
-
         // or use it to invoke the linker:
-        std::string linker = LLD_PATH;
-        std::string cmd = linker + " -o output input.o";
+        const std::string linker = LLD_PATH;
+        const std::string cmd = linker + " -o output input.o";
         std::system(cmd.c_str());
 
     } catch (const std::exception &e) {

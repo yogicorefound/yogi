@@ -30,4 +30,4 @@ app
 /libs/antlr4
 /libs/uni-algo
 /libs/*.a
-/libs/llvm-custom/
+/libs/llvm-custom_bk/

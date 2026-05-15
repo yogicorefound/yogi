@@ -7,7 +7,7 @@
 #include <any>
 #include <string>
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
     class BaseSemantic {
        public:
         static const std::string INT64_MAX_STR;

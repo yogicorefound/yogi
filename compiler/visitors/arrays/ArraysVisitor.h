@@ -5,7 +5,6 @@
 #pragma once
 
 #include "GrammarVisitor.h"
-#include "semantic/semantic.h"
 #include "visitors/base/BaseVisitor.h"
 
 namespace yogi::visitor {

@@ -3,7 +3,6 @@
 //
 
 #include "ArraysVisitor.h"
-#include "semantic/BaseSemantic.h"
 #include "utils/utils.h"
 #include "utils/helpers/visitor/variables.h"
 

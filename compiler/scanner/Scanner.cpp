@@ -40,7 +40,6 @@ namespace yogi::compiler::scanner {
         auto ast = visitor.visit(tree);
         auto node = std::any_cast<visitor::nodes::ModulesPathsNode>(ast);
 
-        // std::cout << "currentDirectory...: " << filePath;
         node.print();
 
         return node;

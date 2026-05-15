@@ -36,10 +36,46 @@ runtime:
 	$(shell find $(MODULES_DIR) -type f -name "*.cpp") \
 	-I $(MODULES_DIR) -o $(MODULES_DIR)/runtime.bc
 
-setup:
-	
+
+setup: submodules setup_llvm setup_antlr setup_uno_algo
 
 
+# Setup LLVM
+LLVM_DIR := $(CURDIR)/libs/llvm-project/build
+setup_llvm:
+	@rm -rf $(LLVM_DIR) ./libs/llvm-custom
+	@cd ./libs/llvm-project && mkdir "build"
+	@cd $(LLVM_DIR) && cmake -G Ninja ../llvm \
+	  -DCMAKE_BUILD_TYPE=Release \
+	  -DLLVM_ENABLE_PROJECTS="lld" \
+	  -DLLVM_TARGETS_TO_BUILD="X86;AArch64" \
+	  -DLLVM_ENABLE_RTTI=ON \
+	  -DLLVM_ENABLE_ASSERTIONS=ON \
+	  -DCMAKE_INSTALL_PREFIX=$(LLVM_DIR)/llvm-custom
+	@cd $(LLVM_DIR) && ninja
+	@cd $(LLVM_DIR) && ninja install
+
+# Setup ANTLR
+ANTLR_DIR := $(CURDIR)/libs/antlr4/runtime/Cpp
+setup_antlr:
+	@rm -rf $(ANTLR_DIR)/build
+	@cd $(ANTLR_DIR) && mkdir "build"
+
+	@cd $(ANTLR_DIR) && cmake -G Ninja -B build
+	@cd $(ANTLR_DIR) && cmake --build build
+
+#Uno-Algorithm
+UNI_ALGO_DIR := $(CURDIR)/libs/uno-algo
+setup_uno_algo:
+	@rm -rf $(UNI_ALGO_DIR)/build
+	@cd $(UNI_ALGO_DIR) && mkdir "build"
+
+	@cd $(UNI_ALGO_DIR) && cmake -G Ninja -B build
+	@cd $(UNI_ALGO_DIR) && cmake --build build
+
+
+submodules:
+	@git submodule update --init --recursive
 
 
 

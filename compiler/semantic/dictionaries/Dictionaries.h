@@ -6,11 +6,9 @@
 #pragma once
 
 #include "visitors/nodes/nodes.h"
-#include "semantic/BaseSemantic.h"
 #include "semantic/scopes/Scope.h"
-#include "utils/utils.h"
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
 
     class Dictionaries : public virtual BaseSemantic {
        public:

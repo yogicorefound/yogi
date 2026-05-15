@@ -8,7 +8,7 @@
 #include <visitors/nodes/nodes.h>
 #include <string>
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
     class Variables : public virtual BaseSemantic {
        public:
         struct EvalExpressionResult {

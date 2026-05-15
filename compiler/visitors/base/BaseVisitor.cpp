@@ -6,7 +6,7 @@
 
 namespace yogi::visitor {
     void BaseVisitor::enterScope() {
-        const auto child = new semantic::Scope(scope);
+        const auto child = new compiler::semantic::Scope(scope);
         scope = child;
     }
 
@@ -16,7 +16,7 @@ namespace yogi::visitor {
         }
     }
 
-    semantic::Scope* BaseVisitor::getCurrentScope() const {
+    compiler::semantic::Scope* BaseVisitor::getCurrentScope() const {
         return scope;
     }
 } // namespace yogi::visitor

@@ -58,7 +58,7 @@ namespace yogi::lowering {
         const llvm::Triple targetTriple(targetTripleStr);
         module->setTargetTriple(targetTriple);
 
-        const llvm::Target *target = llvm::TargetRegistry::lookupTarget(targetTripleStr, err);
+        const llvm::Target *target = llvm::TargetRegistry::lookupTarget(llvm::Triple(targetTripleStr), err);
         if (!target)
             throw std::runtime_error("Failed to lookup target: " + err);
 
@@ -98,7 +98,7 @@ namespace yogi::lowering {
         module->setTargetTriple(triple);
 
         std::string error;
-        auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error);
+        auto target = llvm::TargetRegistry::lookupTarget(llvm::Triple(targetTripleStr), error);
         if (!target)
             throw std::runtime_error("Target not found: " + error);
 

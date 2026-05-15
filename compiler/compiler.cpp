@@ -244,7 +244,6 @@ namespace yogi::compiler {
 
         namespace fs = std::filesystem;
         const fs::path buildDir = fs::current_path();
-        std::cout << buildDir << std::endl;
 
         fs::create_directories(buildDir);
         fs::path output = buildDir / "app";

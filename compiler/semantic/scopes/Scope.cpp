@@ -4,7 +4,7 @@
 
 #include "Scope.h"
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
     bool Scope::declareVariable(const std::string& name, const visitor::nodes::VariableDeclarationNode& info) {
         if (existsInCurrent(name))
             return false;

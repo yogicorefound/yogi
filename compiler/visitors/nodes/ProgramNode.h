@@ -6,9 +6,7 @@
 
 #include <optional>
 #include <utility>
-
 #include "BaseNode.h"
-#include "StatementNode.h"
 #include "utils/helpers/Helpers.h"
 
 namespace yogi::visitor::nodes {
@@ -64,7 +62,6 @@ namespace yogi::visitor::nodes {
 
         bool flagged = false;
 
-
         ModulesPathsNode() = default;
 
         explicit ModulesPathsNode(std::string path)
@@ -74,7 +71,6 @@ namespace yogi::visitor::nodes {
         void addModule(ModulesPathsNode module) {
             modules.push_back(std::move(module));
         }
-
 
         void print() const {
             std::cout << toJson().dump(4) << std::endl;
@@ -99,8 +95,11 @@ namespace yogi::visitor::nodes {
     // Final combined object
     // -------------------------
     struct YogiNode {
-        yogi::visitor::nodes::ModulesPathsNode dfs;
-        std::unordered_map<std::string, yogi::visitor::nodes::ProgramNode> asts;
+        std::unordered_map<std::string, std::vector<std::string> > sccGraph;
+        std::vector<std::vector<std::string> > sccGroups;
+        std::vector<std::string> executionOrder;
+        std::unordered_map<std::string, std::vector<std::string> > dependencyGraph;
+        std::unordered_map<std::string, ProgramNode> asts;
 
         // -----------------------------
         // Convert AST map to JSON
@@ -109,40 +108,26 @@ namespace yogi::visitor::nodes {
             json j = json::object();
 
             for (const auto &[path, program]: asts) {
-                // NOTE: assumes ProgramNode is serializable OR you adapt this
-                j[path] = yogi::utils::Helpers::nodeToJson(program);
+                j[path] = utils::Helpers::nodeToJson(program);
             }
 
             return j;
         }
 
-        // -----------------------------
-        // Convert DFS tree to JSON
-        // (reuses ModulesPathsNode::toJson idea)
-        // -----------------------------
-        static json dfsToJson(const yogi::visitor::nodes::ModulesPathsNode &node) {
-            json j;
-            j["path"] = node.path;
-            j["flagged"] = node.flagged;
-            j["modules"] = json::array();
-
-            for (const auto &child: node.modules) {
-                j["modules"].push_back(dfsToJson(child));
-            }
-
-            return j;
-        }
 
         // -----------------------------
         // Final print function
         // -----------------------------
         void print() const {
-            json root;
+            json j = {
+                {"sccGraph", sccGraph},
+                {"sccGroups", sccGroups},
+                {"executionOrder", executionOrder},
+                {"dependencyGraph", dependencyGraph},
+                {"asts", astsToJson()},
+            };
 
-            root["dfs"] = dfsToJson(dfs);
-            root["asts"] = astsToJson();
-
-            std::cout << root.dump(4) << std::endl;
+            std::cout << j.dump(1) << std::endl;
         }
     };
 

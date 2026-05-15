@@ -21,7 +21,7 @@ cmake_policy(SET CMP0075 NEW)
 cmake_policy(SET CMP0074 NEW)
 
 set(LLVM_ENABLE_RTTI ON)
-set(LLVM_ROOT "${LIBS_DIR}/llvm-custom")
+set(LLVM_ROOT "${LIBS_DIR}/llvm-project/build/llvm-custom")
 add_definitions(-DLLD_PATH="${LLVM_ROOT}/bin/ld.lld")
 
 

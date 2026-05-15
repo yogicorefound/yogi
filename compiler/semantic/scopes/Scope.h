@@ -4,14 +4,13 @@
 #pragma once
 
 #include <visitors/nodes/nodes.h>
-#include <utils/utils.h>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
-#include "semantic/BaseSemantic.h"
+#include "compiler/semantic/base/BaseSemantic.h"
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
     class Scope : public virtual BaseSemantic {
        public:
         explicit Scope(Scope* parent = nullptr) : parent(parent) {}

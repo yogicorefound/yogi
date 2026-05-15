@@ -6,7 +6,7 @@
 #include <charconv>
 #include "semantic/variables/Variables.h"
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
     void Arrays::analyzeUnOrSingedInteger(const std::string& dataType, const std::string& rValue, const std::string& identifier, const std::string& returnType, visitor::nodes::ArrayDeclarationNode& node, const std::string& source) {
         if (dataType.find("uint") != std::string::npos) {
             analyzeUnsignedInteger(rValue, dataType, identifier, source, node);

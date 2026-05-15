@@ -5,10 +5,9 @@
 #pragma once
 
 #include <semantic/scopes/Scope.h>
-#include "semantic/BaseSemantic.h"
-#include "utils/utils.h"
+#include "compiler/semantic/base/BaseSemantic.h"
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
     class Arrays : public virtual BaseSemantic {
        public:
         static visitor::nodes::ArrayDeclarationNode analyzeArrayDeclaration(visitor::nodes::ArrayDeclarationNode& node, const std::string& source);

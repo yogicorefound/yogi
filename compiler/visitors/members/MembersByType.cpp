@@ -9,7 +9,7 @@
 namespace yogi::visitor {
     using namespace yogi::visitor::nodes;
 
-    MembersByType::ResolvedItem MembersByType::resolveItem(const std::any &itemResult, semantic::Scope *scope,
+    MembersByType::ResolvedItem MembersByType::resolveItem(const std::any &itemResult, compiler::semantic::Scope *scope,
                                                            const std::string &source) {
         if (itemResult.type() == typeid(IntegerLiteralNode)) {
             auto n = std::any_cast<IntegerLiteralNode>(itemResult);
@@ -72,7 +72,7 @@ namespace yogi::visitor {
 
     MemberExpressionNode MembersByType::processStringMembers(const std::any &parentNode, const StringLiteralNode &mNode,
                                                              const bool &isMethod, std::vector<std::any> arguments,
-                                                             const std::string &source, semantic::Scope *scope) {
+                                                             const std::string &source, compiler::semantic::Scope *scope) {
         const auto [pType, pValue, resolveNode] = utils::Helpers::resolveItem(parentNode);
         auto member = mNode.value;
 
@@ -780,7 +780,7 @@ namespace yogi::visitor {
 
     MemberExpressionNode MembersByType::processMembers(const MemberExpressionNode &node, const StringLiteralNode &mNode,
                                                        const bool &isMethod, const std::vector<std::any> &arguments,
-                                                       const std::string &source, semantic::Scope *scope) {
+                                                       const std::string &source, compiler::semantic::Scope *scope) {
         std::any result;
 
         if (mNode.value.empty()) {

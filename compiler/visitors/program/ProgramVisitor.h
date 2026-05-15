@@ -18,12 +18,14 @@ namespace yogi::visitor {
     class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor, public ModulesVisitor {
         public:
             explicit Visitor(std::string &source, std::string &filePath, Grammar *parser, const bool justScan)
-                : BaseVisitor(source, filePath, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), ModulesVisitor(), justScan(justScan), source(source), filePath(filePath), parser(parser) {
+                : BaseVisitor(source, filePath, filePath, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), ModulesVisitor(), entryPath(filePath), justScan(justScan), source(source), filePath(filePath), parser(parser) {
             }
 
             std::any visitProgram(Grammar::ProgramContext *ctx) override;
 
             std::any visitStatements(Grammar::StatementsContext *ctx) override;
+
+            std::string &entryPath;
 
         private:
             bool justScan;

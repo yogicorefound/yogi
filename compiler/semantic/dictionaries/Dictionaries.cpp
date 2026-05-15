@@ -5,7 +5,7 @@
 
 #include "Dictionaries.h"
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
 
 
 } // namespace yogi::semantic

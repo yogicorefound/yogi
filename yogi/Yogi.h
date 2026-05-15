@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "compiler/semantic/semantic.h"
 #include "parser/Parser.h"
-#include "visitors/nodes/nodes.h"
 
 namespace yogi {
     class Yogi final {
@@ -16,8 +16,9 @@ namespace yogi {
 
             void print() const;
 
+            visitor::nodes::YogiNode program;
+
         private:
             void init(int argc, const char *argv[]);
-            visitor::nodes::YogiNode program;
     };
 }

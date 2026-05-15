@@ -5,12 +5,12 @@
 #include "semantic/variables/Variables.h"
 #include <visitors/nodes/nodes.h>
 #include <string>
-#include "semantic/BaseSemantic.h"
+#include "../base/BaseSemantic.h"
 #include "utils/utils.h"
 #include "utils/helpers/visitor/variables.h"
 
 
-namespace yogi::semantic {
+namespace yogi::compiler::semantic {
     using namespace yogi::visitor::nodes;
     using namespace yogi::utils::helpers;
 
