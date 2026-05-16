@@ -335,9 +335,8 @@ namespace yogi::utils {
         // ExportDeclarationNode
         if (node.type() == typeid(ExportNode)) {
             const auto &n = std::any_cast<const ExportNode &>(node);
-            std::cout << "ExportStatements: " << n.declaration.type().name();
             return {
-                {"kind", "ExportStatement"},
+                {"kind", n.kind == Kind::ExportDefault ? "ExportDefaultStatement" : "ExportStatement"},
                 {"alias", n.alias.has_value() ? nodeToJson(*n.alias) : nullptr},
                 {"declaration", nodeToJson(n.declaration)}
             };
@@ -352,7 +351,10 @@ namespace yogi::utils {
                 modules.push_back(nodeToJson(e));
             }
 
-            return {{"kind", "ExportStatement"}, {"declarations", modules}};
+            return {
+                {"kind", n.kind == Kind::ExportDefault ? "ExportDefaultStatement" : "ExportListStatement"},
+                {"declarations", modules}
+            };
         }
 
 

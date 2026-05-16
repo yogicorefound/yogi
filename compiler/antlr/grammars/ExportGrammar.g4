@@ -16,6 +16,7 @@ exportStatement
 // export default a
 exportDefaultStatement
     : EXPORT DEFAULT expression
+    | EXPORT DEFAULT exportSpecifierWithBraces
     ;
 
 // export a
@@ -25,7 +26,11 @@ exportNamedStatement
 
 // export { a, b as c }
 exportNamedGroupStatement
-    : EXPORT LBRACE exportSpecifier (COMMA exportSpecifier)* RBRACE
+    : EXPORT exportSpecifierWithBraces
+    ;
+
+exportSpecifierWithBraces
+    : LBRACE exportSpecifier (COMMA exportSpecifier)* COMMA? RBRACE
     ;
 
 exportSpecifier

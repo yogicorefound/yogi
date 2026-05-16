@@ -18,16 +18,15 @@ namespace yogi::visitor::nodes {
         std::any declaration;
         std::optional<IdentifierLiteral> alias = std::nullopt;
 
-        ExportNode(const Position start, const Position end, const std::any &declaration, const std::optional<IdentifierLiteral> &alias = std::nullopt) : BaseNode(Kind::ExportDeclaration, start, end), declaration(declaration), alias(alias) {
+        ExportNode(const Position start, const Position end, const Kind kind, const std::any &declaration, const std::optional<IdentifierLiteral> &alias = std::nullopt) : BaseNode(kind, start, end), declaration(declaration), alias(alias) {
         }
 
     };
 
-
     struct ExportListNode : BaseNode {
         std::vector<ExportNode> exports;
 
-        ExportListNode(const std::vector<ExportNode> &exports, const Position start, const Position end) : BaseNode(Kind::ExportList, start, end), exports(exports) {
+        ExportListNode(const Position start, const Position end, const Kind kind, const std::vector<ExportNode> &exports) : BaseNode(kind, start, end), exports(exports) {
         }
     };
 

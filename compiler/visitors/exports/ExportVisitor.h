@@ -22,11 +22,7 @@ namespace yogi::visitor {
 
             std::any visitExportSpecifier(Grammar::ExportSpecifierContext *ctx) override;
 
-            // std::any visitExportIdentifier(Grammar::ExportIdentifierContext *ctx) override;
-            //
-            // std::any visitExportVariableDeclaration(Grammar::ExportVariableDeclarationContext *ctx) override;
-            //
-            // std::any visitExportMultipleIdentifiers(Grammar::ExportMultipleIdentifiersContext *ctx) override;
+            std::any visitExportSpecifierWithBraces(Grammar::ExportSpecifierWithBracesContext *ctx) override;
     };
 
 }

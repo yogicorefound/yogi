@@ -14,11 +14,7 @@ namespace yogi::visitor::nodes {
         DATA_TYPE,
 
         ExportSymbol,
-        ExportDeclaration,
-        ExportList,
         ExportDefault,
-        ExportReExport,
-        ExportNamespace,
 
         // Regex
         REGEX_LITERAL,

@@ -34,7 +34,7 @@ namespace yogi::visitor {
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         const auto variableDeclaration = visit(ctx->exportSpecifier());
-        const auto node = nodes::ExportNode(start, end, variableDeclaration);
+        const auto node = nodes::ExportNode(start, end, nodes::Kind::ExportSymbol, variableDeclaration);
 
         return node;
     }
@@ -43,16 +43,30 @@ namespace yogi::visitor {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
-        const auto declaration = visit(ctx->expression());
-        const auto node = nodes::ExportNode(start, end, declaration);
+        if (ctx->expression()) {
+            const auto declaration = visit(ctx->expression());
+            const auto node = nodes::ExportNode(start, end, nodes::Kind::ExportDefault, declaration);
 
-        return node;
+            return node;
+        }
+
+        const auto exports = visit(ctx->exportSpecifierWithBraces());
+        const auto exportListNode = std::any_cast<std::vector<nodes::ExportNode> >(exports);
+
+        return nodes::ExportListNode(start, end, nodes::Kind::ExportDefault, exportListNode);
     }
 
     std::any ExportVisitor::visitExportNamedGroupStatement(Grammar::ExportNamedGroupStatementContext *ctx) {
         const nodes::Position start{ctx->start->getLine(), ctx->start->getCharPositionInLine()};
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
+        const auto exports = visit(ctx->exportSpecifierWithBraces());
+        const auto exportListNode = std::any_cast<std::vector<nodes::ExportNode> >(exports);
+
+        return nodes::ExportListNode(start, end, nodes::Kind::ExportSymbol, exportListNode);
+    }
+
+    std::any ExportVisitor::visitExportSpecifierWithBraces(Grammar::ExportSpecifierWithBracesContext *ctx) {
         std::vector<nodes::ExportNode> exports;
         for (auto *specifier: ctx->exportSpecifier()) {
             auto spec = std::any_cast<nodes::ExportNode>(
@@ -62,7 +76,7 @@ namespace yogi::visitor {
             exports.push_back(spec);
         }
 
-        return nodes::ExportListNode(exports, start, end);
+        return exports;
     }
 
     std::any ExportVisitor::visitExportSpecifier(Grammar::ExportSpecifierContext *ctx) {
@@ -73,13 +87,19 @@ namespace yogi::visitor {
         const auto identifier = visit(identifiers.at(0));
 
         std::string alias = "";
+        bool hasAlias = false;
         if (identifiers.size() > 1) {
             alias = identifiers.at(1)->getText();
+            hasAlias = true;
         }
 
-        const auto aliasNode = nodes::IdentifierLiteral(alias, start, end);
-        const auto node = nodes::ExportNode(start, end, identifier, aliasNode);
+        if (hasAlias) {
+            const auto aliasNode = nodes::IdentifierLiteral(alias, start, end);
+            const auto node = nodes::ExportNode(start, end, nodes::Kind::ExportSymbol, identifier, aliasNode);
+            return node;
+        }
 
+        const auto node = nodes::ExportNode(start, end, nodes::Kind::ExportSymbol, identifier, std::nullopt);
         return node;
     }
 
@@ -88,7 +108,7 @@ namespace yogi::visitor {
         const nodes::Position end{ctx->stop->getLine(), ctx->stop->getCharPositionInLine()};
 
         const auto variableDeclaration = visit(ctx->variableDeclaration());
-        const auto node = nodes::ExportNode(start, end, variableDeclaration);
+        const auto node = nodes::ExportNode(start, end, nodes::Kind::ExportSymbol, variableDeclaration);
 
         return node;
     }
