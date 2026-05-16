@@ -12,13 +12,14 @@
 #include "visitors/literals/LiteralsVisitor.h"
 #include "visitors/members/MembersVisitor.h"
 #include "visitors/imports/ImportsVisitor.h"
+#include "visitors/exports/ExportVisitor.h"
 #include "visitors/variables/VariablesVisitor.h"
 
 namespace yogi::visitor {
-    class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor, public ImportsVisitor {
+    class Visitor final : public LiteralsVisitor, public MembersVisitor, public ArraysVisitor, public VariablesVisitor, public DictionaryVisitor, public ExpressionVisitor, public ConditionsVisitor, public ImportsVisitor, public ExportVisitor {
         public:
             explicit Visitor(std::string &source, std::string &filePath, Grammar *parser, const bool justScan)
-                : BaseVisitor(source, filePath, filePath, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), ImportsVisitor(), entryPath(filePath), justScan(justScan), source(source), filePath(filePath), parser(parser) {
+                : BaseVisitor(source, filePath, filePath, parser), LiteralsVisitor(), MembersVisitor(), ArraysVisitor(), VariablesVisitor(), DictionaryVisitor(), ExpressionVisitor(), ConditionsVisitor(), ImportsVisitor(), ExportVisitor(), entryPath(filePath), justScan(justScan), source(source), filePath(filePath), parser(parser) {
             }
 
             std::any visitProgram(Grammar::ProgramContext *ctx) override;

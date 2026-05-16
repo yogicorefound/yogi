@@ -8,7 +8,7 @@
 int main(const int argc, const char *argv[]) {
     try {
         const yogi::Yogi yogi(argc, argv);
-        // yogi.print();
+        yogi.print();
 
         // or use it to invoke the linker:
         const std::string linker = LLD_PATH;

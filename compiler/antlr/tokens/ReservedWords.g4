@@ -1,5 +1,7 @@
 lexer grammar ReservedWords;
 
-IMPORT: 'import';
-FROM: 'from';
 
+IMPORT: 'import';
+EXPORT: 'export';
+DEFAULT: 'default';
+FROM: 'from';

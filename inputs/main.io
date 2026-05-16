@@ -1,2 +1,1 @@
-import {var1} from "./dev.io"
-
+export {a,b,c}

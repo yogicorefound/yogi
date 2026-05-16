@@ -55,96 +55,104 @@
 //	"flagged": false
 //}
 
+//
+//{
+//	"dfs": {
+//		"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
+//		"flagged": false,
+//		"modules": [
+//			{
+//				"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io",
+//				"flagged": false,
+//				"modules": [
+//					{
+//						"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
+//						"flagged": false,
+//						"modules": [
+//							{
+//								"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
+//								"flagged": false,
+//								"modules": []
+//							},
+//							{
+//								"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
+//								"flagged": true,
+//								"modules": []
+//							}
+//						]
+//					}
+//				]
+//			}
+//		]
+//	},
+//	"asts": {
+//		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io": {
+//			"kind": "Program",
+//			"body": [
+//				{
+//					"kind": "ImportWithoutBrackets",
+//					"path": "\"utils.io\"",
+//					"name": "utils"
+//				}
+//			]
+//		},
+//		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io": {
+//			"kind": "Program",
+//			"body": [
+//				{
+//					"kind": "ImportWithoutBrackets",
+//					"path": "\"main.io\"",
+//					"name": "utils"
+//				},
+//				{
+//					"kind": "ImportWithoutBrackets",
+//					"path": "\"utils.io\"",
+//					"name": "utils"
+//				},
+//				{
+//					"kind": "ImportWithoutBrackets",
+//					"path": "\"utils.io\"",
+//					"name": "utils"
+//				},
+//				{
+//					"kind": "ImportWithoutBrackets",
+//					"path": "\"utils.io\"",
+//					"name": "utils"
+//				},
+//				{
+//					"kind": "ImportWithoutBrackets",
+//					"path": "\"utils.io\"",
+//					"name": "utils"
+//				}
+//			]
+//		},
+//		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io": {
+//			"kind": "Program",
+//			"body": [
+//				{
+//					"kind": "ImportWithoutBrackets",
+//					"path": "\"./dev.io\"",
+//					"name": "main"
+//				},
+//				{
+//					"kind": "VariableDeclaration",
+//					"identifier": "a",
+//					"type": 6,
+//					"isConstant": false,
+//					"value": {
+//						"kind": "IntegerLiteral",
+//						"value": "10"
+//					}
+//				}
+//			]
+//		}
+//	}
+//}
+//
+//
+
 
 {
-	"dfs": {
-		"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
-		"flagged": false,
-		"modules": [
-			{
-				"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io",
-				"flagged": false,
-				"modules": [
-					{
-						"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
-						"flagged": false,
-						"modules": [
-							{
-								"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io",
-								"flagged": false,
-								"modules": []
-							},
-							{
-								"path": "/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io",
-								"flagged": true,
-								"modules": []
-							}
-						]
-					}
-				]
-			}
-		]
-	},
-	"asts": {
-		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/dev.io": {
-			"kind": "Program",
-			"body": [
-				{
-					"kind": "ImportWithoutBrackets",
-					"path": "\"utils.io\"",
-					"name": "utils"
-				}
-			]
-		},
-		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/utils.io": {
-			"kind": "Program",
-			"body": [
-				{
-					"kind": "ImportWithoutBrackets",
-					"path": "\"main.io\"",
-					"name": "utils"
-				},
-				{
-					"kind": "ImportWithoutBrackets",
-					"path": "\"utils.io\"",
-					"name": "utils"
-				},
-				{
-					"kind": "ImportWithoutBrackets",
-					"path": "\"utils.io\"",
-					"name": "utils"
-				},
-				{
-					"kind": "ImportWithoutBrackets",
-					"path": "\"utils.io\"",
-					"name": "utils"
-				},
-				{
-					"kind": "ImportWithoutBrackets",
-					"path": "\"utils.io\"",
-					"name": "utils"
-				}
-			]
-		},
-		"/Users/brayhandeaza/Documents/dev/projects/yogi/inputs/main.io": {
-			"kind": "Program",
-			"body": [
-				{
-					"kind": "ImportWithoutBrackets",
-					"path": "\"./dev.io\"",
-					"name": "main"
-				},
-				{
-					"kind": "VariableDeclaration",
-					"identifier": "a",
-					"type": 6,
-					"isConstant": false,
-					"value": {
-						"kind": "IntegerLiteral",
-						"value": "10"
-					}
-				}
-			]
-		}
-	}
+	"kind": "Export",
+
 }

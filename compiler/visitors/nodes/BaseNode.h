@@ -7,11 +7,18 @@
 #include <cstddef>
 
 namespace yogi::visitor::nodes {
-
     enum class Kind {
+
         PROGRAM,
         STATEMENT,
         DATA_TYPE,
+
+        ExportSymbol,
+        ExportDeclaration,
+        ExportList,
+        ExportDefault,
+        ExportReExport,
+        ExportNamespace,
 
         // Regex
         REGEX_LITERAL,

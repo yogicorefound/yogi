@@ -16,3 +16,4 @@
 #include "visitors/nodes/MembersNode.h"
 #include "visitors/nodes/ConditionsNode.h"
 #include "visitors/nodes/ImportNode.h"
+#include "visitors/nodes/ExportNode.h"

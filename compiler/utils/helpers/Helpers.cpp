@@ -332,6 +332,25 @@ namespace yogi::utils {
             return {{"kind", "Entry"}, {"path", n.path}, {"program", nodeToJson(n.program)}};
         }
 
+        // ExportDeclarationNode
+        if (node.type() == typeid(ExportDeclarationNode)) {
+            const auto &n = std::any_cast<const ExportDeclarationNode &>(node);
+            return {{"kind", "ExportStatement"}, {"declaration", nodeToJson(n.declaration)}};
+        }
+
+        // ExportListNode
+        if (node.type() == typeid(ExportListNode)) {
+            const auto &n = std::any_cast<const ExportListNode &>(node);
+
+            json modules = json::array();
+            for (const auto n: n.exports) {
+                modules.push_back(nodeToJson(n));
+            }
+
+            return {{"kind", "ExportStatement"}, {"declarations", modules}};
+        }
+
+
         // -------------------------------------------------
         // Literals
         // -------------------------------------------------

@@ -95,8 +95,12 @@ std::any yogi::visitor::Visitor::visitStatements(Grammar::StatementsContext *ctx
 
     // Import statement
     if (ctx->importStatement()) {
-
         const std::any node = visit(ctx->importStatement());
+        return node;
+    }
+
+    if (ctx->exportStatement()) {
+        const std::any node = visit(ctx->exportStatement());
         return node;
     }
 
