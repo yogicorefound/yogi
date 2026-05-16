@@ -1,1 +1,1 @@
-export default {    a as auth,    b,    c,}
+export default {    a as auth,    b    c}

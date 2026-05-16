@@ -31,3 +31,4 @@ app
 /libs/uni-algo
 /libs/*.a
 /libs/llvm-custom_bk/
+/libs/antlr4/runtime/Cpp/*.ninja
