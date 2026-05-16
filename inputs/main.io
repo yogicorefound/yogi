@@ -1,1 +1,1 @@
-export * from "./utils.io"export { a, b } from "./utils.io"export int a = 10export int b = 10export int c = 10
+export * from "./utils.io"export int a = 10export int b = 10export int c = 10
