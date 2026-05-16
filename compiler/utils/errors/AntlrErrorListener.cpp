@@ -5,10 +5,10 @@
 #include "AntlrErrorListener.h"
 
 namespace yogi::utils::errors {
-    AntlrErrorListener::AntlrErrorListener(const std::string& source) {
+    AntlrErrorListener::AntlrErrorListener(const std::string &source) {
         // Split content into lines
         std::string line;
-        for (const char c : source) {
+        for (const char c: source) {
             if (c == '\n') {
                 lines.push_back(line);
                 line.clear();
@@ -21,8 +21,18 @@ namespace yogi::utils::errors {
             lines.push_back(line);
     }
 
-    void AntlrErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, const size_t line, const size_t charPos, const std::string& msg, std::exception_ptr) {
-        std::cerr << "\n\033[1;31mSyntaxError: at line " << line << ", columns " << charPos  << "\n\033[0m";
+
+    // AntlrErrorListener.cpp
+    void AntlrErrorListener::syntaxError(
+        antlr4::Recognizer *recognizer,
+        antlr4::Token *offendingSymbol,
+        const size_t line,
+        const size_t charPos,
+        const std::string &msg,
+        std::exception_ptr) {
+        hasError = true; // set flag
+
+        std::cerr << "\n\033[1;31mSyntaxError: at line " << line << ", column " << charPos << "\n\033[0m";
 
         if (line > 0 && line <= lines.size()) {
             const std::string l = lines[line - 1];
@@ -33,6 +43,6 @@ namespace yogi::utils::errors {
             std::cerr << "\033[37m" << arrow << "\n";
         }
 
-        std::exit(1);
+        // DO NOT call std::exit(1) here
     }
 } // namespace yogi::utils::errors

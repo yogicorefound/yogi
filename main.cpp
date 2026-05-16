@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include "yogi/Yogi.h"
+#include <exception>
+
 
 int main(const int argc, const char *argv[]) {
     try {

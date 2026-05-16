@@ -6,10 +6,14 @@ options {
 
 import ExpressionsGrammar;
 
-dictionaryDeclaration: DICT_KEYWORD LT dictionaryDeclarationType GT IDENTIFIER EQ LBRACE (dictionaryAssignmentBody (COMMA dictionaryAssignmentBody COMMA? )*)? RBRACE;
+dictionaryDeclaration: DICT_KEYWORD LT dictionaryDeclarationType GT IDENTIFIER EQ dictionaryBody;
+
+dictionaryBody
+    : LBRACE (dictionaryAssignmentBody (COMMA dictionaryAssignmentBody COMMA? )*)? RBRACE
+    ;
 
 dictionaryAssignmentBody
-    : literals COLON expression
+    : literals (COLON expression)?
     ;
 
 dictionaryDeclarationType

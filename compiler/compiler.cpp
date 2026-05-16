@@ -23,49 +23,88 @@
 namespace yogi::compiler {
 
     std::any Compiler::compile(std::string modulePath) {
-        const std::ifstream file(modulePath);
+        try {
+            const std::ifstream file(modulePath);
 
-        if (!file) {
-            std::cerr << "Error: Could not open file " << modulePath << std::endl;
-            std::exit(1);
+            if (!file) {
+                std::cerr << "Error: Could not open file " << modulePath << std::endl;
+                std::exit(1);
+            }
+
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+
+            // ---------------------------------------------
+            // Feed file content into ANTLR
+            // ---------------------------------------------
+            antlr4::ANTLRInputStream input(buffer.str());
+
+            // ---------------------------------------------
+            // Feed ANTLR into Tokens
+            // ---------------------------------------------
+            Tokens lexer(&input);
+            antlr4::CommonTokenStream tokens(&lexer);
+            Grammar grammar(&tokens);
+
+            // grammar.setErrorHandler(std::make_shared<antlr4::BailErrorStrategy>());
+
+            // ---------------------------------------------
+            // Setup error listeners
+            // ---------------------------------------------
+            lexer.removeErrorListeners();
+            grammar.removeErrorListeners();
+
+            utils::errors::AntlrErrorListener errorListener(content);
+            lexer.addErrorListener(&errorListener);
+
+            grammar.addErrorListener(&errorListener);
+            grammar.setErrorHandler(std::make_shared<utils::errors::SafeErrorStrategy>());
+
+
+            // ---------------------------------------------
+            // Feed Tokens into Grammar
+            // ---------------------------------------------
+            // auto *tree = grammar.program();
+            antlr4::tree::ParseTree *tree = nullptr;
+            try {
+                tree = grammar.program();
+            } catch (antlr4::NoViableAltException &e) {
+                std::cerr << "Caught in program(): " << e.what() << std::endl;
+                return nullptr;
+            } catch (antlr4::ParseCancellationException &e) {
+                std::cerr << "Caught ParseCancellation in program(): " << e.what() << std::endl;
+                return nullptr;
+            } catch (...) {
+                std::cerr << "Caught unknown in program()" << std::endl;
+                return nullptr;
+            }
+
+
+            if (errorListener.hasError) {
+                std::cout << "errorListener: \n";
+                return nullptr; // error already printed, exit cleanly
+            }
+
+
+            visitor::Visitor visitor(content, filePath, &grammar, false);
+
+            // ---------------------------------------------
+            // Feed Grammar into Visitor and generate AST
+            // ---------------------------------------------
+            auto ast = visitor.visit(tree);
+            return ast;
+
+        } catch (antlr4::ParseCancellationException &e) {
+            std::cerr << "Parse error: " << e.what() << std::endl;
+
+        } catch (antlr4::RecognitionException &e) {
+            std::cerr << "RecognitionException: " << e.what() << std::endl;
+
+        } catch (std::exception &e) {
+            std::cerr << "Exception: " << e.what() << std::endl;
         }
 
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-
-        // ---------------------------------------------
-        // Feed file content into ANTLR
-        // ---------------------------------------------
-        antlr4::ANTLRInputStream input(buffer.str());
-
-        // ---------------------------------------------
-        // Feed ANTLR into Tokens
-        // ---------------------------------------------
-        Tokens lexer(&input);
-        antlr4::CommonTokenStream tokens(&lexer);
-        Grammar grammar(&tokens);
-
-        // ---------------------------------------------
-        // Setup error listeners
-        // ---------------------------------------------
-        lexer.removeErrorListeners();
-        grammar.removeErrorListeners();
-
-        utils::errors::AntlrErrorListener errorListener(content);
-        lexer.addErrorListener(&errorListener);
-        grammar.addErrorListener(&errorListener);
-
-        // ---------------------------------------------
-        // Feed Tokens into Grammar
-        // ---------------------------------------------
-        auto *tree = grammar.program();
-        visitor::Visitor visitor(content, filePath, &grammar, false);
-
-        // ---------------------------------------------
-        // Feed Grammar into Visitor and generate AST
-        // ---------------------------------------------
-        auto ast = visitor.visit(tree);
-        return ast;
+        return nullptr;
     }
 
     void Compiler::getModuleContent(std::string fPath) {
@@ -250,8 +289,6 @@ namespace yogi::compiler {
         fs::path objFile = buildDir / "main.o";
 
         lowering::CodeEmitter::toObjectFile(module, objFile.string());
-
-
 
 
         // Verify the object file was written correctly

@@ -335,16 +335,26 @@ namespace yogi::utils {
         // ExportDeclarationNode
         if (node.type() == typeid(ExportNode)) {
             const auto &n = std::any_cast<const ExportNode &>(node);
+            const auto isDefaultExport = n.kind == Kind::ExportDefault;
+
             return {
-                {"kind", n.kind == Kind::ExportDefault ? "ExportDefaultStatement" : "ExportStatement"},
+                {"kind", isDefaultExport ? "ExportDefaultStatement" : "ExportStatement"},
                 {"alias", n.alias.has_value() ? nodeToJson(*n.alias) : nullptr},
                 {"declaration", nodeToJson(n.declaration)}
             };
         }
 
+        // Re Export All
+        if (node.type() == typeid(ReExportModuleNode)) {
+            const auto &n = std::any_cast<const ReExportModuleNode &>(node);
+            return {{"kind", "ReExportModule"}, {"module", nodeToJson(n.module)}};
+        }
+
+
         // ExportListNode
         if (node.type() == typeid(ExportListNode)) {
             const auto &n = std::any_cast<const ExportListNode &>(node);
+            const auto isDefaultExport = n.kind == Kind::ExportDefault;
 
             json modules = json::array();
             for (const auto e: n.exports) {
@@ -352,11 +362,29 @@ namespace yogi::utils {
             }
 
             return {
-                {"kind", n.kind == Kind::ExportDefault ? "ExportDefaultStatement" : "ExportListStatement"},
-                {"declarations", modules}
+                {"kind", isDefaultExport ? "ExportDefaultStatement" : "ExportListStatement"},
+                {"declarations", nodeToJson(modules)}
             };
         }
 
+        if (node.type() == typeid(std::vector<DictionaryPairNode>)) {
+            auto pairs = std::any_cast<std::vector<DictionaryPairNode> >(node);
+            json modules = json::array();
+
+            for (const auto n: pairs) {
+                json j = {
+                    {"key", nodeToJson(n.key)},
+                    {"value", nodeToJson(n.value)}
+                };
+
+                modules.push_back(j);
+            }
+
+            return {
+                {"kind", "DictionaryPairNode"},
+                {"pairs", modules}
+            };
+        }
 
         // -------------------------------------------------
         // Literals
@@ -379,7 +407,7 @@ namespace yogi::utils {
                 modules.push_back(nodeToJson(n));
             }
 
-            return {{"kind", "ImportWithBrackets"}, {"modules", modules}, {"path", nodes.path}};
+            return {{"kind", "ImportWithBrackets"}, {"symbols", modules}, {"module", nodes.path}};
         }
 
 

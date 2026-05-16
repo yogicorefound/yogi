@@ -23,6 +23,13 @@ namespace yogi::visitor::nodes {
 
     };
 
+    struct ReExportModuleNode : BaseNode {
+        StringLiteralNode module;
+
+        ReExportModuleNode(const Position start, const Position end, const StringLiteralNode &module) : BaseNode(Kind::ReExportModule, start, end), module(module) {
+        }
+    };
+
     struct ExportListNode : BaseNode {
         std::vector<ExportNode> exports;
 
