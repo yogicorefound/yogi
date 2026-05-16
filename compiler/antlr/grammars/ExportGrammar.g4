@@ -6,39 +6,33 @@ options {
     tokenVocab = Tokens;
 }
 
-
 exportStatement
-    : exportMultipleIdentifiers
-    | exportVariableDeclaration
-    | exportIdentifier
+    : exportDefaultStatement
+    | exportNamedStatement
+    | exportNamedGroupStatement
+    | exportDeclarationStatement
     ;
 
-
-// -------------------------------------------------
-// export multiple identifiers
-// -------------------------------------------------
-// Examples:
-// export { a }
-// -------------------------------------------------
-exportMultipleIdentifiers
-    : EXPORT LBRACE identifierLiteral (COMMA identifierLiteral)* COMMA?  RBRACE
+// export default a
+exportDefaultStatement
+    : EXPORT DEFAULT expression
     ;
 
-// -------------------------------------------------
-// export identifier
-// -------------------------------------------------
-// Examples:
 // export a
-exportIdentifier
-    : EXPORT identifierLiteral
+exportNamedStatement
+    : EXPORT exportSpecifier
     ;
 
-// -------------------------------------------------
-// export variable declaration
-// -------------------------------------------------
-// Examples:
+// export { a, b as c }
+exportNamedGroupStatement
+    : EXPORT LBRACE exportSpecifier (COMMA exportSpecifier)* RBRACE
+    ;
+
+exportSpecifier
+    : identifierLiteral (AS identifierLiteral)?
+    ;
+
 // export int a = 10
-exportVariableDeclaration
+exportDeclarationStatement
     : EXPORT variableDeclaration
     ;
-

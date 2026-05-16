@@ -12,11 +12,21 @@ namespace yogi::visitor {
         public:
             std::any visitExportStatement(Grammar::ExportStatementContext *ctx) override;
 
-            std::any visitExportIdentifier(Grammar::ExportIdentifierContext *ctx) override;
+            std::any visitExportDefaultStatement(Grammar::ExportDefaultStatementContext *ctx) override;
 
-            std::any visitExportVariableDeclaration(Grammar::ExportVariableDeclarationContext *ctx) override;
+            std::any visitExportNamedStatement(Grammar::ExportNamedStatementContext *ctx) override;
 
-            std::any visitExportMultipleIdentifiers(Grammar::ExportMultipleIdentifiersContext *ctx) override;
+            std::any visitExportNamedGroupStatement(Grammar::ExportNamedGroupStatementContext *ctx) override;
+
+            std::any visitExportDeclarationStatement(Grammar::ExportDeclarationStatementContext *ctx) override;
+
+            std::any visitExportSpecifier(Grammar::ExportSpecifierContext *ctx) override;
+
+            // std::any visitExportIdentifier(Grammar::ExportIdentifierContext *ctx) override;
+            //
+            // std::any visitExportVariableDeclaration(Grammar::ExportVariableDeclarationContext *ctx) override;
+            //
+            // std::any visitExportMultipleIdentifiers(Grammar::ExportMultipleIdentifiersContext *ctx) override;
     };
 
 }

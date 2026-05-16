@@ -333,9 +333,14 @@ namespace yogi::utils {
         }
 
         // ExportDeclarationNode
-        if (node.type() == typeid(ExportDeclarationNode)) {
-            const auto &n = std::any_cast<const ExportDeclarationNode &>(node);
-            return {{"kind", "ExportStatement"}, {"declaration", nodeToJson(n.declaration)}};
+        if (node.type() == typeid(ExportNode)) {
+            const auto &n = std::any_cast<const ExportNode &>(node);
+            std::cout << "ExportStatements: " << n.declaration.type().name();
+            return {
+                {"kind", "ExportStatement"},
+                {"alias", n.alias.has_value() ? nodeToJson(*n.alias) : nullptr},
+                {"declaration", nodeToJson(n.declaration)}
+            };
         }
 
         // ExportListNode
@@ -343,8 +348,8 @@ namespace yogi::utils {
             const auto &n = std::any_cast<const ExportListNode &>(node);
 
             json modules = json::array();
-            for (const auto n: n.exports) {
-                modules.push_back(nodeToJson(n));
+            for (const auto e: n.exports) {
+                modules.push_back(nodeToJson(e));
             }
 
             return {{"kind", "ExportStatement"}, {"declarations", modules}};

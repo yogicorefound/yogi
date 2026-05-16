@@ -5,3 +5,4 @@ IMPORT: 'import';
 EXPORT: 'export';
 DEFAULT: 'default';
 FROM: 'from';
+AS: 'as';
